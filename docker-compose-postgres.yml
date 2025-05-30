@@ -19,9 +19,16 @@ services:
       - backnet
 
   adminer:
-      image: adminer
-      restart: always
-      ports:
-        - "8080:8080"
-      networks:
-        - backnet
+    image: adminer
+    restart: always
+    ports:
+      - "${PORT_ADMINER}:${PORT_ADMINER}"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adminer.rule=Host(`${SUBDOMAIN_ADMINER}${DOMAIN}`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.adminer.loadbalancer.server.port=${PORT_ADMINER}"
+      - "traefik.http.routers.adminer.tls=true"
+    networks:
+      - backnet
