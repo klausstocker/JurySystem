@@ -9,7 +9,7 @@ services:
       - PRODUCTION=${PRODUCTION}
       - DB_URL=${DB_URL}
     volumes:
-      - ./shared:/usr/src/shared:ro
+      - ./shared:/usr/src/shared:volume-nocopy
       - ./.env:/usr/.env:ro
       - /etc/localtime:/etc/localtime
     command:
