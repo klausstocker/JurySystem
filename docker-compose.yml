@@ -8,8 +8,8 @@ include:
   #- docker-compose-php-nginx.yml  # service php-nginx declared
   #- docker-compose-portainer.yml  # service portainer declared
   #- docker-compose-traefik.yml  # service traefik declared
-  #- docker-compose-mosquitto.yml # service mosquitto declared
-  #- docker-compose-api-mqtt-gateway.yml # service api-mqtt-gateway declared | depends on: mosquitto
+  - docker-compose-mosquitto.yml # service mosquitto declared
+  - docker-compose-api-mqtt-gateway.yml # service api-mqtt-gateway declared | depends on: mosquitto
   #- docker-compose-influxdb-telegraf-grafana.yml # services influxdb, telegraf, grafana are declared
 networks:
   backnet:
