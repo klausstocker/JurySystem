@@ -1,0 +1,24 @@
+services:
+  flet:
+    extends:
+      file: docker-compose-python_template.yml
+      service: python
+    build:
+      context: ./frontend/flet
+    container_name: flet
+    environment:
+      - FLET_FORCE_WEB_SERVER=true
+      - FLET_SERVER_PORT=${PORT_FLET}
+      - FLET_APP_LIFETIME_MINUTES=10
+    # ports:
+    #  - "${PORT_FLET}:${PORT_FLET}"
+    volumes:
+      - ./frontend/flet/log:/usr/src/app/log
+      - ./frontend/flet/src:/usr/src/app/src:volume-nocopy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web-app.rule=Host(`${SUBDOMAIN_FLET}${DOMAIN}`)"
+      - "traefik.http.routers.web-app.entrypoints=websecure"
+      - "traefik.http.services.web-app.loadbalancer.server.port=${PORT_FLET}"
+      - "traefik.http.routers.web-app.service=web-app"
+      - "traefik.http.routers.web-app.tls.certresolver=letsencrypt"

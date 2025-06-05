@@ -1,0 +1,57 @@
+services:
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    restart: always
+    # ports:
+    #  - "${PORT_INFLUXDB}:8086"
+    volumes:
+      - ./.influxdb/data_db:/var/lib/influxdb2
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.influxdb.rule=Host(`${SUBDOMAIN_INFLUXDB}${DOMAIN}`)"
+      - "traefik.http.routers.influxdb.entrypoints=websecure"
+      - "traefik.http.services.influxdb.loadbalancer.server.port=8086"
+      - "traefik.http.routers.influxdb.tls.certresolver=letsencrypt"
+    networks:
+      - backnet
+
+  telegraf:
+      image: telegraf
+      container_name: telegraf
+      restart: always
+      volumes:
+        - ./.telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro  # Mount the Telegraf configuration file
+        # - /var/run/docker.sock:/var/run/docker.sock:ro  # Mount the Docker socket to collect Docker metrics
+      depends_on:
+        - influxdb
+      links:
+        - influxdb
+      # 8125 UDP
+      # 8092 UDP
+      # 8094 TCP
+      ports:
+        - '${PORT_TELEGRAF}:8094'
+      networks:
+        - backnet
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    # ports:
+    #  - "${PORT_GRAFANA}:3000"
+    depends_on:
+      - influxdb
+    volumes:
+      - ./.grafana/data:/var/lib/grafana
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.rule=Host(`${SUBDOMAIN_GRAFANA}${DOMAIN}`)"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
+    networks:
+      - backnet
+

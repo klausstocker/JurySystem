@@ -1,0 +1,16 @@
+/backend/api/log/
+/backend/app/log/
+/backend/api-mqtt-gateway/log/
+/frontend/flet/log/
+/.venv/
+/.traefik/public-certificates/
+/.portainer_data/
+_suggestions.md
+_readme-emojies.md
+docker-compose-postgres_future.yml
+docker-compose-postgREST_original.yml
+/.node-red
+/.influxdb
+/.grafana
+/.postgres
+/.api-mqtt-gateway

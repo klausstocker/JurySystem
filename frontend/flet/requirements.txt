@@ -1,0 +1,8 @@
+flet==0.28.*
+requests
+httpx==0.27.0
+pyjwt==2.8.0
+dictobj==0.4
+python-dotenv==1.0.1
+paho-mqtt==2.1.0
+bs4==0.0.2

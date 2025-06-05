@@ -1,0 +1,14 @@
+  services:
+    app:
+      extends:
+        file: docker-compose-python_template.yml
+        service: python
+      build:
+        context: ./backend/app
+      container_name: app
+      volumes:
+        - ./backend/app/log:/usr/src/app/log
+        - ./backend/app/src:/usr/src/app/src:volume-nocopy
+      depends_on:
+        db:
+          condition: service_healthy

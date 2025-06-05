@@ -1,0 +1,21 @@
+services:
+  node-red:
+    image: nodered/node-red:latest
+    environment:
+      - TZ=${TZ}
+    # ports:
+    #  - "${PORT_NODERED}:1880"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nodered.rule=Host(`${SUBDOMAIN_NODERED}${DOMAIN}`)"
+      - "traefik.http.routers.nodered.entrypoints=websecure"
+      - "traefik.http.services.nodered.loadbalancer.server.port=1880"
+      - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
+    volumes:
+      - ./.node-red:/data
+    networks:
+      - backnet
+
+
+
+

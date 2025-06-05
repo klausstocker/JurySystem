@@ -1,0 +1,14 @@
+topic read $SYS/#
+
+# in general: base topic is the username
+pattern readwrite %u/#
+
+# individual user settings
+user admin
+topic #
+
+# example for read only
+# topic read topic/sub/#
+
+pattern write $SYS/broker/connection/%c/state
+

@@ -1,0 +1,42 @@
+  services:
+    mosquitto:
+       image: eclipse-mosquitto:latest
+       container_name: mosquitto
+       restart: always
+       volumes:
+          # :ro is not essary
+          - ./.mosquitto/config:/mosquitto/config
+          # self-signed certs are generated on every start of service - comment it, if providing other signed certs
+          - ./.mosquitto/certs/generate_certificates.sh:/mosquitto/certs/generate_certificates.sh
+          # uncomment to hide in .mosquitto/certs for security purposes
+          - ./.mosquitto/certs:/mosquitto/certs
+       ports:
+         # Attention: 1883 and 8083 are unsecure - use it carefully or bind it to localhost only !
+         - "127.0.0.1:${PORT_MQTT_UNSECURE}:1883"
+         - "${PORT_MQTT_SECURE}:8883"
+         - "${PORT_MQTT_WS_SECURE}:8091"
+         - "127.0.0.1:${PORT_MQTT_WS_UNSECURE}:8083"
+
+       healthcheck:
+         test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-i", "healthcheck", "-W", "3"]
+         interval: 10s
+         timeout: 10s
+         retries: 6
+         start_period: 20s
+       # apk add htop
+       # apk add mc
+       command:
+         - /bin/sh
+         - -c
+         - |
+           apk update
+           apk add openssl  
+           /mosquitto/certs/./generate_certificates.sh       
+           mosquitto -c /mosquitto/config/mosquitto.conf | pidof mosquitto > /mosquitto/config/pid
+       expose:
+         - ${PORT_MQTT_UNSECURE}
+         - ${PORT_MQTT_WS_UNSECURE}
+       networks:
+         - backnet
+
+    # /mosquitto/config/./set_permissions.sh  # ??
