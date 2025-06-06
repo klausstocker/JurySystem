@@ -4,19 +4,19 @@ services:
       file: docker-compose-python_template.yml
       service: python
     build:
-      context: ./backend/api
-    container_name: api
+      context: backend/api-fastapi
+    container_name: api-fastapi
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:
-      - ./backend/api/log:/usr/src/app/log
-      - ./backend/api/src:/usr/src/app/src:volume-nocopy
+      - ./backend/api-fastapi/log:/usr/src/app/log
+      - ./backend/api-fastapi/src:/usr/src/app/src:volume-nocopy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api-secure.rule=Host(`${SUBDOMAIN_API}${DOMAIN}`)"
-      - "traefik.http.routers.api-secure.entrypoints=websecure"
-      - "traefik.http.services.api-secure.loadbalancer.server.port=${PORT_API}"
-      - "traefik.http.routers.api-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api-fastapi-secure.rule=Host(`${SUBDOMAIN_API}${DOMAIN}`)"
+      - "traefik.http.routers.api-fastapi-secure.entrypoints=websecure"
+      - "traefik.http.services.api-fastapi-secure.loadbalancer.server.port=${PORT_API}"
+      - "traefik.http.routers.api-fastapi-secure.tls.certresolver=letsencrypt"
     command:
       - /bin/sh
       - -c

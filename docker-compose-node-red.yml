@@ -1,6 +1,7 @@
 services:
   node-red:
     image: nodered/node-red:latest
+    container_name: nodered
     environment:
       - TZ=${TZ}
     # ports:

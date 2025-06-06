@@ -80,7 +80,26 @@ Access @development environment: https://influxdb.localhost , https://grafana.lo
 |---------------|-----------|----------|----------|----------|
 | grafana       | grafana   | admin    | admin    | ALL      |  
 
-At first start, **InfluxDB** will request to set up an initial user.  
+At first start, **InfluxDB** will request to set up an initial user.
+### 👉 RESTful API for mysql/mariadb
+https://github.com/krink-code/db-api?tab=readme-ov-file  
+http://127.0.0.1:8980/api/<db>/<table>/  
+GET    /     # Show status  
+GET    /api                          # Show databases  
+GET    /api/<db>                     # Show database tables  
+GET    /api/<db>/<table>             # Show database table fields    
+GET    /api/<db>/<table>?query=true  # List rows of table  
+POST   /api/<db>/<table>             # Create a new row  
+PUT    /api/<db>/<table>             # Replace existing row with new row  
+
+GET    /api/<db>/<table>/:id         # Retrieve a row by primary key
+PATCH  /api/<db>/<table>/:id         # Update row element by primary key
+DELETE /api/<db>/<table>/:id         # Delete a row by primary key
+
+GET    /api/<db>/<table>/count       # Count number of rows in a table
+
+POST   /api                          # Content-Type: text/sql
+
 ## *Manage Docker*
 ### 👉 Portainer (Manage and administrate Docker)
 Access @development environment: https://portainer.localhost  

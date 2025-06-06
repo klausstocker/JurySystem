@@ -1,6 +1,7 @@
-/backend/api/log/
+/backend/api-fastapi/log/
 /backend/app/log/
 /backend/api-mqtt-gateway/log/
+/backend/api-restful/log
 /frontend/flet/log/
 /.venv/
 /.traefik/public-certificates/
@@ -14,3 +15,5 @@ docker-compose-postgREST_original.yml
 /.grafana
 /.postgres
 /.api-mqtt-gateway
+docker-compose-restful-api.yml
+/backend/api-restful/

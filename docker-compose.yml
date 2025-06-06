@@ -4,6 +4,7 @@ include:
   - docker-compose-flet-app.yml  # service flet declared | depends on: db
   - docker-compose-fastapi.yml  # service api declared | depends on: db
   - docker-compose-mariadb.yml  # services db, phpmyadmin, adminer, maxscale declared
+  - docker-compose-restful-api.yml # service db-api-fastapi declared
   - docker-compose-node-red.yml  # service node-red
   - docker-compose-php-nginx.yml  # service php-nginx declared
   - docker-compose-portainer.yml  # service portainer declared
