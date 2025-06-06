@@ -58,6 +58,7 @@ services:
 
     adminer:
       image: adminer
+      container_name: adminer
       restart: always
       # ports:
       #  - "${PORT_ADMINER}:8080"
@@ -78,6 +79,7 @@ services:
     # username is admin and the password is mariadb
     maxscale:
       image: mariadb/maxscale:latest
+      container_name: maxscale
       # volumes:
       #  - ./.mariadb/maxscale/maxscale.cnf:/etc/maxscale.cnf.d/maxscale.cnf
       ports:

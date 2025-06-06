@@ -4,7 +4,7 @@ include:
   - docker-compose-flet-app.yml  # service flet declared | depends on: db
   - docker-compose-fastapi.yml  # service api declared | depends on: db
   - docker-compose-mariadb.yml  # services db, phpmyadmin, adminer, maxscale declared
-  - docker-compose-restful-api.yml # service db-api-fastapi declared
+  - docker-compose-restful-api.yml # service db-api declared
   - docker-compose-node-red.yml  # service node-red
   - docker-compose-php-nginx.yml  # service php-nginx declared
   - docker-compose-portainer.yml  # service portainer declared
@@ -14,6 +14,7 @@ include:
   - docker-compose-influxdb-telegraf-grafana.yml # services influxdb, telegraf, grafana are declared
 networks:
   backnet:
+    name: back-network
 
 
 
