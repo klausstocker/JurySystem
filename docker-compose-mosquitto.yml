@@ -30,8 +30,12 @@
          - -c
          - |
            apk update
-           apk add openssl  
-           /mosquitto/certs/./generate_certificates.sh       
+           apk add openssl
+           chmod 0x770 /mosquitto/certs/generate_certificates.sh 
+           chmod 0x770 /mosquitto/config/x-add_single_user.sh 
+           chmod 0x770 /mosquitto/config/x-generate_passwd.sh 
+           chmod 0x770 /mosquitto/config/x-reload_user_password_configuration.sh 
+           /mosquitto/certs/./generate_certificates.sh  
            mosquitto -c /mosquitto/config/mosquitto.conf | pidof mosquitto > /mosquitto/config/pid
        expose:
          - ${PORT_MQTT_UNSECURE}
