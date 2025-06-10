@@ -6,23 +6,23 @@ Preconfigured services can be selected in file docker-compose.yml
 It will create a new folder: Dockerized-Web-Framework-for-IoT  
 ⭐ Install wget and unzip (if not already installed)
 ```shell
-    sudo apt update \
-    && apt install -y wget \
-    && apt install -y unzip \
-    && rm -rf /var/lib/apt/lists/* \ 
+    sudo apt update 
+    sudo apt install -y wget 
+    sudo apt install -y unzip 
+    sudo rm -rf /var/lib/apt/lists/*  
 ```
 ⭐ Download master and unzip
 ```shell
-    sudo wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip \ 
-    && unzip master.zip \
-    && rm -rf master.zip \
-    && mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT \
-    && chmod +x /Dockerized-Web-Framework-for-IoT/*.sh
+    wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip 
+    unzip master.zip 
+    rm -rf master.zip 
+    mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT 
+    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
 ```
 ⭐ Alternative methode: clone repository
 ```shell
-    sudo git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git \ 
-    && chmod +x /Dockerized-Web-Framework-for-IoT/*.sh
+    git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
+    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
 ```
 ⭐ Edit .env and docker-composer.yml  
 ⭐ x-rebuild_and_start.production.sh
