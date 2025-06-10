@@ -13,10 +13,16 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ```
 ⭐ Download master and unzip
 ```shell
-    wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip \
+    wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip \ 
     && unzip master.zip \
     && rm -rf master.zip \
-    && mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT
+    && mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT \
+    && chmod +x /Dockerized-Web-Framework-for-IoT/*.sh
+```
+⭐ Alternative methode: clone repository
+```shell
+    gh clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git \ 
+    && chmod +x /Dockerized-Web-Framework-for-IoT/*.sh
 ```
 ⭐ Edit .env and docker-composer.yml  
 ⭐ x-rebuild_and_start.production.sh
