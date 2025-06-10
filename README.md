@@ -11,7 +11,10 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
     sudo apt install -y unzip 
     sudo rm -rf /var/lib/apt/lists/*  
 ```
-⭐ Download master and unzip
+Choose directory or make a new one with appropriate permissions for writing and executing.  
+Navigate into directory and copy the source code in one of two ways.  
+
+⭐ First methode: Download master and unzip (there is no connection to source)
 ```shell
     wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip 
     unzip master.zip 
@@ -19,10 +22,14 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
     mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT 
     chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
 ```
-⭐ Alternative methode: clone repository
+⭐ Alternative methode: clone repository (you can pull updates from source later)
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
     chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
+```
+```shell
+    git add 
+    git commit
 ```
 ⭐ Edit .env and docker-composer.yml  
 ⭐ x-rebuild_and_start.production.sh
