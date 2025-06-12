@@ -1,5 +1,5 @@
 [mariadb]
-ssl-ca = /etc/mysql/certs/ca-cert.pem
-ssl-cert = /etc/mysql/certs/server-cert.pem
-ssl-key = /etc/mysql/certs/server-key.pem
-# require-secure-transport = on
+# ssl-ca = /etc/mysql/certs/ca-cert.pem
+# ssl-cert = /etc/mysql/certs/server-cert.pem
+# ssl-key = /etc/mysql/certs/server-key.pem
+#  require-secure-transport = on
