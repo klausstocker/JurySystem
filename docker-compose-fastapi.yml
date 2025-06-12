@@ -24,5 +24,6 @@ services:
         cd /usr/src/app/src
         uvicorn main:api --reload --workers 1 --host "0.0.0.0" --port ${PORT_API} --proxy-headers
     depends_on:
-      db:
-        condition: service_healthy
+      - db
+      # db:
+      #  condition: service_healthy
