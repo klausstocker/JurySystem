@@ -11,6 +11,7 @@ services:
       volumes:
         - ./.mariadb/certs:/etc/mysql/certs
         - ./.mariadb/conf.d/secure.cnf:/etc/mysql/conf.d/secure.cnf
+        - ./.mariadb/init.sql:/docker-entrypoint-initdb.d/init.sql
         # uncomment if docker volume is necessary
         # - ${DB_VOLUME_NAME}:/var/lib/mysql
         - ./.mariadb/${DB_VOLUME_NAME}:/var/lib/mysql
@@ -18,8 +19,8 @@ services:
       environment:
         MARIADB_ROOT_PASSWORD: example
       # uncomment to make it visible on the host to get ssh access
-      # ports:
-      #  - "${PORT_DB}:3306"
+      ports:
+        - "${PORT_DB}:3306"
       #healthcheck:
       #  test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
       #  interval: 10s
