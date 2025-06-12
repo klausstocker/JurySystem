@@ -27,10 +27,6 @@ Navigate into directory and copy the source code in one of two ways.
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
     chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
 ```
-```shell
-    git add 
-    git commit
-```
 ⭐ Edit .env and docker-composer.yml  
 ⭐ x-rebuild_and_start.production.sh
 
