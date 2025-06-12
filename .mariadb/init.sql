@@ -30,3 +30,12 @@ INSERT INTO `user` (`id`, `username`, `password`, `email`, `registered`, `expire
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
+
+-- Benutzer erstellen
+CREATE USER 'foo'@'%' IDENTIFIED BY 'foo';
+
+-- Optional: Berechtigungen gewähren
+GRANT ALL PRIVILEGES ON 'foo' TO 'foo'@'%' WITH GRANT OPTION;
+
+-- Änderungen anwenden
+FLUSH PRIVILEGES;
