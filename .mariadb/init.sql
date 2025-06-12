@@ -35,7 +35,7 @@ INSERT INTO `user` (`id`, `username`, `password`, `email`, `registered`, `expire
 CREATE USER 'foo'@'%' IDENTIFIED BY 'foo';
 
 -- Optional: Berechtigungen gewähren
-GRANT ALL PRIVILEGES ON 'foo' TO 'foo'@'%' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON foo.user TO 'foo'@'%' WITH GRANT OPTION;
 
 -- Änderungen anwenden
 FLUSH PRIVILEGES;
