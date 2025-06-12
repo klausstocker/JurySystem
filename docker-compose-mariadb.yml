@@ -23,7 +23,9 @@ services:
       healthcheck:
         test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
         interval: 10s
-        timeout: 60s
+        timeout: 30s
+        start_period: 60s
+        start_interval: 10s
         retries: 3
 
       # expose made it visible on the backnet but not on the host
