@@ -1,5 +1,5 @@
 services:
-  api:
+  api-fastapi-sqlmodel:
     extends:
       file: docker-compose-python_template.yml
       service: python
@@ -9,14 +9,14 @@ services:
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:
-      - ./backend/api-fastapi/log:/usr/src/app/log
-      - ./backend/api-fastapi/src:/usr/src/app/src:volume-nocopy
+      - ./backend/api-fastapi-sqlmodel/log:/usr/src/app/log
+      - ./backend/api-fastapi-sqlmodel/src:/usr/src/app/src:volume-nocopy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.api-fastapi-secure.rule=Host(`${SUBDOMAIN_API}${DOMAIN}`)"
-      - "traefik.http.routers.api-fastapi-secure.entrypoints=websecure"
-      - "traefik.http.services.api-fastapi-secure.loadbalancer.server.port=${PORT_API}"
-      - "traefik.http.routers.api-fastapi-secure.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.api-fastapi-sqlmodel.rule=Host(`${SUBDOMAIN_API}${DOMAIN}`)"
+      - "traefik.http.routers.api-fastapi-sqlmodel.entrypoints=websecure"
+      - "traefik.http.services.api-fastapi-sqlmodel.loadbalancer.server.port=${PORT_API}"
+      - "traefik.http.routers.api-fastapi-sqlmodel.tls.certresolver=letsencrypt"
     command:
       - /bin/sh
       - -c
