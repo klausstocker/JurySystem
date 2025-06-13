@@ -33,7 +33,7 @@ In **Windows Powershell** ( not cmd !! )  use following commands.
     Copy-Item -Path ./master/Dockerized-Web-Framework-for-IoT-master ./Dockerized-Web-Framework-for-IoT -Recurse -Force
     Remove-Item -Path ./master -Recurse -Force
 ```  
-It will create a new folder: Dockerized-Web-Framework-for-IoT 
+It will create a new folder: Dockerized-Web-Framework-for-IoT   
 ⭐ Edit .env and docker-composer.yml  
 ⭐ Execute x-rebuild_and_start.local.development.ps1
 
@@ -42,8 +42,8 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ### 👉 Flet (Framework for web application in pure Python)
 <!---
 ### 👉 API-FASTAPI-PURE-SQL
-### 👉 API-FASTAPI-SQLMODEL
 -->
+### 👉 API-FASTAPI-SQLMODEL  
 ### 👉 Node-Red  
 https://nodered.localhost  
 The default credentials for login into Editor & Admin API are **admin/admin**.  
