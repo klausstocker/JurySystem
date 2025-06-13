@@ -4,8 +4,8 @@ services:
       file: docker-compose-python_template.yml
       service: python
     build:
-      context: backend/api-fastapi
-    container_name: api-fastapi
+      context: backend/api-fastapi-sqlmodel
+    container_name: api-fastapi-sqlmodel
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:
