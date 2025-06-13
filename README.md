@@ -2,9 +2,7 @@
 Requires Docker compose **> 2.27**   
 Preconfigured services can be selected in file docker-compose.yml
 ##  🐧🐧🚀 Quickstart - Linux ( production environment )🚀️🐧🐧
-⭐ Navigate to folder where you want to install.  
-It will create a new folder: Dockerized-Web-Framework-for-IoT  
-⭐ Install wget and unzip (if not already installed)
+⭐ Install git,wget and unzip (can be skip if already installed)
 ```shell
     sudo apt update 
     sudo apt install -y git
@@ -12,16 +10,15 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
     sudo apt install -y unzip 
     sudo rm -rf /var/lib/apt/lists/*  
 ```
-Choose directory or make a new one with appropriate permissions for writing and executing.  
-Navigate into directory and clone the source code.  
-
+⭐ Choose directory or make a new one with appropriate permissions for writing and executing.      
+It will create a new folder: Dockerized-Web-Framework-for-IoT    
 ⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
     chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
 ```
-⭐ Edit .env and docker-composer.yml  
-⭐ x-rebuild_and_start.production.sh
+⭐ Edit .env and docker-composer.yml    
+⭐ Execute x-rebuild_and_start.production.sh
 
 ## 🔳 🔳 🚀 Quickstart - Windows ( developing environment )🚀️🔳 🔳   
 In **Windows Powershell** ( not cmd !! )  use following commands.   
@@ -35,7 +32,7 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
     Remove-Item -Path ./master -Recurse -Force
 ```
 ⭐ Edit .env and docker-composer.yml  
-⭐ x-rebuild_and_start.local.development.ps1
+⭐ Execute x-rebuild_and_start.local.development.ps1
 
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
