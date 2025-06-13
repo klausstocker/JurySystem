@@ -7,22 +7,15 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ⭐ Install wget and unzip (if not already installed)
 ```shell
     sudo apt update 
+    sudo apt install -y git
     sudo apt install -y wget 
     sudo apt install -y unzip 
     sudo rm -rf /var/lib/apt/lists/*  
 ```
 Choose directory or make a new one with appropriate permissions for writing and executing.  
-Navigate into directory and copy the source code in one of two ways.  
+Navigate into directory and clone the source code.  
 
-⭐ First methode: Download master and unzip (there is no connection to source)
-```shell
-    wget https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip 
-    unzip master.zip 
-    rm -rf master.zip 
-    mv Dockerized-Web-Framework-for-IoT-master Dockerized-Web-Framework-for-IoT 
-    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
-```
-⭐ Alternative methode: clone repository (you can pull updates from source later)
+⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
     chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
@@ -47,9 +40,12 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
 ### 👉 Flet (Framework for web application in pure Python)
-### 👉 API (FastAPI)
+<!---
+### 👉 API-FASTAPI-PURE-SQL
+### 👉 API-FASTAPI-SQLMODEL
+-->
 ### 👉 Node-Red  
-Access @development environment: https://nodered.localhost  
+https://nodered.localhost  
 The default credentials for login into Editor & Admin API are **admin/admin**.  
 The default credentials for Dashboard are **user/user**.  
 To set new password edit in Security section in file settings.json 
@@ -69,10 +65,10 @@ Generating new hashes (https://bcrypt-generator.com/). Replace it with copy and 
 More about securing node-red: https://nodered.org/docs/user-guide/runtime/securing-node-red  
 
 ### 👉 NGINX-PHP (HTML and PHP Webserver)
-Access @development environment: https://web.localhost/index.php
+https://web.localhost/index.php
 ## *Database*
 ### 👉 MariaDB + Adminer + Phpmyadmin 
-Access @development environment: https://phpmyadmin.localhost , https://adminer.localhost 
+https://phpmyadmin.localhost , https://adminer.localhost 
 
 | Target access | Subdomain  | Username | Password | Database |
 |---------------|------------|----------|----------|----------|
@@ -83,13 +79,14 @@ Access @development environment: https://phpmyadmin.localhost , https://adminer.
 
 At first login update the default password.  
 ### 👉 InfluxDB  + Telegraf + Grafana
-Access @development environment: https://influxdb.localhost , https://grafana.localhost  
+https://influxdb.localhost , https://grafana.localhost  
 
 | Target access | Subdomain | Username | Password | Database |
 |---------------|-----------|----------|----------|----------|
 | grafana       | grafana   | admin    | admin    | ALL      |  
 
 At first start, **InfluxDB** will request to set up an initial user.
+<!---
 ### 👉 RESTful API for mysql/mariadb
 https://github.com/krink-code/db-api?tab=readme-ov-file  
 http://127.0.0.1:8980/api/<db>/<table>/  
@@ -108,14 +105,14 @@ DELETE /api/<db>/<table>/:id         # Delete a row by primary key
 GET    /api/<db>/<table>/count       # Count number of rows in a table
 
 POST   /api                          # Content-Type: text/sql
-
+-->
 ## *Manage Docker*
 ### 👉 Portainer (Manage and administrate Docker)
-Access @development environment: https://portainer.localhost  
+https://portainer.localhost  
 At first start, **Portainer** will request to set up an initial administrator.   
 ## *Tools*
 ### 👉 Traefik (HTTP-Reverse Proxy and LoadBalancer)
-Access @development environment: https://traefik.localhost  
+https://traefik.localhost  
 
 | Target access | Subdomain | Username | Password |
 |---------------|-----------|----------|----------|
