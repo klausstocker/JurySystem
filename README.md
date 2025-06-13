@@ -21,9 +21,10 @@ Next step (clone repository) adds folder **Dockerized-Web-Framework-for-IoT**
 ⭐ Execute x-rebuild_and_start.production.sh
 
 ## 🔳 🔳 🚀 Quickstart - Windows ( developing environment )🚀️🔳 🔳   
-In **Windows Powershell** ( not cmd !! )  use following commands.   
+  
 ⭐ Open the prefered IDE (pycharm, vscode) and clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
-⭐ Manual downloading the code or using the commands in Powershell      
+⭐ Manual downloading the code or using the commands in Powershell  
+In **Windows Powershell** ( not cmd !! )  use following commands. 
 ```powershell
     Remove-Item -Path ./master.zip
     Invoke-WebRequest  https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip -OutFile ./master.zip
