@@ -11,7 +11,7 @@ Preconfigured services can be selected in file docker-compose.yml
     sudo rm -rf /var/lib/apt/lists/*  
 ```
 ⭐ Choose directory or make a new one with appropriate permissions for writing and executing.      
-It will create a new folder: Dockerized-Web-Framework-for-IoT    
+Next step (clone repository) adds folder **Dockerized-Web-Framework-for-IoT**      
 ⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
