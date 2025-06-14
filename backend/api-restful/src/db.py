@@ -128,6 +128,14 @@ async def fetchall(sql):
 
 
 async def fetchone(sql):
+    """Fetch a single row from the database."""
+    async with connections.pool.acquire() as cnx:
+        async with cnx.cursor() as cur:
+            await cur.execute(sql)
+            return await cur.fetchone()
+
+
+async def fetchone_alt(sql):
     """sql: fetchone."""
     async with connections.pool.acquire() as cnx:
         async with cnx.cursor() as cur:
