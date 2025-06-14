@@ -6,7 +6,7 @@ import aiomysql
 import asyncio
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from http_status_codes import HTTP_NOT_FOUND, HTTP_BAD_REQUEST, HTTP_CREATED
+from fastapi import status
 
 
 class Connections:
@@ -54,8 +54,8 @@ async def post_json(database, table, json_data=None) -> JSONResponse:
     sql = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
     insert = await sqlexec(sql, records)
 
-    reply = {'status': HTTP_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
-        else {'status': HTTP_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
+    reply = {'status': status.HTTP_201_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
+        else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
 
     return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
 

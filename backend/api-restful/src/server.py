@@ -20,7 +20,7 @@ import db
 from db import fetch, post_sql, post_json, post_form, sqlcommit, sqlexec, sqlinsert
 # from flask import request
 from flask import jsonify
-
+from mediatypes import MediaTypes
 import mysql.connector
 
 description = """
@@ -39,39 +39,11 @@ UnauthorizedException = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                       headers={"WWW-Authenticate": "Bearer"},
                                       )
 
+media_types = MediaTypes()
+
 
 class Item(BaseModel):
     pass
-
-
-class AppJSONEncoder(json.JSONEncoder):
-    """app: json encoder."""
-
-    def default(self, o):
-        """default: self."""
-        if isinstance(o, decimal.Decimal):
-            # Convert decimal instance to string
-            return str(o)
-
-        if isinstance(o, bytes):
-            # Convert bytes instance to string, json
-            try:
-                o = o.decode('utf-8')
-                try:
-                    o = json.loads(o)
-                    return o
-                except json.decoder.JSONDecodeError:
-                    return str(o)
-
-            except UnicodeDecodeError:
-                return str(o)
-
-        if isinstance(o, bytearray):
-            # Convert bytearray instance to string
-            o = o.decode('utf-8')
-            return str(o)
-
-        return super().default(o)
 
 
 @asynccontextmanager
@@ -100,22 +72,22 @@ api.add_middleware(CORSMiddleware,
 @api.get("/")
 async def root():
     """GET: Show Status."""
-    content = {'status': 200, 'message': "OK", 'version': __version__}
-    return JSONResponse(content, status_code=200, media_type="application/json")
+    content = {'status': status.HTTP_200_OK, 'message': "OK", 'version': __version__}
+    return JSONResponse(content, status_code=content.get('status'), media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api")
 async def show_databases():
     """GET: /api Show Databases."""
     rows = await fetch("SHOW DATABASES", all=True)
-    return JSONResponse(content=rows, status_code=200, media_type="application/json")
+    return JSONResponse(content=rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api/{database}")
 async def show_tables(database: str) -> JSONResponse:
     """GET: /api/<database> Show Database Tables."""
     rows = await fetch(f"SHOW TABLES FROM {database}", all=True)
-    return JSONResponse(rows, status_code=200, media_type="application/json")
+    return JSONResponse(rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api/{database}/{table}")
@@ -126,9 +98,9 @@ async def get_many(database: str, table: str,
     sql = f"SELECT {fields} FROM {database}.{table}" if fields else f"SHOW FIELDS FROM {database}.{table}"
     sql = sql + f" LIMIT {limit}" if limit and fields else sql
     rows = await fetch(sql, all=True)
-    status_code = 200 if rows else 404
+    status_code = status.HTTP_200_OK if rows else status.HTTP_404_NOT_FOUND
     response_data = jsonable_encoder(rows) if rows else []
-    return JSONResponse(response_data, status_code=status_code, media_type="application/json")
+    return JSONResponse(response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api/{database}/{table}/{key}")
@@ -137,10 +109,9 @@ async def get_one(database: str, table: str, key: str,
                   fields: str = Query(description='fields', default="*")) -> JSONResponse:
     """GET: /api/<database>/<table>:id."""
     row = await fetch(f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'")
-    if row:
-        return JSONResponse(jsonable_encoder(row), status_code=200, media_type="application/json")
-    else:
-        return JSONResponse([], status_code=404, media_type="application/json")
+    response_data = jsonable_encoder(row) if row else []
+    status_code = status.HTTP_200_OK if row else status.HTTP_404_NOT_FOUND
+    return JSONResponse(response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
 
 
 @api.post("/api")
@@ -193,10 +164,9 @@ async def post_insert(request: Request, item: Item, database=None, table=None):
     """POST: /api/<database>/<table>."""
     # Create a new row. key1=val1,key2=val2.
     try:
-        _json = await request.json()
-        print(_json)
-        if _json:
-            return await post_json(database, table, _json)
+        json_data = await request.json()
+        if json_data:
+            return await post_json(database, table, json_data)
     except Exception as e:
         print("TimeoutError", e)
 
