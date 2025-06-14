@@ -6,6 +6,7 @@ import aiomysql
 import asyncio
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from http_status_codes import HTTP_NOT_FOUND, HTTP_BAD_REQUEST, HTTP_CREATED
 
 
 class Connections:
@@ -38,32 +39,28 @@ def post_sql():
     return jsonify(status=202, method='POST'), 202
 
 
-async def post_json(database, table, json_data=None):
+async def post_json(database, table, json_data=None) -> JSONResponse:
     """post: json data application/json."""
     post = json_data
 
-    placeholders = ['%s'] * len(post)
+    # fields = ",".join([str(key) for key in post])
+    # placeholders = ['%s'] * len(post)
+    # places = ",".join([str(key) for key in placeholders])
+    places = ",".join(['%s'] * len(post))
+    fields = ",".join(post)
 
-    fields = ",".join([str(key) for key in post])
-    places = ",".join([str(key) for key in placeholders])
+    records = [value for value in post.values()]
 
-    records = []
-    for key in post:
-        records.append(post[key])
-
-    sql = "INSERT INTO " + database + "." + table
-    sql += " (" + fields + ") VALUES (" + places + ")"
-
+    sql = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
     insert = await sqlexec(sql, records)
 
-    if insert > 0:
-        reply = {'status': 201, 'message': "Created", 'insert': True, 'rowid': insert}
-    else:
-        reply = {'status': 461, 'message': "Failed Create", 'insert': False}
-    return JSONResponse(jsonable_encoder(reply), status_code=417, media_type="application/json")
+    reply = {'status': HTTP_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
+        else {'status': HTTP_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
+
+    return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
 
 
-def post_form(database, table):
+async def post_form(database, table):
     """post: form data application/x-www-form-urlencoded."""
     credentials = request.form.get('credentials', None)
 
