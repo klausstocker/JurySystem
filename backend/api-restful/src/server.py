@@ -123,15 +123,13 @@ async def get_many(database: str, table: str,
                    fields: str = Query(description='fields', default=None),
                    limit: int = Query(gt=0, lt=10000, default=None)) -> JSONResponse:
     """GET: /api/<database>/<table> Show Database Table fields."""
-    sql = f"SELECT {fields} FROM {database}.{table}" if fields == "*" else f"SHOW FIELDS FROM {database}.{table}"
-    sql = sql + f" LIMIT {limit}" if limit else sql
-
+    sql = f"SELECT {fields} FROM {database}.{table}" if fields else f"SHOW FIELDS FROM {database}.{table}"
+    sql = sql + f" LIMIT {limit}" if limit and fields else sql
     rows = await fetch(sql, all=True)
     print(rows)
-    if rows:
-        return JSONResponse(jsonable_encoder(rows), status_code=200, media_type="application/json")
-    else:
-        return JSONResponse([], status_code=404, media_type="application/json")
+    status_code = 200 if rows else 404
+    response_data = jsonable_encoder(rows) if rows else []
+    return JSONResponse(response_data, status_code=status_code, media_type="application/json")
 
 
 @api.get("/api/{database}/{table}/{key}")
