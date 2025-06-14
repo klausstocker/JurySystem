@@ -70,23 +70,39 @@ api.add_middleware(CORSMiddleware,
 
 
 @api.get("/")
-async def root():
-    """GET: Show Status."""
+async def root() -> JSONResponse:
+    """
+    Handles the root GET request and returns a JSON response containing the status,
+    message, and version information of the application. This endpoint serves as a
+    health check or informational route for clients.
+    """
     content = {'status': status.HTTP_200_OK, 'message': "OK", 'version': __version__}
-    return JSONResponse(content, status_code=content.get('status'), media_type=media_types.APPLICATION_JSON)
+    return JSONResponse(content=content, status_code=content.get('status'), media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api")
-async def show_databases():
-    """GET: /api Show Databases."""
-    rows = await fetch("SHOW DATABASES", all=True)
+async def show_databases() -> JSONResponse:
+    """
+    Fetches and displays the list of all available databases from the server.
+
+    This function executes a database query to fetch all the names of databases
+    from the connected server. It sends a JSON response containing the list of
+    database names to the client. The data is retrieved asynchronously.
+    """
+    query = "SHOW DATABASES"
+    rows = await fetch(query, all=True)
     return JSONResponse(content=rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
 @api.get("/api/{database}")
 async def show_tables(database: str) -> JSONResponse:
-    """GET: /api/<database> Show Database Tables."""
-    rows = await fetch(f"SHOW TABLES FROM {database}", all=True)
+    """
+    Fetches and returns the list of tables from a specified database. This function executes
+    a query to retrieve all tables from the provided database and returns the result as a
+    JSON response with appropriate status code and media type.
+    """
+    query = f"SHOW TABLES FROM {database}"
+    rows = await fetch(query, all=True)
     return JSONResponse(rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
@@ -94,10 +110,17 @@ async def show_tables(database: str) -> JSONResponse:
 async def get_many(database: str, table: str,
                    fields: str = Query(description='fields', default=None),
                    limit: int = Query(gt=0, lt=10000, default=None)) -> JSONResponse:
-    """GET: /api/<database>/<table> Show Database Table fields."""
-    sql = f"SELECT {fields} FROM {database}.{table}" if fields else f"SHOW FIELDS FROM {database}.{table}"
-    sql = sql + f" LIMIT {limit}" if limit and fields else sql
-    rows = await fetch(sql, all=True)
+    """
+    Fetches multiple records from a specified database table or shows the table fields.
+
+    This function is designed for querying records or table schema from a database, with optional
+    support for selecting specific fields and limiting the number of records retrieved. The response
+    is formatted as JSON. Depending on input parameters, it either queries data rows if fields are
+    specified or shows table schema if fields are not specified.
+    """
+    query = f"SELECT {fields} FROM {database}.{table}" if fields else f"SHOW FIELDS FROM {database}.{table}"
+    query = query + f" LIMIT {limit}" if limit and fields else query
+    rows = await fetch(query, all=True)
     status_code = status.HTTP_200_OK if rows else status.HTTP_404_NOT_FOUND
     response_data = jsonable_encoder(rows) if rows else []
     return JSONResponse(response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
@@ -107,11 +130,16 @@ async def get_many(database: str, table: str,
 async def get_one(database: str, table: str, key: str,
                   column: str = Query(description='column', default='id'),
                   fields: str = Query(description='fields', default="*")) -> JSONResponse:
-    """GET: /api/<database>/<table>:id."""
-    row = await fetch(f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'")
+    """
+    Handles HTTP GET requests to fetch a specific record from a database table based
+    on a provided key. Supports specifying the column to search within and the fields
+    to select in the response.
+    """
+    query = f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'"
+    row = await fetch(query)
     response_data = jsonable_encoder(row) if row else []
     status_code = status.HTTP_200_OK if row else status.HTTP_404_NOT_FOUND
-    return JSONResponse(response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
+    return JSONResponse(content=response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
 
 
 @api.post("/api")
