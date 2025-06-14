@@ -59,7 +59,7 @@ api = FastAPI(lifespan=lifespan,
               version="1.0.0",
               contact={"name": "Franz Krenn",
                        "email": "office@fkrenn.at"},
-              summary="Simplify xour access",
+              summary="Simplify your access",
               description=description)
 
 api.add_middleware(CORSMiddleware,
