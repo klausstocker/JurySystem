@@ -17,7 +17,7 @@ from fastapi import Depends, Query, Body
 from pydantic import BaseModel
 
 import db
-from db import fetch, post_sql, post_json, post_form, sqlcommit, sqlexec, sqlinsert
+from db import fetch, post_sql, post_json, post_form, sql_commit, sql_exec, sql_insert
 # from flask import request
 from flask import jsonify
 from mediatypes import MediaTypes
@@ -189,72 +189,83 @@ async def post_api(request: Request):
 
 @api.post("/api/{database}/{table}")
 async def post_insert(request: Request, item: Item, database=None, table=None):
-    """POST: /api/<database>/<table>."""
+    """
+    Handles an HTTP POST request to insert a new row into the specified database and table. The
+    method expects application/json as the Content-Type of the request. If valid JSON data
+    is provided in the request body, it triggers an internal function for inserting the data.
+    If the request does not meet this expectation, a structured error response is returned.
+    """
     # Create a new row. key1=val1,key2=val2.
-    try:
+    content_type = request.headers.get('Content-Type')
+    if content_type == media_types.APPLICATION_JSON:
         json_data = await request.json()
         if json_data:
             return await post_json(database, table, json_data)
-    except Exception as e:
-        print("TimeoutError", e)
-
-    # if request.form:
-    #    return post_form(database, table)
-
-    reply = {'status': 417,
+    reply = {'status': status.HTTP_417_EXPECTATION_FAILED,
              'message': 'Expectation Failed',
              'details': 'Can Not Meet Expectation: request-header field',
              'method': 'POST',
              'insert': False}
-    return JSONResponse(jsonable_encoder(reply), status_code=417, media_type="application/json")
+    return JSONResponse(content=jsonable_encoder(reply), status_code=reply.get('status'),
+                        media_type=media_types.APPLICATION_JSON)
 
 
 @api.delete("/api/{database}/{table}/{key}")
 async def delete_one(request: Request, database=None, table=None, key=None,
                      column: str = Query(description='column', default='id')):
-    """DELETE: /api-fastapi/<database>/<table>:id."""
+    """
+    Delete a single row from a specific table in a database by its primary key.
+    This asynchronous function constructs and executes a SQL DELETE query to
+    remove a specific record based on the provided key and optional column name.
+    """
     # Delete a row by primary key id?column=
-    delete = await sqlcommit(f"DELETE FROM {database}.{table} WHERE {column}='{key}'")
-
-    if delete > 0:
-        reply = {'status': 200, "message": "deleted", "delete": True}
-    else:
-        reply = {'status': 466, "message": "Failed Delete", "delete": False}
-    return JSONResponse(jsonable_encoder(reply), status_code=200, media_type="application/json")
+    query = f"DELETE FROM {database}.{table} WHERE {column}='{key}'"
+    delete = await sql_commit(query) > 0
+    reply = {'status': status.HTTP_200_OK if delete else status.HTTP_404_NOT_FOUND,
+             'message': "Deleted" if delete else "Failed Delete",
+             'delete': delete}
+    return JSONResponse(content=jsonable_encoder(reply), status_code=reply.get('status'),
+                        media_type=media_types.APPLICATION_JSON)
 
 
 @api.patch("/api/{database}/{table}/{key}")
-async def patch_one(database=None, table=None, key=None):
-    """PATCH: /api/<database>/<table>:id."""
+async def patch_one(request: Request, item: Item, database=None, table=None, key=None,
+                    column: str = Query(description='column', default='id')) -> JSONResponse:
+    """
+    Updates a single row element in a specified database table based on the provided primary key. The function accepts a JSON body containing
+    a single key-value pair to update. If the request contains content other than application/json or if an invalid payload
+    is provided, the function responds with an appropriate error message. On successful update, the function returns a status of HTTP 201.
+    """
     # Update row element by primary key (single key/val) id?column=
-
-    column = request.args.get("column", 'id')
-
-    if not request.headers['Content-Type'] == 'application/json':
-        return jsonify(status=412, errorType="Precondition Failed"), 412
-
-    post = request.get_json()
-
-    if len(post) > 1:
-        _return = {'status': 405,
-                   'errorType': 'Method Not Allowed',
-                   'errorMessage': 'Single Key-Value Only',
-                   'update': False}
-        return jsonify(_return), 405
-
-    for _key in post:
-        field = _key
-        value = post[_key]
-
-    sql = "UPDATE " + database + "." + table
-    sql += " SET " + field + "='" + value + "' WHERE " + column + "='" + key + "'"
-
-    update = sqlcommit(sql)
-
-    if update > 0:
-        return jsonify(status=201, message="Created", update=True), 201
-
-    return jsonify(status=465, message="Failed Update", update=False), 465
+    reply = {"status": status.HTTP_412_PRECONDITION_FAILED}
+    try:
+        if request.headers['Content-Type'] == media_types.APPLICATION_JSON:
+            json_data = await request.json()
+            if len(json_data) > 1:
+                reply = {'status': status.HTTP_405_METHOD_NOT_ALLOWED,
+                         'errorType': 'Method Not Allowed',
+                         'errorMessage': 'Single Key-Value Only',
+                         'update': False}
+            else:
+                field, value = next(iter(json_data.items()))
+                query = f"UPDATE {database}.{table} SET {field}='{value}' WHERE {column}='{key}'"
+                update = await sql_commit(query) > 0
+                reply = {'status': status.HTTP_201_CREATED if update else status.HTTP_404_NOT_FOUND,
+                         'message': "Update" if update else "Failed Update",
+                         'update': update}
+        else:
+            reply = {'status': status.HTTP_412_PRECONDITION_FAILED,
+                     'errorType': 'Media Type not supported',
+                     'errorMessage': 'Media Type Must Be application/json',
+                     'update': False}
+    except Exception as e:
+        reply = {'status': status.HTTP_406_NOT_ACCEPTABLE,
+                 'errorType': 'Update not successful',
+                 'errorMessage': f'{e}',
+                 'update': False}
+    finally:
+        return JSONResponse(content=jsonable_encoder(reply), status_code=reply.get('status'),
+                            media_type=media_types.APPLICATION_JSON)
 
 
 @api.put("/api/{database}/{table}")
@@ -290,49 +301,6 @@ async def put_replace(database=None, table=None):
                        rowid=replace), 201
 
     return jsonify(status=461, message="Failed Create", replace=False), 461
-
-
-'''
-@api.errorhandler(404)
-def not_found(_e=None):
-    """Not_Found: HTTP File Not Found 404."""
-    message = {'status': 404, 'errorType': 'Not Found: ' + request.url}
-    return jsonify(message), 404
-
-
-@api.errorhandler(Exception)
-def handle_exception(_e):
-    """Exception: HTTP Exception."""
-    if isinstance(_e, HTTPException):
-        return jsonify(status=_e.code,
-                       errorType="HTTP Exception",
-                       errorMessage=str(_e)), _e.code
-
-    if type(_e).__name__ == 'OperationalError':
-        return jsonify(status=512,
-                       errorType="OperationalError",
-                       errorMessage=str(_e)), 512
-
-    if type(_e).__name__ == 'InterfaceError':
-        return jsonify(status=512,
-                       errorType="InterfaceError",
-                       errorMessage=str(_e)), 512
-
-    if type(_e).__name__ == 'ProgrammingError':
-        return jsonify(status=512,
-                       errorType="ProgrammingError",
-                       errorMessage=str(_e)), 512
-
-    if type(_e).__name__ == 'AttributeError':
-        return jsonify(status=512,
-                       errorType="AttributeError",
-                       errorMessage=str(_e)), 512
-
-    res = {'status': 500, 'errorType': 'Internal Server Error'}
-    res['errorMessage'] = str(_e)
-    return jsonify(res), 500
-
-'''
 
 
 def sql_connection(user=None, password=None):
