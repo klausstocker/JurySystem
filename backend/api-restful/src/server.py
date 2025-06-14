@@ -17,7 +17,7 @@ from fastapi import Depends, Query, Body
 from pydantic import BaseModel
 
 import db
-from db import fetchall, fetchone, post_sql, post_json, post_form, sqlcommit, sqlexec, sqlinsert
+from db import fetch, post_sql, post_json, post_form, sqlcommit, sqlexec, sqlinsert
 # from flask import request
 from flask import jsonify
 
@@ -107,14 +107,14 @@ async def root():
 @api.get("/api")
 async def show_databases():
     """GET: /api Show Databases."""
-    rows = await fetchall("SHOW DATABASES")
+    rows = await fetch("SHOW DATABASES", all=True)
     return JSONResponse(content=rows, status_code=200, media_type="application/json")
 
 
 @api.get("/api/{database}")
 async def show_tables(database: str) -> JSONResponse:
     """GET: /api/<database> Show Database Tables."""
-    rows = await fetchall(f"SHOW TABLES FROM {database}")
+    rows = await fetch(f"SHOW TABLES FROM {database}", all=True)
     return JSONResponse(rows, status_code=200, media_type="application/json")
 
 
@@ -125,8 +125,8 @@ async def get_many(database: str, table: str,
     """GET: /api/<database>/<table> Show Database Table fields."""
     sql = f"SELECT {fields} FROM {database}.{table}" if fields == "*" else f"SHOW FIELDS FROM {database}.{table}"
     sql = sql + f" LIMIT {limit}" if limit else sql
-    print(sql)
-    rows = await fetchall(sql)
+
+    rows = await fetch(sql, all=True)
     print(rows)
     if rows:
         return JSONResponse(jsonable_encoder(rows), status_code=200, media_type="application/json")
@@ -139,7 +139,7 @@ async def get_one(database: str, table: str, key: str,
                   column: str = Query(description='column', default='id'),
                   fields: str = Query(description='fields', default="*")) -> JSONResponse:
     """GET: /api/<database>/<table>:id."""
-    row = await fetchone(f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'")
+    row = await fetch(f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'")
     if row:
         return JSONResponse(jsonable_encoder(row), status_code=200, media_type="application/json")
     else:

@@ -127,12 +127,14 @@ async def fetchall(sql):
     return rows
 
 
-async def fetchone(sql):
+async def fetch(sql: str = str(), all: bool = False):
     """Fetch a single row from the database."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql)
-            return await cur.fetchone()
+    print(f'SQL: {sql}')
+    async with connections.pool.acquire() as connection:
+        async with connection.cursor() as cursor:
+            await cursor.execute(sql)
+            result = await cursor.fetchall() if all else await cursor.fetchone()
+            return result
 
 
 async def fetchone_alt(sql):
