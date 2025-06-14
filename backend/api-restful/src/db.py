@@ -42,25 +42,19 @@ def post_sql():
 async def post_json(database, table, json_data=None) -> JSONResponse:
     """post: json data application/json."""
     post = json_data
-
-    # fields = ",".join([str(key) for key in post])
-    # placeholders = ['%s'] * len(post)
-    # places = ",".join([str(key) for key in placeholders])
     places = ",".join(['%s'] * len(post))
     fields = ",".join(post)
-
     records = [value for value in post.values()]
 
-    sql = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
-    insert = await sqlexec(sql, records)
-
+    query = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
+    insert = await sql_exec(query, records)
     reply = {'status': status.HTTP_201_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
         else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
 
     return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
 
 
-async def post_form(database, table):
+async def post_form(database, table, form_data=None) -> JSONResponse:
     """post: form data application/x-www-form-urlencoded."""
     credentials = request.form.get('credentials', None)
 
@@ -86,7 +80,7 @@ async def post_form(database, table):
         sql = "INSERT INTO " + database + "." + table
         sql += " (" + fields + ") VALUES (" + places + ")"
 
-        insert = sqlinsert(sql, records, base64_user, base64_pass)
+        insert = sql_insert(sql, records, base64_user, base64_pass)
 
         if insert > 0:
             return jsonify(status=201,
@@ -116,19 +110,31 @@ def base64_untoken(base64_bytes):
     return base64_user, base64_pass
 
 
-async def fetchall(sql):
-    """sql: fetchall."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql)
-            rows = await cur.fetchall()
-            await cur.close()
-            cnx.close()
-    return rows
+def decode_token(base64_bytes) -> tuple[str, str]:
+    """
+    Decodes a base64-encoded token and extracts the username and password.
+
+    The function takes a base64-encoded string representing a concatenation
+    of a username and password, separated by a colon (:). It decodes the
+    token, splits it into the username and password, and returns them as
+    separate strings.
+    """
+    token_bytes = base64.b64decode(base64_bytes)
+    untoken = token_bytes.decode('ascii')
+    base64_user, base64_pass = untoken.split(":", 1)
+    return base64_user, base64_pass
 
 
 async def fetch(sql: str = str(), all: bool = False):
-    """Fetch a single row from the database."""
+    """
+    Fetch data from the database with the provided SQL query and fetch mode. This
+    function executes the given SQL query and retrieves the result(s) based on the
+    specified fetching mode.
+
+    This is an asynchronous function utilizing a connection pool to acquire a
+    connection to the database and execute the SQL query efficiently. It supports
+    two fetching modes: fetching a single result or fetching all results.
+    """
     print(f'SQL: {sql}')
     async with connections.pool.acquire() as connection:
         async with connection.cursor() as cursor:
@@ -137,51 +143,42 @@ async def fetch(sql: str = str(), all: bool = False):
             return result
 
 
-async def fetchone_alt(sql):
-    """sql: fetchone."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql)
-            row = await cur.fetchone()
-            await cur.close()
-            cnx.close()
-    return row
+async def sql_exec(sql, values):
+    """
+    Executes an SQL command asynchronously and commits the transaction. This function is
+    intended for use with a connection pool. It provides a way to run SQL commands while
+    automatically managing connections and cursors.
+    """
+    async with connections.pool.acquire() as connection:
+        async with connection.cursor() as cursor:
+            await cursor.execute(sql, values)
+            await connection.commit()
+            return cursor.lastrowid
 
 
-async def sqlexec(sql, values):
-    """sql: exec values."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql, values)
-            await cnx.commit()
-            last_rowid = cur.lastrowid
-            await cur.close()
-            cnx.close()
-    return last_rowid
+async def sql_commit(sql):
+    """
+    Executes the given SQL query and commits the transaction to the database. This function
+    uses asynchronous database connection management to ensure efficiency and ensure that
+    resources are appropriately cleaned up after the operation.
+    """
+    async with connections.pool.acquire() as connection:
+        async with connection.cursor() as cursor:
+            await cursor.execute(sql)
+            await connection.commit()
+            return cursor.rowcount
 
 
-async def sqlcommit(sql):
-    """sql: commit."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql)
-            await cnx.commit()
-            rowcount = cur.rowcount
-            await cur.close()
-            cnx.close()
-    return rowcount
-
-
-async def sqlinsert(sql, values):
-    """sql: insert values, user, password."""
-    async with connections.pool.acquire() as cnx:
-        async with cnx.cursor() as cur:
-            await cur.execute(sql, values)
-            await cnx.commit()
-            last_rowid = cur.lastrowid
-            await cur.close()
-            cnx.close()
-    return last_rowid
+async def sql_insert(sql, values):
+    """
+    Executes an SQL INSERT statement asynchronously with provided SQL syntax and
+    arguments, commits the transaction, and returns the last inserted row ID.
+    """
+    async with connections.pool.acquire() as connection:
+        async with connection.cursor() as cursor:
+            await cursor.execute(sql, values)
+            await connection.commit()
+            return cursor.lastrowid
 
 
 async def connect():
