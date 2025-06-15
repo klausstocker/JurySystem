@@ -45,6 +45,7 @@ services:
       - influxdb
     volumes:
       - ./.grafana/data:/var/lib/grafana
+    user: '0'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.entrypoints=websecure"
