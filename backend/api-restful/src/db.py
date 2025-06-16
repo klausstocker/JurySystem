@@ -7,40 +7,51 @@ import asyncio
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi import status
+from mediatypes import MediaTypes
+
+media_types = MediaTypes()
 
 
 class Connections:
     pool = None
 
 
-def post_sql():
-    """post: sql."""
-    post = request.data
-    sql = post.decode('utf-8')
+async def post_sql(sql_query=None, ):
+    """
+    Executes a given SQL query asynchronously and returns the results in JSON format. The function supports queries
+    that either return rows or that involve updates/commands without rows.
+    Returns JSONResponse containing the results of the SQL query. The HTTP status code in the response represents
+    the outcome of the query:
+    - 200 (OK): If the query returns rows.
+    - 201 (Created): If the query executes successfully without returning rows.
+    - 202 (Accepted): If no SQL query is provided or execution yields no specific results.
+    """
+    async with connections.pool.acquire() as connection:
+        async with connection.cursor() as cursor:
+            try:
+                results = await cursor.execute(sql_query)
+                for result in results:
+                    if result.with_rows:
+                        return JSONResponse(result, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
+                    await connection.commit()
+                    return JSONResponse(result, status_code=status.HTTP_201_CREATED,
+                                        media_type=media_types.APPLICATION_JSON)
+            except Exception as e:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: {e}")
 
-    cnx = sql_connection()
-    cur = cnx.cursor(buffered=True)
-
-    try:
-        for result in cur.execute(sql, multi=True):
-
-            if result.with_rows:
-                return jsonify(result.fetchall()), 200
-
-            cnx.commit()
-            return jsonify(status=201,
-                           statment=result.statement,
-                           rowcount=result.rowcount,
-                           lastrowid=result.lastrowid), 201
-    finally:
-        cur.close()
-        cnx.close()
-
-    return jsonify(status=202, method='POST'), 202
+        return JSONResponse(content={}, status_code=status.HTTP_202_ACCEPTED)
 
 
 async def post_json(database, table, json_data=None) -> JSONResponse:
-    """post: json data application/json."""
+    """
+    Inserts JSON data into the specified database table asynchronously and
+    returns a JSON response indicating the status of the operation.
+
+    The function takes a database name, table name, and a dictionary of JSON
+    data as input. The JSON data is processed to construct a SQL INSERT query,
+    which is executed asynchronously. It returns a JSONResponse containing
+    details about the success or failure of the operation.
+    """
     post = json_data
     places = ",".join(['%s'] * len(post))
     fields = ",".join(post)
@@ -52,62 +63,6 @@ async def post_json(database, table, json_data=None) -> JSONResponse:
         else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
 
     return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
-
-
-async def post_form(database, table, form_data=None) -> JSONResponse:
-    """post: form data application/x-www-form-urlencoded."""
-    credentials = request.form.get('credentials', None)
-
-    if credentials:
-
-        columns = []
-        records = []
-        for key in request.form.keys():
-            if key == 'credentials':
-                continue
-            columns.append(key)
-            records.append(request.form[key])
-
-        count = len(request.form) - 1
-        placeholders = ['%s'] * count
-
-        places = ",".join([str(key) for key in placeholders])
-
-        fields = ",".join([str(key) for key in columns])
-
-        base64_user, base64_pass = base64_untoken(credentials.encode('ascii'))
-
-        sql = "INSERT INTO " + database + "." + table
-        sql += " (" + fields + ") VALUES (" + places + ")"
-
-        insert = sql_insert(sql, records, base64_user, base64_pass)
-
-        if insert > 0:
-            return jsonify(status=201,
-                           message="Created",
-                           method="POST",
-                           insert=True,
-                           rowid=insert), 201
-
-        return jsonify(status=461,
-                       message="Failed Create",
-                       method="POST",
-                       insert=False), 461
-
-    return jsonify(status=401,
-                   message='Unauthorized',
-                   details='No valid authentication credentials for target resource',
-                   method='POST',
-                   insert=False), 401
-
-
-def base64_untoken(base64_bytes):
-    """base64: untoken."""
-    token_bytes = base64.b64decode(base64_bytes)
-    untoken = token_bytes.decode('ascii')
-    base64_user = untoken.split(":", 1)[0]
-    base64_pass = untoken.split(":", 1)[1]
-    return base64_user, base64_pass
 
 
 def decode_token(base64_bytes) -> tuple[str, str]:

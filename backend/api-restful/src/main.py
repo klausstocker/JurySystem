@@ -4,36 +4,32 @@ import uvicorn
 
 __version__ = '1.0.0'
 
-import decimal
-import json
 from contextlib import asynccontextmanager
+from typing import Annotated, Union, Any
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI, HTTPException, status
-from typing import Annotated, Union, Any
 from fastapi import Depends, Query, Body
 from pydantic import BaseModel
-
-import db
-from db import fetch, post_sql, post_json, post_form, sql_commit, sql_exec, sql_insert
-# from flask import request
-from flask import jsonify
+from db import fetch, post_json, sql_commit, post_sql, sql_exec, connections, connect
 from mediatypes import MediaTypes
-import mysql.connector
 
 description = """
-🚀🚀 RESTful API 🚀🚀
+🚀🚀 RESTful API 🚀🚀  
+Basic implementation of a RESTful API using **FastAPI**.
 """
 
-UnprivilegedException = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unprivileged user")
-DisabledUserException = HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Disabled user")
-
+UnprivilegedException = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                      detail="Unprivileged user")
+DisabledUserException = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                      detail="Disabled user")
+UnsupportedMediaTypeException = HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                              detail="Media Type not supported")
 CredentialsException = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                      detail="Could not validate credentials",
                                      headers={"WWW-Authenticate": "Bearer"})
-
 UnauthorizedException = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                       detail="Incorrect username or password",
                                       headers={"WWW-Authenticate": "Bearer"},
@@ -46,12 +42,16 @@ class Item(BaseModel):
     pass
 
 
+class QueryRequest(BaseModel):
+    sql: str
+
+
 @asynccontextmanager
 async def lifespan(api: FastAPI):
-    await db.connect()
+    await connect()
     yield
-    db.connections.pool.close()
-    await db.connections.pool.wait_closed()
+    connections.pool.close()
+    await connections.pool.wait_closed()
 
 
 api = FastAPI(lifespan=lifespan,
@@ -59,7 +59,7 @@ api = FastAPI(lifespan=lifespan,
               version="1.0.0",
               contact={"name": "Franz Krenn",
                        "email": "office@fkrenn.at"},
-              summary="Simplify your access",
+              summary="Simplify database access",
               description=description)
 
 api.add_middleware(CORSMiddleware,
@@ -76,8 +76,11 @@ async def root() -> JSONResponse:
     message, and version information of the application. This endpoint serves as a
     health check or informational route for clients.
     """
-    content = {'status': status.HTTP_200_OK, 'message': "OK", 'version': __version__}
-    return JSONResponse(content=content, status_code=content.get('status'), media_type=media_types.APPLICATION_JSON)
+    try:
+        content = {'status': status.HTTP_200_OK, 'message': "OK", 'version': __version__}
+        return JSONResponse(content=content, status_code=content.get('status'), media_type=media_types.APPLICATION_JSON)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {e}")
 
 
 @api.get("/api")
@@ -89,9 +92,11 @@ async def show_databases() -> JSONResponse:
     from the connected server. It sends a JSON response containing the list of
     database names to the client. The data is retrieved asynchronously.
     """
-    query = "SHOW DATABASES"
-    rows = await fetch(query, all=True)
-    return JSONResponse(content=rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
+    try:
+        rows = await fetch("SHOW DATABASES", all=True)
+        return JSONResponse(content=rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {e}")
 
 
 @api.get("/api/{database}")
@@ -101,8 +106,7 @@ async def show_tables(database: str) -> JSONResponse:
     a query to retrieve all tables from the provided database and returns the result as a
     JSON response with appropriate status code and media type.
     """
-    query = f"SHOW TABLES FROM {database}"
-    rows = await fetch(query, all=True)
+    rows = await fetch(f"SHOW TABLES FROM {database}", all=True)
     return JSONResponse(rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
@@ -143,76 +147,30 @@ async def get_one(database: str, table: str, key: str,
 
 
 @api.post("/api")
-async def post_api(request: Request):
+async def execute_sql_query(request: Request, item: QueryRequest = Body(media_type=media_types.APPLICATION_JSON, )):
     """POST: /api """
-    content_type = request.headers.get('Content-Type')
-    print(content_type)
-    try:
-        _json = await request.json()
-    except Exception as e:
-        print("TimeoutError", e)
-        return JSONResponse(jsonable_encoder({"exception": e}), status_code=415, media_type="application/json")
-    print(_json, request.headers)
-    return JSONResponse([], status_code=415, media_type="application/json")
-    if _json:
-        return JSONResponse([], status_code=415, media_type="application/json")
-        # return jsonify(status=415, post='json'), 415
-
-    if request.form():
-        return jsonify(status=415, post='form'), 415
-
-    # if request.files():
-    #    return jsonify(status=415, post='files'), 415
-
-    if request.stream():
-        content_type = request.headers.get('Content-Type')
-        if content_type == 'image/jpg':
-            return jsonify(status=415, post='stream', content_type='image/jpg'), 415
-
-        if content_type == 'application/octet-stream':
-            return jsonify(status=415,
-                           post='stream',
-                           content_type='application/octet-stream'), 415
-
-        if str(content_type).lower().startswith('text/plain'):
-            return jsonify(status=415, post='stream', content_type='text/plain'), 415
-
-        if str(content_type).lower().startswith('text/sql'):
-            return post_sql()
-
-        return jsonify(status=415, post='stream'), 415
-
-    return jsonify(status=415,
-                   error='Unsupported Media Type',
-                   method='POST'), 415
+    return await post_sql(item.sql)
 
 
 @api.post("/api/{database}/{table}")
-async def post_insert(request: Request, item: Item, database=None, table=None):
+async def post_insert(request: Request, item: Item, database=None, table=None) -> JSONResponse:
     """
     Handles an HTTP POST request to insert a new row into the specified database and table. The
     method expects application/json as the Content-Type of the request. If valid JSON data
     is provided in the request body, it triggers an internal function for inserting the data.
-    If the request does not meet this expectation, a structured error response is returned.
     """
     # Create a new row. key1=val1,key2=val2.
-    content_type = request.headers.get('Content-Type')
-    if content_type == media_types.APPLICATION_JSON:
-        json_data = await request.json()
-        if json_data:
-            return await post_json(database, table, json_data)
-    reply = {'status': status.HTTP_417_EXPECTATION_FAILED,
-             'message': 'Expectation Failed',
-             'details': 'Can Not Meet Expectation: request-header field',
-             'method': 'POST',
-             'insert': False}
-    return JSONResponse(content=jsonable_encoder(reply), status_code=reply.get('status'),
-                        media_type=media_types.APPLICATION_JSON)
+    if not request.headers['Content-Type'] == media_types.APPLICATION_JSON:
+        raise HTTPException(status_code=412, detail="Precondition Failed")
+    json_data = await request.json()
+    if json_data:
+        return await post_json(database, table, json_data)
+    raise HTTPException(status_code=417, detail='Can Not Meet Expectation: request-header field')
 
 
 @api.delete("/api/{database}/{table}/{key}")
 async def delete_one(request: Request, database=None, table=None, key=None,
-                     column: str = Query(description='column', default='id')):
+                     column: str = Query(description='column', default='id')) -> JSONResponse:
     """
     Delete a single row from a specific table in a database by its primary key.
     This asynchronous function constructs and executes a SQL DELETE query to
@@ -269,64 +227,29 @@ async def patch_one(request: Request, item: Item, database=None, table=None, key
 
 
 @api.put("/api/{database}/{table}")
-async def put_replace(database=None, table=None):
-    """PUT: /api/<database>/<table>."""
-    # Replace existing row with new row. key1=val1,key2=val2."""
-    database = request.view_args['database']
-    table = request.view_args['table']
+async def put_replace(request: Request, item: Item, database=None, table=None) -> JSONResponse:
+    """
+    Handles the HTTP PUT request to replace or insert a record into a specified database table.
 
-    if not request.headers['Content-Type'] == 'application/json':
-        return jsonify(status=412, errorType="Precondition Failed"), 412
-
-    post = request.get_json()
-
-    placeholders = ['%s'] * len(post)
-
-    fields = ",".join([str(key) for key in post])
-    places = ",".join([str(key) for key in placeholders])
-
-    records = []
-    for key in post:
-        records.append(post[key])
-
-    sql = "REPLACE INTO " + database + "." + table
-    sql += " (" + fields + ") VALUES (" + places + ")"
-
-    replace = await sqlexec(sql, records)
-
-    if replace > 0:
-        return jsonify(status=201,
-                       message="Created",
-                       replace=True,
-                       rowid=replace), 201
-
-    return jsonify(status=461, message="Failed Create", replace=False), 461
-
-
-def sql_connection(user=None, password=None):
-    """sql: connection."""
-    if not user:
-        user = request.authorization.username
-
-    if not password:
-        password = request.authorization.password
-
-    config = {
-        'user': user,
-        'password': password,
-        'host': request.headers.get('X-Host', '127.0.0.1'),
-        'port': int(request.headers.get('X-Port', '3306')),
-        'database': request.headers.get('X-Db', ''),
-        'raise_on_warnings': request.headers.get('X-Raise-Warnings', True),
-        'get_warnings': request.headers.get('X-Get-Warnings', True),
-        'auth_plugin': request.headers.get('X-Auth-Plugin', 'mysql_native_password'),
-        'use_pure': request.headers.get('X-Pure', True),
-        'use_unicode': request.headers.get('X-Unicode', True),
-        'charset': request.headers.get('X-Charset', 'utf8'),
-        'connection_timeout': int(request.headers.get('X-Connection-Timeout', 10)),
-    }
-    _db = mysql.connector.connect(**config)
-    return _db
+    This function replaces records in a specified database table or inserts new records if they do not exist.
+    The data is expected to be sent in JSON format, and the provided `item` (can be any serializable input)
+    contains the values for insertion or replacement. The database name and table name are passed as path
+    parameters. The provided `request` must include valid headers with `Content-Type` set to `application/json`.
+    """
+    if not request.headers['Content-Type'] == media_types.APPLICATION_JSON:
+        raise HTTPException(status_code=status.HTTP_412_PRECONDITION_FAILED, detail="Precondition Failed")
+    json_data = await request.json()
+    places = ",".join(['%s'] * len(json_data))
+    fields = ",".join(json_data)
+    records = [value for value in json_data.values()]
+    query = f"REPLACE INTO {database}.{table} ({fields}) VALUES ({places})"
+    print(f'SQl Query: {query} {records}')
+    replace = await sql_exec(query, records)
+    print(replace)
+    reply = {"status": status.HTTP_200_OK, "message": "Created", "replace": True, "rowid": replace} if replace > 0 \
+        else {"status": status.HTTP_201_CREATED, "message": "Created", "replace": False}
+    return JSONResponse(content=jsonable_encoder(reply), status_code=reply.get('status'),
+                        media_type=media_types.APPLICATION_JSON)
 
 
 def main():

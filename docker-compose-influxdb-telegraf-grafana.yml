@@ -39,13 +39,14 @@ services:
     image: grafana/grafana
     container_name: grafana
     restart: always
+    # if you are running as root then set it to 0
+    user: '0'
     # ports:
     #  - "${PORT_GRAFANA}:3000"
     depends_on:
       - influxdb
     volumes:
       - ./.grafana/data:/var/lib/grafana
-    user: '0'
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.entrypoints=websecure"
