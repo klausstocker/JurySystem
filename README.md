@@ -130,7 +130,7 @@ You will find instructions in file .env to change user and password.
 Here
 [Mosquitto config readme](https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/blob/36d962b5b0966c86f58121a170970d2ba95da774/.mosquitto/config/readme.md)
 you find to add, delete users.   
-[TEst]([An Internal Link](.mosquitto/config/readme.md))
+[TEst](.mosquitto/config/readme.md)
 ### 👉 API-MQTT Gateway
 
 ### System requirements  
