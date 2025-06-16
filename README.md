@@ -1,7 +1,7 @@
 # 🐳 Dockerized Web-Framework for IoT 🐳
 Requires Docker compose **> 2.27**   
-Preconfigured services can be selected in file docker-compose.yml
-##  🐧🐧🚀 Quickstart - Linux ( production environment )🚀️🐧🐧
+Select preconfigured services in docker-compose.yml by comment or uncomment includes.
+##  🐧🐧🚀 Installing - Linux ( production environment )🚀️🐧🐧
 ⭐ Install git,wget and unzip (can be skip if already installed)
 ```shell
     sudo apt update 
@@ -11,20 +11,19 @@ Preconfigured services can be selected in file docker-compose.yml
     sudo rm -rf /var/lib/apt/lists/*  
 ```
 ⭐ Choose directory or make a new one with appropriate permissions for writing and executing.      
-Next step (clone repository) adds folder **Dockerized-Web-Framework-for-IoT**      
+Clone repository adds folder **Dockerized-Web-Framework-for-IoT**.      
 ⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
-    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh
+    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh  
+    rm -rf ./Dockerized-Web-Framework-for-IoT/*.ps1  
 ```
-⭐ Edit .env and docker-composer.yml    
-⭐ Execute x-rebuild_and_start.production.sh
 
-## 🔳 🔳 🚀 Quickstart - Windows ( developing environment )🚀️🔳 🔳   
+## 🔳 🔳 🚀 Installing - Windows ( developing environment )🚀️🔳 🔳   
   
-⭐ Open the prefered IDE (pycharm, vscode) and clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
-⭐ Manual downloading the code or using the commands in Powershell  
-In **Windows Powershell** ( not cmd !! )  use following commands. 
+⭐ Open prefered IDE (pycharm, vscode) and clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
+⭐ or manual downloading the code or using the commands in Powershell    
+In **Windows Powershell** ( not cmd !! )  use following commands.   
 ```powershell
     Remove-Item -Path ./master.zip
     Invoke-WebRequest  https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/archive/master.zip -OutFile ./master.zip
@@ -33,10 +32,11 @@ In **Windows Powershell** ( not cmd !! )  use following commands.
     Copy-Item -Path ./master/Dockerized-Web-Framework-for-IoT-master ./Dockerized-Web-Framework-for-IoT -Recurse -Force
     Remove-Item -Path ./master -Recurse -Force
 ```  
-It will create a new folder: Dockerized-Web-Framework-for-IoT   
+It will create a new folder: Dockerized-Web-Framework-for-IoT  
+## Editing defaults  
 ⭐ Edit .env and docker-composer.yml  
 ⭐ Execute x-rebuild_and_start.local.development.ps1
-
+# Selectable Services
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
 ### 👉 Flet (Framework for web application in pure Python)
@@ -127,7 +127,10 @@ You will find instructions in file .env to change user and password.
 | websocket | localhost | 8083 |          |          |        No       |
 | websocket | 0.0.0.0   | 8091 | admin    | admin    |       Yes       |
 
-
+Here
+[Mosquitto config readme](https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/blob/36d962b5b0966c86f58121a170970d2ba95da774/.mosquitto/config/readme.md)
+you find to add, delete users.   
+[TEst](.mosquitto/config/readme.md)
 ### 👉 API-MQTT Gateway
 
 ### System requirements  
