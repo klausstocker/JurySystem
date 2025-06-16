@@ -19,8 +19,8 @@ services:
       environment:
         MARIADB_ROOT_PASSWORD: example
       # uncomment to make it visible on the host to get ssh access
-      ports:
-        - "${PORT_DB}:3306"
+      # ports:
+      #  - "${PORT_DB}:3306"
       healthcheck:
         test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
         interval: 10s
