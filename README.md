@@ -81,7 +81,7 @@ At first login update the default password.
 ### 👉 InfluxDB  + Telegraf + Grafana
 https://influxdb.localhost , https://grafana.localhost  
 
-| Target access | Subdomain | Username | Password | Database |
+| Target access | Subdomain | Default Username | Default Password | Database |
 |---------------|-----------|----------|----------|----------|
 | grafana       | grafana   | admin    | admin    | ALL      |  
 
@@ -114,18 +114,18 @@ At first start, **Portainer** will request to set up an initial administrator.
 ### 👉 Traefik (HTTP-Reverse Proxy and LoadBalancer)
 https://traefik.localhost  
 
-| Target access | Subdomain | Username | Password |
+| Target access | Subdomain | Default Username | Default Password |
 |---------------|-----------|----------|----------|
 | traefik       | traefik   | admin    | admin    |
 
 You will find instructions in file .env to change user and password.    
 ### 👉 Mosquitto MQTT  
-| Protocol  | Binding   | Port | Username | Password | Encryption(tls) |
-|-----------|-----------|------|----------|----------|-----------------|
-| mqtt      | localhost | 1883 |          |          |        No       |
-| mqtt      | 0.0.0.0   | 8883 | admin    | admin    |       Yes       |
-| websocket | localhost | 8083 |          |          |        No       |
-| websocket | 0.0.0.0   | 8091 | admin    | admin    |       Yes       |
+| Protocol  | Binding   | Port | Default Username | Default Password | Encryption(tls) |
+|-----------|-----------|------|------------------|------------------|-----------------|
+| mqtt      | localhost | 1883 |                  |                  |        No       |
+| mqtt      | 0.0.0.0   | 8883 | admin            | admin            |       Yes       |
+| websocket | localhost | 8083 |                  |                  |        No       |
+| websocket | 0.0.0.0   | 8091 | admin            | admin            |       Yes       |
 
 Useful links:  
 [How to add, delete users and set password](.mosquitto/config/readme.md)  
