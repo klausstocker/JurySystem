@@ -127,10 +127,9 @@ You will find instructions in file .env to change user and password.
 | websocket | localhost | 8083 |          |          |        No       |
 | websocket | 0.0.0.0   | 8091 | admin    | admin    |       Yes       |
 
-Here
-[Mosquitto config readme](https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT/blob/36d962b5b0966c86f58121a170970d2ba95da774/.mosquitto/config/readme.md)
-you find to add, delete users.   
-[TEst](.mosquitto/config/readme.md)
+Useful links:  
+[How to add, delete users and set password](.mosquitto/config/readme.md)  
+[Mosquitto.org configuration manual](https://mosquitto.org/man/mosquitto-conf-5.html)  
 ### 👉 API-MQTT Gateway
 
 ### System requirements  
