@@ -53,6 +53,7 @@ services:
       - "traefik.http.routers.grafana.rule=Host(`${SUBDOMAIN_GRAFANA}${DOMAIN}`)"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.service=grafana"
       - "traefik.http.routers.grafana.tls.certresolver=letsencrypt"
     networks:
       - backnet
