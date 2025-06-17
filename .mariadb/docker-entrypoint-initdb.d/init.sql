@@ -33,9 +33,18 @@ INSERT INTO `user` (`id`, `username`, `password`, `email`, `registered`, `expire
 
 -- Benutzer erstellen
 CREATE USER 'foo'@'%' IDENTIFIED BY 'foo';
-
 -- Optional: Berechtigungen gewähren
 GRANT ALL PRIVILEGES ON foo.user TO 'foo'@'%' WITH GRANT OPTION;
-
 -- Änderungen anwenden
+FLUSH PRIVILEGES;
+
+-- used by wordpress
+CREATE USER 'live_user'@'%' IDENTIFIED BY 'password';
+CREATE USER 'specs_user'@'%' IDENTIFIED BY 'password';
+
+CREATE DATABASE IF NOT EXISTS `live`;
+CREATE DATABASE IF NOT EXISTS `specs`;
+
+GRANT ALL ON live.* TO 'live_user'@'%';
+GRANT ALL ON specs.* TO 'specs_user'@'%';
 FLUSH PRIVILEGES;
