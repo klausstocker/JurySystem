@@ -13,8 +13,10 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI, HTTPException, status
 from fastapi import Depends, Query, Body
 from pydantic import BaseModel
-from db import fetch, sql_commit, post_sql, sql_exec, connections, connect
+from db import DatabaseConnections
 from mediatypes import MediaTypes
+
+db = DatabaseConnections(host="localhost", port=3311, database="foo", username="foo", password="foo")
 
 description = """
 🚀🚀 RESTful API 🚀🚀  
@@ -48,10 +50,10 @@ class QueryRequest(BaseModel):
 
 @asynccontextmanager
 async def lifespan(api: FastAPI):
-    await connect()
+    await db.connect()
     yield
-    connections.pool.close()
-    await connections.pool.wait_closed()
+    db.pool.close()
+    await db.pool.wait_closed()
 
 
 api = FastAPI(lifespan=lifespan,
@@ -93,7 +95,7 @@ async def show_databases() -> JSONResponse:
     database names to the client. The data is retrieved asynchronously.
     """
     try:
-        rows = await fetch("SHOW DATABASES", all=True)
+        rows = await db.fetch("SHOW DATABASES", all=True)
         return JSONResponse(content=rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error: {e}")
@@ -106,7 +108,7 @@ async def show_tables(database: str) -> JSONResponse:
     a query to retrieve all tables from the provided database and returns the result as a
     JSON response with appropriate status code and media type.
     """
-    rows = await fetch(f"SHOW TABLES FROM {database}", all=True)
+    rows = await db.fetch(f"SHOW TABLES FROM {database}", all=True)
     return JSONResponse(rows, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
 
 
@@ -124,7 +126,7 @@ async def get_many(database: str, table: str,
     """
     query = f"SELECT {fields} FROM {database}.{table}" if fields else f"SHOW FIELDS FROM {database}.{table}"
     query = query + f" LIMIT {limit}" if limit and fields else query
-    rows = await fetch(query, all=True)
+    rows = await db.fetch(query, all=True)
     status_code = status.HTTP_200_OK if rows else status.HTTP_404_NOT_FOUND
     response_data = jsonable_encoder(rows) if rows else []
     return JSONResponse(response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
@@ -140,7 +142,7 @@ async def get_one(database: str, table: str, key: str,
     to select in the response.
     """
     query = f"SELECT {fields} FROM {database}.{table} WHERE {column}='{key}'"
-    row = await fetch(query)
+    row = await db.fetch(query)
     response_data = jsonable_encoder(row) if row else []
     status_code = status.HTTP_200_OK if row else status.HTTP_404_NOT_FOUND
     return JSONResponse(content=response_data, status_code=status_code, media_type=media_types.APPLICATION_JSON)
@@ -149,6 +151,31 @@ async def get_one(database: str, table: str, key: str,
 @api.post("/api")
 async def execute_sql_query(request: Request, item: QueryRequest = Body(media_type=media_types.APPLICATION_JSON, )):
     """POST: /api """
+    async def post_sql(sql_query=None, ):
+        """
+        Executes a given SQL query asynchronously and returns the results in JSON format. The function supports queries
+        that either return rows or that involve updates/commands without rows.
+        Returns JSONResponse containing the results of the SQL query. The HTTP status code in the response represents
+        the outcome of the query:
+        - 200 (OK): If the query returns rows.
+        - 201 (Created): If the query executes successfully without returning rows.
+        - 202 (Accepted): If no SQL query is provided or execution yields no specific results.
+        """
+        async with db.pool.acquire() as conn:
+            async with conn.cursor() as cursor:
+                try:
+                    results = await cursor.execute(sql_query)
+                    for result in results:
+                        if result.with_rows:
+                            return JSONResponse(result, status_code=status.HTTP_200_OK,
+                                                media_type=media_types.APPLICATION_JSON)
+                        await conn.commit()
+                        return JSONResponse(result, status_code=status.HTTP_201_CREATED,
+                                            media_type=media_types.APPLICATION_JSON)
+                except Exception as e:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: {e}")
+
+            return JSONResponse(content={}, status_code=status.HTTP_202_ACCEPTED)
     return await post_sql(item.sql)
 
 
@@ -168,7 +195,7 @@ async def post_insert(request: Request, item: Item, database=None, table=None) -
         fields = ",".join(json_data)
         records = [value for value in json_data.values()]
         query = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
-        insert = await sql_exec(query, records)
+        insert = await db.sql_exec(query, records)
         reply = {'status': status.HTTP_201_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
             else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
 
@@ -188,7 +215,7 @@ async def delete_one(request: Request, database=None, table=None, key=None,
     """
     # Delete a row by primary key id?column=
     query = f"DELETE FROM {database}.{table} WHERE {column}='{key}'"
-    delete = await sql_commit(query) > 0
+    delete = await db.sql_commit(query) > 0
     reply = {'status': status.HTTP_200_OK if delete else status.HTTP_404_NOT_FOUND,
              'message': "Deleted" if delete else "Failed Delete",
              'delete': delete}
@@ -217,7 +244,7 @@ async def patch_one(request: Request, item: Item, database=None, table=None, key
             else:
                 field, value = next(iter(json_data.items()))
                 query = f"UPDATE {database}.{table} SET {field}='{value}' WHERE {column}='{key}'"
-                update = await sql_commit(query) > 0
+                update = await db.sql_commit(query) > 0
                 reply = {'status': status.HTTP_201_CREATED if update else status.HTTP_404_NOT_FOUND,
                          'message': "Update" if update else "Failed Update",
                          'update': update}
@@ -254,7 +281,7 @@ async def put_replace(request: Request, item: Item, database=None, table=None) -
     records = [value for value in json_data.values()]
     query = f"REPLACE INTO {database}.{table} ({fields}) VALUES ({places})"
     print(f'SQl Query: {query} {records}')
-    replace = await sql_exec(query, records)
+    replace = await db.sql_exec(query, records)
     print(replace)
     reply = {"status": status.HTTP_200_OK, "message": "Created", "replace": True, "rowid": replace} if replace > 0 \
         else {"status": status.HTTP_201_CREATED, "message": "Created", "replace": False}
