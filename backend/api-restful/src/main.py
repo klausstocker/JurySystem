@@ -13,7 +13,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi import FastAPI, HTTPException, status
 from fastapi import Depends, Query, Body
 from pydantic import BaseModel
-from db import fetch, post_json, sql_commit, post_sql, sql_exec, connections, connect
+from db import fetch, sql_commit, post_sql, sql_exec, connections, connect
 from mediatypes import MediaTypes
 
 description = """
@@ -164,8 +164,18 @@ async def post_insert(request: Request, item: Item, database=None, table=None) -
         raise HTTPException(status_code=412, detail="Precondition Failed")
     json_data = await request.json()
     if json_data:
-        return await post_json(database, table, json_data)
-    raise HTTPException(status_code=417, detail='Can Not Meet Expectation: request-header field')
+        places = ",".join(['%s'] * len(json_data))
+        fields = ",".join(json_data)
+        records = [value for value in json_data.values()]
+        query = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
+        insert = await sql_exec(query, records)
+        reply = {'status': status.HTTP_201_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
+            else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
+
+        return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
+
+    raise HTTPException(status_code=status.HTTP_417_EXPECTATION_FAILED,
+                        detail='Can Not Meet Expectation: request-header field')
 
 
 @api.delete("/api/{database}/{table}/{key}")

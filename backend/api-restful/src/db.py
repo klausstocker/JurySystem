@@ -12,7 +12,7 @@ from mediatypes import MediaTypes
 media_types = MediaTypes()
 
 
-class Connections:
+class DatabaseConnections:
     pool = None
 
 
@@ -32,7 +32,8 @@ async def post_sql(sql_query=None, ):
                 results = await cursor.execute(sql_query)
                 for result in results:
                     if result.with_rows:
-                        return JSONResponse(result, status_code=status.HTTP_200_OK, media_type=media_types.APPLICATION_JSON)
+                        return JSONResponse(result, status_code=status.HTTP_200_OK,
+                                            media_type=media_types.APPLICATION_JSON)
                     await connection.commit()
                     return JSONResponse(result, status_code=status.HTTP_201_CREATED,
                                         media_type=media_types.APPLICATION_JSON)
@@ -40,29 +41,6 @@ async def post_sql(sql_query=None, ):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error: {e}")
 
         return JSONResponse(content={}, status_code=status.HTTP_202_ACCEPTED)
-
-
-async def post_json(database, table, json_data=None) -> JSONResponse:
-    """
-    Inserts JSON data into the specified database table asynchronously and
-    returns a JSON response indicating the status of the operation.
-
-    The function takes a database name, table name, and a dictionary of JSON
-    data as input. The JSON data is processed to construct a SQL INSERT query,
-    which is executed asynchronously. It returns a JSONResponse containing
-    details about the success or failure of the operation.
-    """
-    post = json_data
-    places = ",".join(['%s'] * len(post))
-    fields = ",".join(post)
-    records = [value for value in post.values()]
-
-    query = f"INSERT INTO {database}.{table} ({fields}) VALUES ({places})"
-    insert = await sql_exec(query, records)
-    reply = {'status': status.HTTP_201_CREATED, 'message': "Created", 'insert': True, 'rowid': insert} if insert > 0 \
-        else {'status': status.HTTP_400_BAD_REQUEST, 'message': "Failed Create", 'insert': False}
-
-    return JSONResponse(jsonable_encoder(reply), status_code=reply.get('status'), media_type="application/json")
 
 
 def decode_token(base64_bytes) -> tuple[str, str]:
@@ -138,7 +116,7 @@ async def sql_insert(sql, values):
 
 async def connect():
     host = 'localhost'
-    port = 3310
+    port = 3311
     user = 'foo'
     base = 'foo'
     password = 'foo'
@@ -161,4 +139,4 @@ async def close():
     await connections.pool.wait_closed()
 
 
-connections = Connections()
+connections = DatabaseConnections()
