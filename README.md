@@ -46,7 +46,7 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ### 👉 API-FASTAPI-SQLMODEL  
 ### 👉 Node-Red  
 https://nodered.localhost  
-The default credentials for login into Editor & Admin API are **admin/admin**.  
+The default credentials for login into Editor & Admin API are **admin/secretPassword**.  
 The default credentials for Dashboard are **user/user**.  
 To set new password edit in Security section in file settings.json 
 ```
