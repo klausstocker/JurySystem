@@ -40,6 +40,7 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
 ### 👉 Flet (Framework for web application in pure Python)
+### 👉 Wordpress (widely used content management system)
 <!---
 ### 👉 API-FASTAPI-PURE-SQL
 -->
