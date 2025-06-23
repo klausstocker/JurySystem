@@ -32,6 +32,7 @@ services:
       # expose made it visible on the backnet but not on the host
       expose:
         - "${PORT_DB}"
+        - "33060"
       networks:
         - backnet
 

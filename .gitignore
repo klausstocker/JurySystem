@@ -13,6 +13,7 @@ docker-compose-postgREST_original.yml
 /.postgres/
 /.api-mqtt-gateway
 docker-compose-restful-api.yml
-/backend/api-restful/
+# docker-compose-wordpress.yml
+# /backend/api-restful/
 /backend/api-fastapi-pure-sql/
 /.mosquitto/config/pid
