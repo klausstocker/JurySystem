@@ -15,5 +15,6 @@ docker-compose-postgREST_original.yml
 docker-compose-restful-api.yml
 # docker-compose-wordpress.yml
 # /backend/api-restful/
+docker-compose-supertokens.yml
 /backend/api-fastapi-pure-sql/
 /.mosquitto/config/pid
