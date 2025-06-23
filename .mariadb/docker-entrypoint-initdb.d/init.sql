@@ -42,12 +42,15 @@ FLUSH PRIVILEGES;
 CREATE USER 'live_user'@'%' IDENTIFIED BY 'password';
 CREATE USER 'specs_user'@'%' IDENTIFIED BY 'password';
 CREATE USER 'wordpress'@'%' IDENTIFIED BY 'wordpress';
+CREATE USER 'supertokens'@'%' IDENTIFIED BY 'supertokens';
 
 CREATE DATABASE IF NOT EXISTS `live`;
 CREATE DATABASE IF NOT EXISTS `specs`;
 CREATE DATABASE IF NOT EXISTS `wordpress`;
+CREATE DATABASE IF NOT EXISTS `supertokens`;
 
 GRANT ALL ON live.* TO 'live_user'@'%';
 GRANT ALL ON specs.* TO 'specs_user'@'%';
 GRANT ALL ON wordpress.* TO 'wordpress'@'%';
+GRANT ALL ON supertokens.* TO 'supertokens'@'%';
 FLUSH PRIVILEGES;
