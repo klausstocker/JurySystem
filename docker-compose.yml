@@ -1,8 +1,9 @@
 include:
   # basic services
-  #- docker-compose-portainer.yml  # service portainer declared
-  #- docker-compose-traefik.yml  # service traefik declared
+  - docker-compose-portainer.yml  # service portainer declared
+  - docker-compose-traefik.yml  # service traefik declared
   - docker-compose-mariadb.yml  # services db, phpmyadmin, adminer, maxscale declared
+
   # uncomment needed services
   #- docker-compose-wordpress.yml
   #- docker-compose-influxdb-telegraf-grafana.yml # services influxdb, telegraf, grafana are declared
