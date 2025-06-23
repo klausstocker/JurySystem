@@ -44,7 +44,7 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 <!---
 ### 👉 API-FASTAPI-PURE-SQL
 -->
-### 👉 API-FASTAPI-SQLMODEL  
+### 👉 API-FASTAPI-SQLMODEL  (fastapi using sqlmodel) 
 ### 👉 Node-Red  
 https://nodered.localhost  
 The default credentials for login into Editor & Admin API are **admin/secretPassword**.  
