@@ -20,6 +20,9 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Just change to your belongings
 export ROOT="/mosquitto"
+# next echo must exist - otherwise the first openssl command will not work
+# this happens only on windows hosts
+echo "ROOT is $ROOT"
 # IP="FQDN / IP ADRESS"
 export IP='127.0.0.1'
 SUBJECT_CA="/C=AT/ST=Vienna/L=Vienna/O=htl/OU=CA/CN=$IP"
