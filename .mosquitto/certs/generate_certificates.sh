@@ -39,7 +39,13 @@ function generate_client () {
    openssl req -new -nodes -sha256 -subj "$SUBJECT_CLIENT" -out $ROOT/certs/client.csr -keyout $ROOT/certs/client.key
    openssl x509 -req -sha256 -in $ROOT/certs/client.csr -CA $ROOT/certs/ca.crt -CAkey $ROOT/certs/ca.key -CAcreateserial -out $ROOT/certs/client.crt -days 3650
 }
-generate_CA
+echo "Generating certificates"
+echo "Generate CA"
+echo "$SUBJECT_CA"
+openssl req -x509 -nodes -sha256 -newkey rsa:2048 -subj "$SUBJECT_CA"  -days 3650 -keyout $ROOT/certs/ca.key -out $ROOT/certs/ca.crt
+# generate_CA
+echo "Generate Server"
 generate_server
+echo "Generate Client"
 generate_client
 
