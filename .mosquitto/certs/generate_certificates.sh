@@ -19,9 +19,9 @@
 #Load the Pathes
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Just change to your belongings
-ROOT="/mosquitto"
+export ROOT="/mosquitto"
 # IP="FQDN / IP ADRESS"
-IP='127.0.0.1'
+export IP='127.0.0.1'
 SUBJECT_CA="/C=AT/ST=Vienna/L=Vienna/O=htl/OU=CA/CN=$IP"
 SUBJECT_SERVER="/C=AT/ST=Vienna/L=Vienna/O=htl/OU=Server/CN=$IP"
 SUBJECT_CLIENT="/C=AT/ST=Vienna/L=Vienna/O=htl/OU=Client/CN=$IP"
