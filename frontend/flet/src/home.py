@@ -6,8 +6,9 @@ class HomeView(ft.View):
         super().__init__()
         self.page = page
         self.route = '/'
+        username = page.session.get('username')
         self.controls = [
-            ft.AppBar(title=ft.Text("Flet app"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(f"Jury System, user: {username}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.ElevatedButton("Go to settings", on_click=lambda _: self.page.go("/settings")),
         ]
 
