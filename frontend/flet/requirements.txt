@@ -6,3 +6,4 @@ dictobj==0.4
 python-dotenv==1.0.1
 paho-mqtt==2.1.0
 bs4==0.0.2
+PyMySQL==1.1.1

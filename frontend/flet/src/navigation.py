@@ -1,6 +1,7 @@
 import flet as ft
 from home import HomeView
 from settings import SiteView
+from users import UserView
 
 
 class RouteErrorView(ft.View):
@@ -21,6 +22,8 @@ class Navigator:
         self.page.views.append(HomeView(self.page))
         if self.page.route == "/settings":
             self.page.views.append(SiteView(self.page))
+        if self.page.route == "/users":
+            self.page.views.append(UserView(self.page))
         self.page.update()
 
     def view_pop(self, view):

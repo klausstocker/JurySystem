@@ -1,5 +1,6 @@
 import flet as ft
 from navigation import Navigator
+from database import JuryDatabase
 
 def main(page: ft.Page):
     page.title = "Jury System"
@@ -7,20 +8,10 @@ def main(page: ft.Page):
     username = ft.TextField(label="User name")
     password = ft.TextField(label="Password")
 
+    jurydb = JuryDatabase('db')
+
     def loginbtn(e):
-        data = {"users": [
-            {"name": "admin", "password": "adminpass"}, 
-            {"name": "user", "password": "user"}, 
-            ]}
-
-        found = False
-        for user in data["users"]:
-            if user['name'] == username.value and user['password'] == password.value:
-                found = True
-                print("Login success !!!")
-                break
-
-        if found:
+        if jurydb.validateUser(username.value, password.value):
             print("Redirecting...")
             navi = Navigator(page)
             page.session.set("username", username.value)

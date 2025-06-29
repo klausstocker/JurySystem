@@ -9,7 +9,8 @@ class HomeView(ft.View):
         username = page.session.get('username')
         self.controls = [
             ft.AppBar(title=ft.Text(f"Jury System, user: {username}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            ft.ElevatedButton("Go to settings", on_click=lambda _: self.page.go("/settings")),
+            ft.ElevatedButton("Users", on_click=lambda _: self.page.go("/users")),
+            ft.ElevatedButton("Settings", on_click=lambda _: self.page.go("/settings")),
         ]
 
     def did_mount(self):
