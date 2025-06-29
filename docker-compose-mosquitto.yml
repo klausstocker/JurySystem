@@ -6,6 +6,8 @@
        volumes:
           # :ro is not essary
           - ./.mosquitto/config:/mosquitto/config
+          - ./.mosquitto/log:/mosquitto/log
+          - ./.mosquitto/data:/mosquitto/data
           # self-signed certs are generated on every start of service - comment it, if providing other signed certs
           - ./.mosquitto/certs/generate_certificates.sh:/mosquitto/certs/generate_certificates.sh
           # uncomment to hide in .mosquitto/certs for security purposes
@@ -34,7 +36,7 @@
            apk add openssl
            chmod +x /mosquitto/certs/generate_certificates.sh 
            chmod +x /mosquitto/config/*.sh 
-           /mosquitto/certs/./generate_certificates.sh  
+           sh /mosquitto/certs/./generate_certificates.sh  
            mosquitto -c /mosquitto/config/mosquitto.conf | pidof mosquitto > /mosquitto/config/pid
        expose:
          - ${PORT_MQTT_UNSECURE}
