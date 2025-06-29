@@ -10,7 +10,7 @@
 CREATE DATABASE IF NOT EXISTS `JurySystem` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `JurySystem`;
 
-CREATE TABLE IF NOT EXISTS `user` (
+CREATE TABLE IF NOT EXISTS `users` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(50) DEFAULT NULL,
   `password` varchar(50) DEFAULT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `registered`, `expires`, `restrictions`, `locked`) VALUES
-	(1, 'admin', 'pass', 'john.doe@example.com', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0);
+	(1, 'admin', 'pass', 'john.doe@example.com', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
@@ -32,7 +32,7 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `registered`, `expir
 /*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;
 
 -- Benutzer erstellen
-CREATE USER 'JurySystem'@'%' IDENTIFIED BY 'JurySystem' WITH PASSWORD='asdfuas347lkasudhr';
+CREATE USER 'JurySystem'@'%' IDENTIFIED BY 'asdfuas347lkasudhr';
 -- Optional: Berechtigungen gewähren
 GRANT ALL PRIVILEGES ON `JurySystem`.* TO 'JurySystem'@'%' WITH GRANT OPTION;
 -- Änderungen anwenden
