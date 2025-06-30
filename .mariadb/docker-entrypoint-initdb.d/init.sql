@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `expires` datetime DEFAULT NULL,
   `restrictions` tinyint(4) DEFAULT NULL,
   `locked` tinyint(4) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `registered`, `expires`, `restrictions`, `locked`) VALUES

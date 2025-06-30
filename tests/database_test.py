@@ -12,6 +12,7 @@ class TestDatabase(unittest.TestCase):
 
         user = db.getUser(1)
         self.assertEqual(user.restrictions, Restrictions.ADMIN)
+        self.assertTrue(user.valid())
         
         insertedId = db.insertUser('michelhausen', 'pass', 'michelhausen@sportunion.at', Restrictions.TRAINER)
         insertedUser = db.getUser(insertedId)

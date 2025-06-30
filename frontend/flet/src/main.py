@@ -4,10 +4,6 @@ from database import JuryDatabase
 
 def main(page: ft.Page):
     page.title = "Jury System"
-
-    username = ft.TextField(label="User name")
-    password = ft.TextField(label="Password")
-
     jurydb = JuryDatabase('db')
 
     def loginbtn(e):
@@ -21,10 +17,13 @@ def main(page: ft.Page):
         else:
             print("Login failed !!!")
             page.open(ft.SnackBar(
-                ft.Text("Wrong login", size=30),
+                ft.Text("wrong login, user expired or locked", size=30),
                 bgcolor="red"
             ))
 
+    username = ft.TextField(label="User name")
+    password = ft.TextField(label="Password", password=True, can_reveal_password=True, on_submit=loginbtn)
+    
     page.theme_mode = ft.ThemeMode.DARK
     page.auto_scroll = True
     page.controls = [username, password,ft.ElevatedButton("Login Now",
