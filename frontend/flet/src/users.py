@@ -11,12 +11,12 @@ def userAsRow(user: User, editFunc: callable, deleteFunc: callable):
                     icon=ft.Icons.EDIT,
                     icon_color=ft.Colors.GREEN_300,
                     tooltip="Edit",
-                    on_click=lambda e: editFunc(user.id))),
+                    on_click=lambda e: editFunc(e, user.id))),
         ft.DataCell(ft.IconButton(
                     icon=ft.Icons.DELETE,
                     icon_color=ft.Colors.RED_300,
                     tooltip="Delete",
-                    on_click=lambda e: deleteFunc(user.id))),
+                    on_click=lambda e: deleteFunc(e, user.id))),
         ft.DataCell(ft.Text(user.username)),
         ft.DataCell(ft.Text(user.email)),
         ft.DataCell(ft.Text(user.registered)),
@@ -31,21 +31,43 @@ class UserView(ft.View):
         super().__init__()
         db = JuryDatabase('db')
         
-        def deleteFunc(userId):
-            db.removeUser(userId)
-        
-        def editFunc(userId):
+        def deleteFunc(e, userId):
+            user = db.getUser(userId)
+            def yes(e):
+                db.removeUser(userId)
+                dlg.open = False
+                self.table.rows = [userAsRow(user, editFunc, deleteFunc) for user in db.getAllUsers()]
+                e.control.page.update()
+
+            def no(e):
+                print('cancel')
+                dlg.open = False
+                e.control.page.update()
+
+            dlg = ft.AlertDialog(
+                modal=True,
+                content=ft.Text(f"Delete user '{user.username}'?"),
+                actions=[
+                    ft.TextButton("Yes", on_click=yes),
+                    ft.TextButton("No", on_click=no),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END)
+            e.control.page.overlay.append(dlg)
+            dlg.open = True
+            e.control.page.update()
+
+        def editFunc(e, userId):
             print(f'edit {userId=}')
         
-        users = db.getAllUsers()
         self.page = page
         self.route = '/users'
+        self.table = ft.DataTable(
+                columns=[ft.DataColumn(ft.Text(h)) for h in header()],
+                rows=[userAsRow(user, editFunc, deleteFunc) for user in db.getAllUsers()]
+            )
         self.controls = [
             ft.AppBar(title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[userAsRow(user, editFunc, deleteFunc) for user in users]
-            ),
+            self.table,
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 
