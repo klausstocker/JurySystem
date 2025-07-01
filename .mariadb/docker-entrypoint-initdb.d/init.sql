@@ -29,6 +29,21 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`
 	(2, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0),
 	(3, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0);
 
+CREATE TABLE IF NOT EXISTS `athletes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `givenname` varchar(50) DEFAULT NULL,
+  `surname` varchar(50) DEFAULT NULL,
+  `userId` int(10) unsigned NOT NULL,
+  `birth` datetime DEFAULT NULL,
+  `gender` tinyint(4) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender`) VALUES
+	(1, 'Klaus', 'Stocker', 2, '1978-07-15', 0),
+	(2, 'Christoph', 'Hogl', 3, '1977-07-13', 0),
+	(3, 'Johanna', 'Stocker', 2, '2010-05-20', 1);
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;

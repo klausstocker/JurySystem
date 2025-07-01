@@ -7,6 +7,10 @@ from typing import List
 class Restrictions(Enum):
     TRAINER = 0
     ADMIN = 1
+    
+class Gender(Enum):
+    MALE = 0
+    FEMALE = 1
 
 @dataclass
 class User:
@@ -21,9 +25,24 @@ class User:
     
     def valid(self) -> bool:
         return datetime.now() < self.expires and not self.locked
+    
+    @staticmethod
+    def fromRow(row):
+        return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'])
 
-def UserFromRow(row):
-    return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'])
+
+@dataclass
+class Athlete:
+    id: int
+    givenname: str
+    surname: str
+    userId: int
+    birth: datetime
+    gender: Gender
+    
+    @staticmethod
+    def fromRow(row):
+        return Athlete(row['id'], row['givenname'], row['surname'], row['userId'], row['birth'], Gender(row['gender']))
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -38,13 +57,13 @@ class JuryDatabase:
            if cursor.execute(f'SELECT * FROM users WHERE username="{username}";') != 1:
                return False
            row = cursor.fetchone()
-           user = UserFromRow(row)
+           user = User.fromRow(row)
            return row['password'] == password and user.valid()
 
     def getUser(self, id: int) -> User:
         with self.conn.cursor() as cursor:
            cursor.execute(f'SELECT * FROM users WHERE id="{id}";')
-           return UserFromRow(cursor.fetchone())
+           return User.fromRow(cursor.fetchone())
         return None
 
     def insertUser(self, username: str, password: str, email:str, team:str, restrictions: Restrictions) -> int:
@@ -71,5 +90,29 @@ class JuryDatabase:
         with self.conn.cursor() as cursor:
             cursor.execute('SELECT * FROM users;')
             for row in cursor.fetchall():
-                users.append(UserFromRow(row))
+                users.append(User.fromRow(row))
         return users
+    
+    def getAthletes(self, userId: int) -> List[Athlete]:
+        athletes = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM athletes WHERE userId = {userId};')
+            for row in cursor.fetchall():
+                athletes.append(Athlete.fromRow(row))
+        return athletes
+    
+    def getAthlete(self, athleteId: int) -> Athlete:
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM athletes WHERE id = {athleteId};')
+            return Athlete.fromRow(cursor.fetchone())
+        return None
+    
+    def insertAthlete(self, givenname: str, surname: str, userId: int, birth: datetime, gender: Gender):
+        with self.conn.cursor() as cursor:
+            sql = f"INSERT INTO athletes (givenname, surname, userId, birth, gender) VALUES ('{givenname}', '{surname}', '{userId}','{birth}', {gender.value});"
+            cnt = cursor.execute(sql)
+            if cnt != 1:
+                return None
+            self.conn.commit()
+            return cursor.lastrowid
+        return None

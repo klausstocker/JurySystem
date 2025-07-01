@@ -60,6 +60,9 @@ class UserView(ft.View):
         def editFunc(e, userId):
             print(f'edit {userId=}')
         
+        def addFunc(e):
+            print('add')
+        
         self.page = page
         self.route = '/users'
         self.table = ft.DataTable(
@@ -69,6 +72,10 @@ class UserView(ft.View):
         self.controls = [
             ft.AppBar(title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
+            ft.IconButton(ft.Icons.ADD_CIRCLE,
+                    icon_color=ft.Colors.BLUE_300,
+                    tooltip="Add",
+                    on_click=addFunc),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 
