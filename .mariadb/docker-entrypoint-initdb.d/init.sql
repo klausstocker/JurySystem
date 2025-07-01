@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(50) DEFAULT NULL,
   `password` varchar(50) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
+  `team` varchar(50) DEFAULT NULL,
   `registered` datetime DEFAULT NULL,
   `expires` datetime DEFAULT NULL,
   `restrictions` tinyint(4) DEFAULT NULL,
@@ -23,10 +24,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `registered`, `expires`, `restrictions`, `locked`) VALUES
-	(1, 'admin', 'pass', 'john.doe@example.com', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0),
-	(2, 'michelhausen', 'pass', 'john.doe@example.com', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0),
-	(3, 'tulln', 'pass', 'john.doe@example.com', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0);
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`, `expires`, `restrictions`, `locked`) VALUES
+	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0),
+	(2, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0),
+	(3, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

@@ -13,6 +13,7 @@ class User:
     id: int
     username: str
     email: str
+    team: str
     registered: datetime
     expires: datetime
     restrictions: Restrictions
@@ -22,7 +23,7 @@ class User:
         return datetime.now() < self.expires and not self.locked
 
 def UserFromRow(row):
-    return User(row['id'], row['username'], row['email'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'])
+    return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'])
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -46,10 +47,10 @@ class JuryDatabase:
            return UserFromRow(cursor.fetchone())
         return None
 
-    def insertUser(self, username: str, password: str, email:str, restrictions: Restrictions) -> int:
+    def insertUser(self, username: str, password: str, email:str, team:str, restrictions: Restrictions) -> int:
         locked = 0
         with self.conn.cursor() as cursor:
-            sql = f"INSERT INTO users (username, password, email, registered, expires, restrictions, locked) VALUES ('{username}', '{password}', '{email}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked});"
+            sql = f"INSERT INTO users (username, password, email, team, registered, expires, restrictions, locked) VALUES ('{username}', '{password}', '{email}','{team}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked});"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None

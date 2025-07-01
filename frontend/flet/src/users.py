@@ -3,7 +3,7 @@ import pymysql.cursors
 from database import JuryDatabase, User
 
 def header():
-    return ['', '', 'Username', 'E-Mail', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']
+    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']
 
 def userAsRow(user: User, editFunc: callable, deleteFunc: callable):
     cells = [
@@ -19,6 +19,7 @@ def userAsRow(user: User, editFunc: callable, deleteFunc: callable):
                     on_click=lambda e: deleteFunc(e, user.id))),
         ft.DataCell(ft.Text(user.username)),
         ft.DataCell(ft.Text(user.email)),
+        ft.DataCell(ft.Text(user.team)),
         ft.DataCell(ft.Text(user.registered)),
         ft.DataCell(ft.Text(user.expires)),
         ft.DataCell(ft.Text(user.restrictions.name)),
