@@ -1,6 +1,6 @@
 import flet as ft
 import pymysql.cursors
-from database import JuryDatabase, User
+from database import JuryDatabase, User, Restrictions
 
 def header():
     return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']
@@ -94,25 +94,47 @@ class UserEditView(ft.View):
         self.route = f'/userEdit/{userId}'
         db = JuryDatabase('db')
         
-        def save(e):
+        def update(e):
             print(f'saving {userId=}')
+            db.updateUser(userId, nameEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
+            self.page.go("/users")
             
         def cancel(e):
             print(f'cancel {userId=}')
+            self.page.go("/users")
 
+        print(f'get user {userId=}')
+        user = db.getUser(userId)
+        print(f'{user.username=}')
+        nameEdit = ft.TextField(label="Username", value=user.username)
+        emailEdit = ft.TextField(label="Email", value=user.email)
+        teamEdit = ft.TextField(label="Team", value=user.team)
+        resitrictionsEdit = ft.Dropdown(
+            label="Restrictions",
+            width = 300,
+            options=[ft.dropdownm2.Option(e.name) for e in Restrictions],
+            value=user.restrictions.name)
+        expiresEdit = ft.TextField(label="expires", value=user.expires)
+        lockedEdit = ft.Checkbox(label="locked", value=user.locked)
         self.controls = [
             ft.AppBar(title=ft.Text("Edit User"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            nameEdit,
+            emailEdit,
+            teamEdit,
+            resitrictionsEdit,
+            expiresEdit,
+            lockedEdit,
             ft.Row(spacing=0, controls=
                 [
                     ft.IconButton(
                         icon=ft.Icons.CHECK_CIRCLE,
                         icon_color=ft.Colors.GREEN_300,
                         tooltip="Save",
-                        on_click=save),
+                        on_click=update),
                     ft.IconButton(
                         icon=ft.Icons.CANCEL,
-                        icon_color=ft.Colors.GREEN_300,
-                        tooltip="Save",
+                        icon_color=ft.Colors.RED_300,
+                        tooltip="Cancel",
                         on_click=cancel)], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
         ]

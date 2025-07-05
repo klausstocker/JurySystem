@@ -28,7 +28,7 @@ class User:
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'])
+        return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0)
 
 
 @dataclass
@@ -60,10 +60,11 @@ class JuryDatabase:
            user = User.fromRow(row)
            return row['password'] == password and user.valid()
 
-    def getUser(self, id: int) -> User:
+    def getUser(self, userId: int) -> User:
         with self.conn.cursor() as cursor:
-           cursor.execute(f'SELECT * FROM users WHERE id="{id}";')
-           return User.fromRow(cursor.fetchone())
+            sql = f'SELECT * FROM users WHERE id="{userId}";'
+            cursor.execute(sql)
+            return User.fromRow(cursor.fetchone())
         return None
 
     def insertUser(self, username: str, password: str, email:str, team:str, restrictions: Restrictions) -> int:
@@ -77,9 +78,18 @@ class JuryDatabase:
             return cursor.lastrowid
         return None
     
-    def removeUser(self, id: int) -> bool:
+    def removeUser(self, userId: int) -> bool:
         with self.conn.cursor() as cursor:
-            sql = f"DELETE FROM `users` WHERE `users`.`id` = {id} ;"
+            sql = f"DELETE FROM `users` WHERE `users`.`id` = {userId} ;"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
+    
+    def updateUser(self, userId: int, username: str, email: str, team: str, expires: datetime, restrictions: Restrictions, locked: bool):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `users` SET `username` = '{username}', `email` = '{email}', `team` = '{team}', `expires` = '{expires}',`restrictions` = '{restrictions.value}', `locked` = '{1 if locked else 0}' WHERE `users`.`id` = {userId};"
+            print(sql)
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0

@@ -1,6 +1,7 @@
 import unittest
 import pymysql.cursors
 from frontend.flet.src.database import JuryDatabase, Restrictions, User, Gender
+from datetime import datetime
 
 
 class TestDatabase(unittest.TestCase):
@@ -8,6 +9,10 @@ class TestDatabase(unittest.TestCase):
     def __init__(self, methodName = "runTest"):
         super().__init__(methodName)
         self.db = JuryDatabase('localhost')
+        
+    def testRestrictions(self):
+        a = Restrictions['TRAINER']
+        self.assertEqual(a, Restrictions.TRAINER)
 
     def test_user(self):
         self.assertTrue(self.db.validateUser('admin', 'pass'))
@@ -22,6 +27,8 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(insertedUser.username, 'judenau')
         self.assertEqual(insertedUser.locked, 0)
         self.assertEqual(insertedUser.restrictions, Restrictions.TRAINER)
+        self.assertTrue(self.db.updateUser(insertedId, 'judenau1', '', '', datetime.now(), Restrictions.TRAINER, False))
+        self.assertEqual(self.db.getUser(insertedId).username, 'judenau1')
         
         self.assertTrue(self.db.removeUser(insertedId))
         self.assertFalse(self.db.removeUser(insertedId))
