@@ -59,6 +59,7 @@ class UserView(ft.View):
 
         def editFunc(e, userId):
             print(f'edit {userId=}')
+            self.page.go(f'/userEdit/{userId}')
         
         def addFunc(e):
             print('add')
@@ -85,3 +86,34 @@ class UserView(ft.View):
 
     def will_unmount(self):
         print('Will unmount')
+
+class UserEditView(ft.View):
+    def __init__(self, page: ft.Page, userId: int):
+        super().__init__()
+        self.page = page
+        self.route = f'/userEdit/{userId}'
+        db = JuryDatabase('db')
+        
+        def save(e):
+            print(f'saving {userId=}')
+            
+        def cancel(e):
+            print(f'cancel {userId=}')
+
+        self.controls = [
+            ft.AppBar(title=ft.Text("Edit User"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.Row(spacing=0, controls=
+                [
+                    ft.IconButton(
+                        icon=ft.Icons.CHECK_CIRCLE,
+                        icon_color=ft.Colors.GREEN_300,
+                        tooltip="Save",
+                        on_click=save),
+                    ft.IconButton(
+                        icon=ft.Icons.CANCEL,
+                        icon_color=ft.Colors.GREEN_300,
+                        tooltip="Save",
+                        on_click=cancel)], scroll=ft.ScrollMode.AUTO),
+            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+        ]
+            
