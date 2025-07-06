@@ -34,12 +34,13 @@ class TestDatabase(unittest.TestCase):
         self.assertFalse(self.db.removeUser(insertedId))
         
     def test_athlete(self):
-        athletes = self.db.getAthletes(2)
+        athletes = self.db.getAthletes(3)
         self.assertEqual(len(athletes), 2)
         self.assertEqual(athletes[0].givenname, 'Klaus')
         
         insertedId = self.db.insertAthlete('Daniel', 'Stocker', 3, '2015-03-31', Gender.MALE)
         self.assertEqual(self.db.getAthlete(insertedId).givenname, 'Daniel')
+        self.assertTrue(self.db.removeAthlete(insertedId))
 
 if __name__ == '__main__':
     unittest.main()

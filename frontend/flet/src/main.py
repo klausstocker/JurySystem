@@ -7,10 +7,11 @@ def main(page: ft.Page):
     jurydb = JuryDatabase('db')
 
     def loginbtn(e):
-        if jurydb.validateUser(username.value, password.value):
+        userId = jurydb.validateUser(username.value, password.value)
+        if userId is not None:
             print("Redirecting...")
             navi = Navigator(page)
-            page.session.set("username", username.value)
+            page.session.set("userId", userId)
             page.on_route_change = navi.route_change
             page.on_view_pop = navi.view_pop
             page.go(page.route)

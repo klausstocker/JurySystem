@@ -3,6 +3,7 @@ import re
 from home import HomeView
 from settings import SiteView
 from users import UserView, UserEditView
+from athletes import AthleteView
 
 
 class RouteErrorView(ft.View):
@@ -29,6 +30,8 @@ class Navigator:
         if self.page.route.startswith('/userEdit'):
             userId = int(self.page.route.split('/')[-1])
             self.page.views.append(UserEditView(self.page, userId))
+        if self.page.route == '/athletes':
+            self.page.views.append(AthleteView(self.page))
         self.page.update()
 
     def view_pop(self, view):

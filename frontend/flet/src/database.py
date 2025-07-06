@@ -45,6 +45,9 @@ class Athlete:
     @staticmethod
     def fromRow(row):
         return Athlete(row['id'], row['givenname'], row['surname'], row['userId'], row['birth'], Gender(row['gender']))
+    
+    def name(self):
+        return f'{self.givenname} {self.surname}'
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -57,10 +60,12 @@ class JuryDatabase:
     def validateUser(self, username, password):
         with self.conn.cursor() as cursor:
            if cursor.execute(f'SELECT * FROM users WHERE username="{username}";') != 1:
-               return False
+               return None
            row = cursor.fetchone()
            user = User.fromRow(row)
-           return user.password == password and user.valid()
+           if user.password != password and user.valid():
+               return None
+           return user.id
 
     def getUser(self, userId: int) -> User:
         with self.conn.cursor() as cursor:
@@ -127,3 +132,11 @@ class JuryDatabase:
             self.conn.commit()
             return cursor.lastrowid
         return None
+
+    def removeAthlete(self, athleteId: int) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = f"DELETE FROM `athletes` WHERE `athletes`.`id` = {athleteId} ;"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False

@@ -41,9 +41,9 @@ CREATE TABLE IF NOT EXISTS `athletes` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender`) VALUES
-	(1, 'Klaus', 'Stocker', 2, '1978-07-15', 0),
-	(2, 'Christoph', 'Hogl', 3, '1977-07-13', 0),
-	(3, 'Johanna', 'Stocker', 2, '2010-05-20', 1);
+	(1, 'Klaus', 'Stocker', 3, '1978-07-15', 0),
+	(2, 'Christoph', 'Hogl', 4, '1977-07-13', 0),
+	(3, 'Johanna', 'Stocker', 3, '2010-05-20', 1);
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
