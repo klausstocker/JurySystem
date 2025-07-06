@@ -6,7 +6,8 @@ from typing import List
 
 class Restrictions(Enum):
     TRAINER = 0
-    ADMIN = 1
+    HOST = 1
+    ADMIN = 2
     
 class Gender(Enum):
     MALE = 0
@@ -16,6 +17,7 @@ class Gender(Enum):
 class User:
     id: int
     username: str
+    password: str
     email: str
     team: str
     registered: datetime
@@ -28,7 +30,7 @@ class User:
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0)
+        return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0)
 
 
 @dataclass
@@ -58,7 +60,7 @@ class JuryDatabase:
                return False
            row = cursor.fetchone()
            user = User.fromRow(row)
-           return row['password'] == password and user.valid()
+           return user.password == password and user.valid()
 
     def getUser(self, userId: int) -> User:
         with self.conn.cursor() as cursor:
@@ -86,10 +88,9 @@ class JuryDatabase:
             return cnt != 0
         return False
     
-    def updateUser(self, userId: int, username: str, email: str, team: str, expires: datetime, restrictions: Restrictions, locked: bool):
+    def updateUser(self, userId: int, username: str, password: str, email: str, team: str, expires: datetime, restrictions: Restrictions, locked: bool):
         with self.conn.cursor() as cursor:
-            sql = f"UPDATE `users` SET `username` = '{username}', `email` = '{email}', `team` = '{team}', `expires` = '{expires}',`restrictions` = '{restrictions.value}', `locked` = '{1 if locked else 0}' WHERE `users`.`id` = {userId};"
-            print(sql)
+            sql = f"UPDATE `users` SET `username` = '{username}',`password` = '{password}', `email` = '{email}', `team` = '{team}', `expires` = '{expires}',`restrictions` = '{restrictions.value}', `locked` = '{1 if locked else 0}' WHERE `users`.`id` = {userId};"
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0

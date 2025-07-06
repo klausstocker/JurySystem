@@ -27,7 +27,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(insertedUser.username, 'judenau')
         self.assertEqual(insertedUser.locked, 0)
         self.assertEqual(insertedUser.restrictions, Restrictions.TRAINER)
-        self.assertTrue(self.db.updateUser(insertedId, 'judenau1', '', '', datetime.now(), Restrictions.TRAINER, False))
+        self.assertTrue(self.db.updateUser(insertedId, 'judenau1', 'pass', '', '', datetime.now(), Restrictions.TRAINER, False))
         self.assertEqual(self.db.getUser(insertedId).username, 'judenau1')
         
         self.assertTrue(self.db.removeUser(insertedId))

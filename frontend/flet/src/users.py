@@ -62,8 +62,8 @@ class UserView(ft.View):
             self.page.go(f'/userEdit/{userId}')
         
         def addFunc(e):
-            print('add')
-        
+            self.page.go(f'/userEdit/0')
+            
         self.page = page
         self.route = '/users'
         self.table = ft.DataTable(
@@ -93,10 +93,15 @@ class UserEditView(ft.View):
         self.page = page
         self.route = f'/userEdit/{userId}'
         db = JuryDatabase('db')
+        createUser = userId == 0
         
         def update(e):
-            print(f'saving {userId=}')
-            db.updateUser(userId, nameEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
+            if createUser:
+                print(f'creating user')
+                db.insertUser(nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, Restrictions[resitrictionsEdit.value])
+            else:
+                print(f'saving {userId=}')
+                db.updateUser(userId, nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
             self.page.go("/users")
             
         def cancel(e):
@@ -104,26 +109,33 @@ class UserEditView(ft.View):
             self.page.go("/users")
 
         print(f'get user {userId=}')
-        user = db.getUser(userId)
-        print(f'{user.username=}')
-        nameEdit = ft.TextField(label="Username", value=user.username)
-        emailEdit = ft.TextField(label="Email", value=user.email)
-        teamEdit = ft.TextField(label="Team", value=user.team)
+        if not createUser:
+            user = db.getUser(userId)
+            print(f'{user.username=}')
+        nameEdit = ft.TextField(label="Username", value=None if createUser else user.username)
+        passwordEdit = ft.TextField(label="Passworde", value=None if createUser else user.password)
+        emailEdit = ft.TextField(label="Email", value=None if createUser else user.email)
+        teamEdit = ft.TextField(label="Team", value=None if createUser else user.team)
         resitrictionsEdit = ft.Dropdown(
             label="Restrictions",
             width = 300,
             options=[ft.dropdownm2.Option(e.name) for e in Restrictions],
-            value=user.restrictions.name)
-        expiresEdit = ft.TextField(label="expires", value=user.expires)
-        lockedEdit = ft.Checkbox(label="locked", value=user.locked)
+            value=Restrictions.TRAINER.name if createUser else user.restrictions.name)
+        expiresEdit = ft.TextField(label="expires", value=None if createUser else user.expires)
+        lockedEdit = ft.Checkbox(label="locked", value=False if createUser else user.locked)
         self.controls = [
-            ft.AppBar(title=ft.Text("Edit User"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(f'{'Create ' if createUser else 'Edit '} User'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             nameEdit,
+            passwordEdit,
             emailEdit,
             teamEdit,
-            resitrictionsEdit,
-            expiresEdit,
-            lockedEdit,
+            resitrictionsEdit]
+        if not createUser:
+            self.controls += [
+                expiresEdit,
+                lockedEdit
+            ]
+        self.controls += [
             ft.Row(spacing=0, controls=
                 [
                     ft.IconButton(
