@@ -40,6 +40,8 @@ class TestDatabase(unittest.TestCase):
         
         insertedId = self.db.insertAthlete('Daniel', 'Stocker', 3, '2015-03-31', Gender.MALE)
         self.assertEqual(self.db.getAthlete(insertedId).givenname, 'Daniel')
+        self.assertTrue(self.db.updateAthlete(insertedId, 'Daniel', 'Stocker1', 3, '2015-03-31', Gender.MALE))
+        self.assertEqual(self.db.getAthlete(insertedId).surname, 'Stocker1')
         self.assertTrue(self.db.removeAthlete(insertedId))
 
 if __name__ == '__main__':

@@ -6,7 +6,8 @@ class HomeView(ft.View):
         super().__init__()
         self.page = page
         self.route = '/'
-        username = page.session.get('username')
+        user = page.session.get('user')
+        username = '' if user is None else user.username
         self.controls = [
             ft.AppBar(title=ft.Text(f"Jury System, user: {username}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.ElevatedButton("Users", on_click=lambda _: self.page.go("/users")),
@@ -37,8 +38,7 @@ class LoginView(ft.View):
             userId = db.validateUser(username.value, password.value)
             if userId is not None:
                 print("Redirecting...")
-                self.page.session.set('userId', userId)
-                self.page.session.set('username', username.value)
+                self.page.session.set('user', db.getUser(userId))
                 self.page.go('/home')
             else:
                 print("Login failed !!!")

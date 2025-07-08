@@ -8,7 +8,7 @@ class SiteView(ft.View):
         self.route = '/settings'
         self.controls = [
             ft.AppBar(title=ft.Text("Settings"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            ft.ElevatedButton("Go Home", on_click=lambda _: self.page.go("/")),
+            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 
     def did_mount(self):

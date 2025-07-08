@@ -161,6 +161,14 @@ class JuryDatabase:
             return cursor.lastrowid
         return None
 
+    def updateAthlete(self, athleteId: int,  givenname: str, surname: str, userId: int, birth: datetime, gender: Gender):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `athletes` SET `givenname` = '{givenname}',`surname` = '{surname}', `userId` = '{userId}', `birth` = '{birth}', `gender` = {gender.value} WHERE `athletes`.`id` = {athleteId};"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
+
     def removeAthlete(self, athleteId: int) -> bool:
         with self.conn.cursor() as cursor:
             sql = f"DELETE FROM `athletes` WHERE `athletes`.`id` = {athleteId} ;"
