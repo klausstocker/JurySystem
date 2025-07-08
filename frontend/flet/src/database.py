@@ -12,6 +12,10 @@ class Restrictions(Enum):
 class Gender(Enum):
     MALE = 0
     FEMALE = 1
+    
+class RankingType(Enum):
+    NO_RANKING = 1
+    RANKING = 0
 
 @dataclass
 class User:
@@ -48,7 +52,31 @@ class Athlete:
     
     def name(self):
         return f'{self.givenname} {self.surname}'
+    
+@dataclass
+class Event:
+    id: int
+    name: str
+    userId: int
+    date: datetime
 
+    @staticmethod
+    def fromRow(row):
+        return Event(row['id'], row['name'], row['userId'], row['date'])
+
+@dataclass
+class EventCategory:
+    name: str
+    eventId: int
+    gender: Gender
+    birthFrom: datetime
+    birthTo: datetime
+    rankingType: RankingType
+    
+    @staticmethod
+    def fromRow(row):
+        return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']))
+   
 class JuryDatabase:
     def __init__(self, host: str):
         self.conn = pymysql.connect(host=host,

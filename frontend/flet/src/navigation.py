@@ -1,6 +1,5 @@
 import flet as ft
-import re
-from home import HomeView
+from home import HomeView, LoginView
 from settings import SiteView
 from users import UserView, UserEditView
 from athletes import AthleteView
@@ -23,14 +22,16 @@ class Navigator:
         print(f'{route=}')
         self.page.views.clear()
         self.page.views.append(HomeView(self.page))
-        if self.page.route == '/settings':
+        if self.page.route == '/login' or self.page.session.get('userId') is None:
+            self.page.views.append(LoginView(self.page))
+        elif self.page.route == '/settings':
             self.page.views.append(SiteView(self.page))
-        if self.page.route == '/users':
+        elif self.page.route == '/users':
             self.page.views.append(UserView(self.page))
-        if self.page.route.startswith('/userEdit'):
+        elif self.page.route.startswith('/userEdit'):
             userId = int(self.page.route.split('/')[-1])
             self.page.views.append(UserEditView(self.page, userId))
-        if self.page.route == '/athletes':
+        elif self.page.route == '/athletes':
             self.page.views.append(AthleteView(self.page))
         self.page.update()
 

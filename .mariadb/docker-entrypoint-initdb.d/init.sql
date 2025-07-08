@@ -45,6 +45,30 @@ INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender
 	(2, 'Christoph', 'Hogl', 4, '1977-07-13', 0),
 	(3, 'Johanna', 'Stocker', 3, '2010-05-20', 1);
 
+CREATE TABLE IF NOT EXISTS `events` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(10) NOT NULL,
+  `userId` int(10) unsigned NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `events` (`id`, `name`, `userId`, `date`) VALUES
+  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28');
+
+CREATE TABLE IF NOT EXISTS `event_categories` (
+  `name` varchar(10) NOT NULL,
+  `eventId` int(10) unsigned NOT NULL,
+  `gender` tinyint(4) NOT NULL,
+  `birthFrom` datetime NOT NULL,
+  `birthTo` datetime NOT NULL,
+  `rankingType` tinyint(4),
+  PRIMARY KEY (`name`, `eventId`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`) VALUES
+  ('Kn01', 1, 0, '2020-01-01', '2021-12-31', 0);
+
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
 /*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
