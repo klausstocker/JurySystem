@@ -176,3 +176,44 @@ class JuryDatabase:
             self.conn.commit()
             return cnt != 0
         return False
+    
+    def getEvents(self, userId: int) -> List[Event]:
+        events = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM events WHERE userId = {userId};')
+            for row in cursor.fetchall():
+                events.append(Event.fromRow(row))
+        return events
+    
+    def getEvent(self, eventId: int) -> Event:
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM events WHERE id = {eventId};')
+            return Event.fromRow(cursor.fetchone())
+        return None
+    
+    def insertEvent(self, name: str, userId: int, date: datetime):
+        with self.conn.cursor() as cursor:
+            sql = f"INSERT INTO events (name, userId, date) VALUES ('{name}', '{userId}','{date}');"
+            cnt = cursor.execute(sql)
+            if cnt != 1:
+                return None
+            self.conn.commit()
+            return cursor.lastrowid
+        return None
+
+    def updateEvent(self, eventId: int,  name: str, userId: int, date: datetime):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `events` SET `name` = '{name}', `userId` = '{userId}', `date` = '{date}' WHERE `events`.`id` = {eventId};"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
+
+    def removeEvent(self, eventId: int) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = f"DELETE FROM `events` WHERE `events`.`id` = {eventId} ;"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
+ 

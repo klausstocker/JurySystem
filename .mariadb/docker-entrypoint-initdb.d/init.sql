@@ -47,7 +47,7 @@ INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender
 
 CREATE TABLE IF NOT EXISTS `events` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(10) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `userId` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
   PRIMARY KEY (`id`)
@@ -57,7 +57,7 @@ INSERT INTO `events` (`id`, `name`, `userId`, `date`) VALUES
   (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28');
 
 CREATE TABLE IF NOT EXISTS `event_categories` (
-  `name` varchar(10) NOT NULL,
+  `name` varchar(50) NOT NULL,
   `eventId` int(10) unsigned NOT NULL,
   `gender` tinyint(4) NOT NULL,
   `birthFrom` datetime NOT NULL,
