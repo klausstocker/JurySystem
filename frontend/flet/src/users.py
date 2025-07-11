@@ -1,6 +1,10 @@
+import os
+import sys
 import flet as ft
 import pymysql.cursors
-from database import JuryDatabase, User, Restrictions
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
+from shared.database import JuryDatabase, User, Restrictions
 
 def header():
     return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']

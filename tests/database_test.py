@@ -1,6 +1,8 @@
+import os
+import sys
 import unittest
 import pymysql.cursors
-from frontend.flet.src.database import JuryDatabase, Restrictions, User, Gender
+from shared.database.database import JuryDatabase, Restrictions, User, Gender
 from datetime import datetime
 
 
@@ -10,7 +12,7 @@ class TestDatabase(unittest.TestCase):
         super().__init__(methodName)
         self.db = JuryDatabase('localhost')
         
-    def testRestrictions(self):
+    def test_restrictions(self):
         a = Restrictions['TRAINER']
         self.assertEqual(a, Restrictions.TRAINER)
 

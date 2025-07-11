@@ -1,6 +1,11 @@
+import os
+import sys
 import flet as ft
 import pymysql.cursors
-from database import JuryDatabase, Athlete, Gender
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
+from shared.database import JuryDatabase, Athlete, Gender
+
 
 def header():
     return ['', '', 'given name', 'surname', 'birth', 'gender']
@@ -65,6 +70,10 @@ class AthleteView(ft.View):
         def addFunc(e):
             self.page.go(f'/athleteEdit/0')
             
+        def printPdf(e):
+            host = self.page.url[5:]
+            page.launch_url(f'https://api.{host}/athletes/{user.id}')
+            
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
                 rows=[athleteAsRow(athlete, editFunc, deleteFunc) for athlete in db.getAthletes(user.id)]
@@ -72,10 +81,15 @@ class AthleteView(ft.View):
         self.controls = [
             ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
-            ft.IconButton(ft.Icons.ADD_CIRCLE,
+            ft.Row(spacing=0, controls=[
+                ft.IconButton(ft.Icons.ADD_CIRCLE,
                     icon_color=ft.Colors.BLUE_300,
                     tooltip="Add",
                     on_click=addFunc),
+                ft.IconButton(ft.Icons.SAVE,
+                          icon_color=ft.Colors.BLUE_300,
+                          tooltip="pdf",
+                          on_click=printPdf)]),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 

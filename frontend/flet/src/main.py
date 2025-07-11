@@ -1,6 +1,5 @@
 import flet as ft
 from navigation import Navigator
-from database import JuryDatabase
 
 def main(page: ft.Page):
     page.title = "Jury System"

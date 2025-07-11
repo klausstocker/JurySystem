@@ -2,7 +2,7 @@ FROM python:3.13-slim
 
 WORKDIR /usr/src/app
 
-# set environment variables - has advantages for python in docker cointainer
+# set environment variables - has advantages for python in docker container
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 

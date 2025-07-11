@@ -1,6 +1,9 @@
+import os
+import sys
 import flet as ft
-from database import JuryDatabase
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
+from shared.database import JuryDatabase, Athlete, Gender
 class HomeView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
