@@ -3,13 +3,12 @@
 
 ```mermaid
 erDiagram
-    user ||--o| teams: "manages"
-    teams ||--o{ athletes : "consists of"
+    user (team) ||--o{ athletes : "consists of"
     athletes ||--o{ attendances : "attends"
-    competitions ||--o{ attendances: "is attended"
-    competitions ||--o{ competitionCategories : "is categorized"
-    discipline ||--o{ competiotionDiscipline : ""
-    rating ||--o{ competiotionDiscipline :""
+    events ||--o{ attendances: "is attended"
+    events ||--o{ eventCategories : "is categorized"
+    events ||--o{ eventDiscipline : "consists of"
+    rating ||--o{ eventDiscipline : ""
     attendances ||--o{ rating : ""
-    rating ||--o{ competitionCategories : ""
+    rating ||--o{ eventCategories : ""
 ```

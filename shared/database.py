@@ -28,13 +28,14 @@ class User:
     expires: datetime
     restrictions: Restrictions
     locked: bool
+    hidden: bool
     
     def valid(self) -> bool:
         return datetime.now() < self.expires and not self.locked
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0)
+        return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0)
 
 
 @dataclass
@@ -45,10 +46,11 @@ class Athlete:
     userId: int
     birth: datetime
     gender: Gender
+    hidden: bool
     
     @staticmethod
     def fromRow(row):
-        return Athlete(row['id'], row['givenname'], row['surname'], row['userId'], row['birth'], Gender(row['gender']))
+        return Athlete(row['id'], row['givenname'], row['surname'], row['userId'], row['birth'], Gender(row['gender']), row['hidden'] != 0)
     
     def name(self):
         return f'{self.givenname} {self.surname}'
@@ -132,7 +134,7 @@ class JuryDatabase:
     def getAllUsers(self) -> List[User]:
         users = []
         with self.conn.cursor() as cursor:
-            cursor.execute('SELECT * FROM users;')
+            cursor.execute('SELECT * FROM users WHERE hidden = 0;')
             for row in cursor.fetchall():
                 users.append(User.fromRow(row))
         return users
@@ -140,7 +142,7 @@ class JuryDatabase:
     def getAthletes(self, userId: int) -> List[Athlete]:
         athletes = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM athletes WHERE userId = {userId};')
+            cursor.execute(f'SELECT * FROM athletes WHERE userId = {userId} AND hidden = 0;')
             for row in cursor.fetchall():
                 athletes.append(Athlete.fromRow(row))
         return athletes
@@ -169,12 +171,29 @@ class JuryDatabase:
             return cnt != 0
         return False
 
-    def removeAthlete(self, athleteId: int) -> bool:
+    def athleteHasAttendances(self, athleteId):
         with self.conn.cursor() as cursor:
-            sql = f"DELETE FROM `athletes` WHERE `athletes`.`id` = {athleteId} ;"
-            cnt = cursor.execute(sql)
+            sql = f"SELECT * FROM `attendances` WHERE `athleteId` = {athleteId} ;"
+            return cursor.execute(sql) != 0
+        return False
+    
+    def hideAthlete(self, athleteId: int, hide: bool):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `athletes` SET `hidden` = {1 if hide else 0} WHERE `athletes`.`id` = {athleteId};"
+            cursor.execute(sql)
             self.conn.commit()
-            return cnt != 0
+
+    def removeAthlete(self, athleteId: int) -> bool:
+        """An athlete can only be deleted if there are no attendancies any more, 
+            otherwise he can only be hidden."""
+        if self.athleteHasAttendances(athleteId):
+            self.hideAthlete(athleteId, True)
+        else:
+            with self.conn.cursor() as cursor:
+                sql = f"DELETE FROM `athletes` WHERE `athletes`.`id` = {athleteId} ;"
+                cnt = cursor.execute(sql)
+                self.conn.commit()
+                return cnt != 0
         return False
     
     def getEvents(self, userId: int) -> List[Event]:
