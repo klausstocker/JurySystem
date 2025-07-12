@@ -86,6 +86,9 @@ class JuryDatabase:
                             password='asdfuas347lkasudhr',
                             database='JurySystem',
                             cursorclass=pymysql.cursors.DictCursor)
+        
+    def __del__(self):
+        self.conn.close()
     
     def validateUser(self, username, password):
         with self.conn.cursor() as cursor:
