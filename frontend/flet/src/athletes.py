@@ -1,7 +1,6 @@
 import os
 import sys
 import flet as ft
-import pymysql.cursors
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, Gender

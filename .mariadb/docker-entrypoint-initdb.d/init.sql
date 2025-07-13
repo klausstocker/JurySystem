@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`, `expires`, `restrictions`, `locked`, `hidden`) VALUES
-	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 2, 0, 0),
+	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 3, 0, 0),
 	(2, 'host', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0, 0),
 	(3, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0),
 	(4, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0);
@@ -53,11 +53,12 @@ CREATE TABLE IF NOT EXISTS `events` (
   `name` varchar(50) NOT NULL,
   `userId` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
+  `progress` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `events` (`id`, `name`, `userId`, `date`) VALUES
-  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28');
+INSERT INTO `events` (`id`, `name`, `userId`, `date`, `progress`) VALUES
+  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 0);
 
 CREATE TABLE IF NOT EXISTS `event_categories` (
   `name` varchar(50) NOT NULL,
@@ -96,6 +97,21 @@ INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`) VALUES
   (1, 1, 'Kn01'),
   (2, 1, 'Kn01'),
   (3, 1, 'Md01');
+
+CREATE TABLE IF NOT EXISTS `ratings` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `athleteId` int(10) unsigned NOT NULL,
+  `eventDisciplineName` varchar(50) NOT NULL,
+  `eventId` int(10) unsigned NOT NULL,
+  `difficulty` decimal(8,4) NOT NULL,
+  `execution` decimal(8,4) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `difficulty`, `execution`) VALUES
+  (1, 1, 'Reck', 1, 6.7, 2.0),
+  (2, 2, 'Reck', 1, 5.7, 1.0);
+  
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

@@ -7,7 +7,8 @@ from typing import List
 class Restrictions(Enum):
     TRAINER = 0
     HOST = 1
-    ADMIN = 2
+    JUDGE = 2
+    ADMIN = 3
     
 class Gender(Enum):
     MALE = 0
@@ -55,16 +56,22 @@ class Athlete:
     def name(self):
         return f'{self.givenname} {self.surname}'
     
+class Progress(Enum):
+    PLANNED = 0
+    ACTIVE = 1
+    FINISHED = 2
+    DELETED = 3
 @dataclass
 class Event:
     id: int
     name: str
     userId: int
     date: datetime
+    progress: Progress
 
     @staticmethod
     def fromRow(row):
-        return Event(row['id'], row['name'], row['userId'], row['date'])
+        return Event(row['id'], row['name'], row['userId'], row['date'], Progress(row['progress']))
 
 @dataclass
 class EventCategory:
@@ -78,7 +85,33 @@ class EventCategory:
     @staticmethod
     def fromRow(row):
         return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']))
-   
+
+@dataclass
+class Attendance:
+    athleteId: int
+    eventId: int
+    eventCategoryName: str
+    
+    @staticmethod
+    def fromRow(row):
+        return Attendance(row['athleteId'], row['eventId'], row['eventCategoryName'])
+
+@dataclass
+class Rating:
+    id: int
+    athleteId: int
+    eventId: int
+    eventDisciplineName: str
+    difficulty: float
+    execution: float
+    
+    def sum(self):
+        return self.difficulty + self.execution
+    
+    @staticmethod
+    def fromRow(row):
+        return Rating(row['id'], row['athleteId'], row['eventId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
+
 class JuryDatabase:
     def __init__(self, host: str):
         self.conn = pymysql.connect(host=host,
@@ -215,7 +248,7 @@ class JuryDatabase:
     
     def insertEvent(self, name: str, userId: int, date: datetime):
         with self.conn.cursor() as cursor:
-            sql = f"INSERT INTO events (name, userId, date) VALUES ('{name}', '{userId}','{date}');"
+            sql = f"INSERT INTO events (name, userId, date) VALUES ('{name}', '{userId}', '{date}');"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
@@ -237,5 +270,19 @@ class JuryDatabase:
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0
-        return False
+        return 
+    
+    def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId};')
+            return Attendance.fromRow(cursor.fetchone())
+        return None
+    
+    def getEventRatings(self, eventId: int, max: int) -> list[Rating]:
+        ratings = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM ratings WHERE eventId = {eventId} ORDER BY id DESC LIMIT {max};')
+            for row in cursor.fetchall():
+                ratings.append(Rating.fromRow(row))
+        return ratings
  

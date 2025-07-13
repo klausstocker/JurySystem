@@ -61,6 +61,10 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(self.db.updateEvent(insertedId, 'LM1', 2, '2026-01-02'))
         self.assertEqual(self.db.getEvent(insertedId).name, 'LM1')
         self.assertTrue(self.db.removeEvent(insertedId))
+    
+    def test_rating(self):
+        self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
+        self.assertEqual(len(self.db.getEventRatings(1, 2)), 2)
         
 if __name__ == '__main__':
     unittest.main()

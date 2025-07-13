@@ -3,6 +3,7 @@ from home import HomeView, LoginView
 from settings import SiteView
 from users import UserView, UserEditView
 from athletes import AthleteView, AthleteEditView
+from live_event import LiveEventView
 
 
 class RouteErrorView(ft.View):
@@ -22,7 +23,11 @@ class Navigator:
         print(f'{route=}')
         self.page.views.clear()
         self.page.views.append(HomeView(self.page))
-        if self.page.route == '/login' or self.page.session.get('user') is None:
+        if self.page.route.startswith('/public/liveEvent'):
+            eventId = int(self.page.route.split('/')[-1])
+            print(f'switch to live event {eventId}')
+            self.page.views.append(LiveEventView(self.page, eventId))
+        elif self.page.route == '/login' or self.page.session.get('user') is None:
             self.page.views.append(LoginView(self.page))
         elif self.page.route == '/settings':
             self.page.views.append(SiteView(self.page))
