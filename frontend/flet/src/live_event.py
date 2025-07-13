@@ -2,7 +2,7 @@ import os
 import sys
 import flet as ft
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
+import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Athlete, Attendance, Event, Progress, Rating
@@ -29,9 +29,9 @@ class LiveEventView(ft.View):
         self.route =f'/public/liveEvent/{eventId}'
 
         def onServerTime():
-            time = datetime.strftime(datetime.now(), '%H:%M:%S')
+            t = time.strftime('%H:%M:%S', time.localtime())
             self.controls = [
-                ft.AppBar(title=ft.Text(f'Live ratings of {event.name}, {time}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+                ft.AppBar(title=ft.Text(f'Live ratings of {event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
                 self.table
             ]
             self.page.update()
@@ -55,7 +55,7 @@ class LiveEventView(ft.View):
                 rows=rows
             )
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Live ratings of {event.name}, {event.date}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(f'Live ratings of {event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table
         ]
 

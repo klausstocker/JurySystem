@@ -29,7 +29,8 @@ INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`
 	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 3, 0, 0),
 	(2, 'host', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0, 0),
 	(3, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0),
-	(4, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0);
+	(4, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0),
+	(5, 'jugde', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 2, 0, 0);
 
 CREATE TABLE IF NOT EXISTS `athletes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -103,14 +104,15 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   `athleteId` int(10) unsigned NOT NULL,
   `eventDisciplineName` varchar(50) NOT NULL,
   `eventId` int(10) unsigned NOT NULL,
+  `userId` int(10) unsigned NOT NULL,
   `difficulty` decimal(8,4) NOT NULL,
   `execution` decimal(8,4) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `difficulty`, `execution`) VALUES
-  (1, 1, 'Reck', 1, 6.7, 2.0),
-  (2, 2, 'Reck', 1, 5.7, 1.0);
+INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
+  (1, 1, 'Reck', 1, 5, 6.7, 2.0),
+  (2, 2, 'Reck', 1, 5, 5.7, 1.0);
   
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;

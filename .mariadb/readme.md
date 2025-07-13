@@ -9,6 +9,7 @@ erDiagram
     events ||--o{ eventCategories : "is categorized"
     events ||--o{ eventDiscipline : "consists of"
     rating ||--o{ eventDiscipline : ""
-    attendances ||--o{ rating : ""
+    attendances ||--o{ rating : "is rated"
     rating ||--o{ eventCategories : ""
+    user (judge) ||--o{ ratings : "rates"
 ```

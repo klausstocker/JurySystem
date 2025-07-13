@@ -101,6 +101,7 @@ class Rating:
     id: int
     athleteId: int
     eventId: int
+    userId: int
     eventDisciplineName: str
     difficulty: float
     execution: float
@@ -110,7 +111,7 @@ class Rating:
     
     @staticmethod
     def fromRow(row):
-        return Rating(row['id'], row['athleteId'], row['eventId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
+        return Rating(row['id'], row['athleteId'], row['eventId'], row['userId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -285,4 +286,14 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 ratings.append(Rating.fromRow(row))
         return ratings
+    
+    def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
+        with self.conn.cursor() as cursor:
+            sql = f"INSERT INTO ratings (athleteId, eventId, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
+            cnt = cursor.execute(sql)
+            if cnt != 1:
+                return None
+            self.conn.commit()
+            return cursor.lastrowid
+        return None
  
