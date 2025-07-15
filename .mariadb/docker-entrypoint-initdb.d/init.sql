@@ -40,7 +40,8 @@ CREATE TABLE IF NOT EXISTS `athletes` (
   `birth` datetime DEFAULT NULL,
   `gender` tinyint(4) DEFAULT NULL,
   `hidden` tinyint(4) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender`, `hidden`) VALUES
@@ -55,7 +56,8 @@ CREATE TABLE IF NOT EXISTS `events` (
   `userId` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
   `progress` tinyint(4) DEFAULT 0,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `events` (`id`, `name`, `userId`, `date`, `progress`) VALUES
@@ -68,7 +70,8 @@ CREATE TABLE IF NOT EXISTS `event_categories` (
   `birthFrom` datetime NOT NULL,
   `birthTo` datetime NOT NULL,
   `rankingType` tinyint(4),
-  PRIMARY KEY (`name`, `eventId`)
+  PRIMARY KEY (`name`, `eventId`),
+  FOREIGN KEY (`eventId`) REFERENCES events(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`) VALUES
@@ -78,7 +81,8 @@ INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birth
 CREATE TABLE IF NOT EXISTS `event_disciplines` (
   `name` varchar(50) NOT NULL,
   `eventId` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`name`, `eventId`)
+  PRIMARY KEY (`name`, `eventId`),
+  FOREIGN KEY (`eventId`) REFERENCES events(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `event_disciplines` (`name`, `eventId`) VALUES
@@ -91,7 +95,9 @@ CREATE TABLE IF NOT EXISTS `attendances` (
   `athleteId` int(10) unsigned NOT NULL,
   `eventId` int(10) unsigned NOT NULL,
   `eventCategoryName` varchar(50) NOT NULL,
-  PRIMARY KEY (`athleteId`, `eventId`, `eventCategoryName`)
+  PRIMARY KEY (`athleteId`, `eventId`, `eventCategoryName`),
+  FOREIGN KEY (`eventId`) REFERENCES events(`id`),
+  FOREIGN KEY (`athleteId`) REFERENCES athletes(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`) VALUES
@@ -107,7 +113,10 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   `userId` int(10) unsigned NOT NULL,
   `difficulty` decimal(8,4) NOT NULL,
   `execution` decimal(8,4) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`eventId`) REFERENCES events(`id`),
+  FOREIGN KEY (`athleteId`) REFERENCES athletes(`id`),
+  FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
