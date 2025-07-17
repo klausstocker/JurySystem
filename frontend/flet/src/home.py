@@ -8,7 +8,7 @@ class HomeView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
-        self.route = '/'
+        self.route = '/home'
         user = page.session.get('user')
         username = '' if user is None else user.username
         self.controls = [
