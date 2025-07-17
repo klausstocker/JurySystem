@@ -3,6 +3,7 @@ from home import HomeView, LoginView
 from settings import SiteView
 from users import UserView, UserEditView
 from athletes import AthleteView, AthleteEditView
+from rating import RatingView
 from live_event import LiveEventView
 
 
@@ -41,6 +42,9 @@ class Navigator:
         elif self.page.route.startswith('/athleteEdit'):
             athleteId = int(self.page.route.split('/')[-1])
             self.page.views.append(AthleteEditView(self.page, athleteId))
+        elif self.page.route.startswith('/rating'):
+            eventId = int(self.page.route.split('/')[-1])
+            self.page.views.append(RatingView(self.page, eventId))
         self.page.update()
 
     def view_pop(self, view):

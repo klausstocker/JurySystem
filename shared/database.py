@@ -87,6 +87,15 @@ class EventCategory:
         return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']))
 
 @dataclass
+class EventDiscipline:
+    name: str
+    eventId: int
+    
+    @staticmethod
+    def fromRow(row):
+        return EventDiscipline(row['name'], row['eventId'])
+
+@dataclass
 class Attendance:
     athleteId: int
     eventId: int
@@ -286,7 +295,31 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 ratings.append(Rating.fromRow(row))
         return ratings
+
+    def getEventDisciplines(self, eventId: int) -> list[EventDiscipline]:
+        disciplines = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM `event_disciplines` WHERE eventId = {eventId} ORDER BY name;')
+            for row in cursor.fetchall():
+                disciplines.append(EventDiscipline.fromRow(row))
+        return disciplines
+
+    def getEventGroups(self, eventId: int) -> list[str]:
+        groups = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT DISTINCT `group` FROM `attendances` WHERE eventId = {eventId} ORDER BY `group`;')
+            for row in cursor.fetchall():
+                groups.append(row['group'])
+        return groups
     
+    def getEventGroup(self, eventId: int, group: str) -> list[Athlete]:
+        athletes = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT `athletes`.* FROM `attendances` JOIN `athletes` ON athletes.id=attendances.athleteId WHERE `attendances`.`eventId` = {eventId} AND `attendances`.`group` = "{group}";')
+            for row in cursor.fetchall():
+                athletes.append(Athlete.fromRow(row))
+        return athletes
+ 
     def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:
             sql = f"INSERT INTO ratings (athleteId, eventId, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
