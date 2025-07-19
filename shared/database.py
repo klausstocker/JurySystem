@@ -56,6 +56,9 @@ class Athlete:
     def name(self):
         return f'{self.givenname} {self.surname}'
     
+    def birthFormated(self):
+        return self.birth.strftime('%d.%m.%Y')
+    
 class Progress(Enum):
     PLANNED = 0
     ACTIVE = 1
@@ -118,9 +121,28 @@ class Rating:
     def sum(self):
         return self.difficulty + self.execution
     
+    def rate(self, difficulty: float, execution: float):
+        self.difficulty = difficulty
+        self.execution = execution
+    
     @staticmethod
     def fromRow(row):
         return Rating(row['id'], row['athleteId'], row['eventId'], row['userId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
+
+@dataclass
+class AthleteRatings:
+    athlete: Athlete
+    eventId: int
+    eventCategoryName: str
+    ratings: dict[str, Rating]
+    
+    def sum(self):
+        return sum(r.sum() for r in self.ratings.values())
+    
+    def ratingOrNone(self, discpiline: str):
+        if discpiline in self.ratings.keys():
+            return self.ratings[discpiline].difficulty, self.ratings[discpiline].execution, self.ratings[discpiline].id
+        return None, None, None
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -280,7 +302,7 @@ class JuryDatabase:
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0
-        return 
+        return False
     
     def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
         with self.conn.cursor() as cursor:
@@ -319,14 +341,42 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 athletes.append(Athlete.fromRow(row))
         return athletes
- 
-    def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
+
+    def getAthleteRatings(self, athleteId: int, eventId: int) -> AthleteRatings:
+        athlete = self.getAthlete(athleteId)
+        attendance = self.getAttendance(athleteId, eventId)
+        ratings = {}
         with self.conn.cursor() as cursor:
-            sql = f"INSERT INTO ratings (athleteId, eventId, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
+            cursor.execute(f'SELECT * FROM `ratings` WHERE `eventId` = {eventId} AND `athleteId` = "{athleteId}";')
+            for row in cursor.fetchall():
+                rating = Rating.fromRow(row)
+                ratings[rating.eventDisciplineName] = rating
+        return AthleteRatings(athlete, eventId, attendance.eventCategoryName, ratings)
+
+    def updateRating(self, ratingId: int, userId: int, difficulty: float, execution: float):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `ratings` SET `userId`='{userId}', `difficulty`='{difficulty}', `execution`='{execution}' WHERE `id`='{ratingId}'"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
             self.conn.commit()
             return cursor.lastrowid
         return None
- 
+
+    def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
+        with self.conn.cursor() as cursor:
+            sql = f"INSERT INTO `ratings` (athleteId, eventId, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
+            cnt = cursor.execute(sql)
+            if cnt != 1:
+                return None
+            self.conn.commit()
+            return cursor.lastrowid
+        return None
+    
+    def removeRating(self, ratingId: int):
+        with self.conn.cursor() as cursor:
+            sql = f"DELETE FROM `ratings` WHERE `ratings`.`id` = '{ratingId}';"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False

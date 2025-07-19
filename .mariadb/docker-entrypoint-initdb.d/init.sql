@@ -126,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   `difficulty` decimal(8,4) NOT NULL,
   `execution` decimal(8,4) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE (`athleteId`, `eventId`, `eventDisciplineName`),
   FOREIGN KEY (`eventId`) REFERENCES events(`id`),
   FOREIGN KEY (`athleteId`) REFERENCES athletes(`id`),
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
@@ -133,8 +134,9 @@ CREATE TABLE IF NOT EXISTS `ratings` (
 
 INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
   (1, 1, 'Reck', 1, 5, 6.7, 2.0),
-  (2, 2, 'Reck', 1, 5, 5.7, 1.0);
-  
+  (2, 2, 'Reck', 1, 5, 5.7, 1.0),
+  (3, 1, 'Boden', 1, 5, 4.0, 2.0);
+
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;

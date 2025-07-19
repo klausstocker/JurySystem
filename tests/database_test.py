@@ -69,7 +69,12 @@ class TestDatabase(unittest.TestCase):
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
         self.assertEqual(len(self.db.getEventRatings(1, 2)), 2)
-        
+        self.assertAlmostEqual(float(self.db.getAthleteRatings(1, 1).sum()), 14.7)
+        insertedId = self.db.insertRating(2, 1, 5, 'Sprung', 2., 3.)
+        self.assertAlmostEqual(float(self.db.getAthleteRatings(2, 1).sum()), 11.7)
+        self.assertIsNotNone(self.db.updateRating(insertedId, 5, 3., 4.))
+        self.assertAlmostEqual(float(self.db.getAthleteRatings(2, 1).sum()), 13.7)
+        self.db.removeRating(insertedId)
         
 if __name__ == '__main__':
     unittest.main()

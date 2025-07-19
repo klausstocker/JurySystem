@@ -16,7 +16,7 @@ async def test():
 @api.get('/athletes/{userId}')
 async def athletes(userId: int):
     db = JuryDatabase('db')
-    data = [[athlete.name(), athlete.birth, athlete.gender.name] for athlete in db.getAthletes(userId)]
+    data = [[athlete.name(), athlete.birthFormated(), athlete.gender.name] for athlete in db.getAthletes(userId)]
     user = db.getUser(userId)
     data = printTable('Athletes', user.team, '', ['name', 'birth', 'gender'], data )
     headers = {'Content-Disposition': 'attachment; filename="athletes.pdf"'}

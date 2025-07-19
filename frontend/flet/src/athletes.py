@@ -23,7 +23,7 @@ def athleteAsRow(athlete: Athlete, editFunc: callable, deleteFunc: callable):
                     on_click=lambda e: deleteFunc(e, athlete.id))),
         ft.DataCell(ft.Text(athlete.givenname)),
         ft.DataCell(ft.Text(athlete.surname)),
-        ft.DataCell(ft.Text(athlete.birth)),
+        ft.DataCell(ft.Text(athlete.birthFormated())),
         ft.DataCell(ft.Text(athlete.gender.name))
         ]
     return ft.DataRow(cells=cells)
@@ -129,7 +129,7 @@ class AthleteEditView(ft.View):
         givenNameEdit = ft.TextField(label="given name", value=None if createAthlete else athlete.givenname)
         surnameEdit = ft.TextField(label="surname", value=None if createAthlete else athlete.surname)
         teamEdit = ft.TextField(label="Team", value=user.team, disabled=True)
-        birthEdit = ft.TextField(label="birth", value=None if createAthlete else athlete.birth)
+        birthEdit = ft.TextField(label="birth", value=None if createAthlete else athlete.birthFormated())
         genderEdit = ft.Dropdown(
             label="gender",
             width = 300,
