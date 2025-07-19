@@ -28,7 +28,11 @@ class Navigator:
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to live event {eventId}')
             self.page.views.append(LiveEventView(self.page, eventId))
-        elif self.page.route == '/' or self.page.route == '/login' or self.page.session.get('user') is None:
+        elif self.page.route == '/login':
+            self.page.views.append(LoginView(self.page))
+        elif self.page.session.get('user') is None:
+            print(f'store target={self.page.route}')
+            self.page.session.set('target', self.page.route)
             self.page.views.append(LoginView(self.page))
         elif self.page.route == '/settings':
             self.page.views.append(SiteView(self.page))

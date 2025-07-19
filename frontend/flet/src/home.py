@@ -8,7 +8,7 @@ class HomeView(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__()
         self.page = page
-        self.route = '/home'
+        self.route = '/'
         user = page.session.get('user')
         username = '' if user is None else user.username
         self.controls = [
@@ -42,13 +42,20 @@ class LoginView(ft.View):
             if userId is not None:
                 print("Redirecting...")
                 self.page.session.set('user', db.getUser(userId))
-                self.page.go('/home')
+                if self.page.session.contains_key('target'):
+                    target = self.page.session.get('target')
+                    self.page.session.remove('target')
+                    self.page.route = target
+                    self.page.on_route_change(ft.RouteChangeEvent(target))
+                else:
+                    self.page.go('/')
             else:
                 print("Login failed !!!")
                 self.page.open(ft.SnackBar(
                     ft.Text("wrong login, user expired or locked", size=30),
                     bgcolor="red"
                 ))
+
         username = ft.TextField(label="User name")
         password = ft.TextField(label="Password", password=True, can_reveal_password=True, on_submit=loginbtn)
     
