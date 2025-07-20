@@ -1,6 +1,7 @@
 import os
 import sys
 import flet as ft
+from view import View
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
 
@@ -22,7 +23,7 @@ def ratingAsRow(user: User, athlete: Athlete, attendance: Attendance, event: Eve
         ]
     return ft.DataRow(cells=cells)
 
-class LiveEventView(ft.View):
+class LiveEventView(View):
     def __init__(self, page: ft.Page, eventId: int):
         super().__init__()
         self.page = page
@@ -40,14 +41,13 @@ class LiveEventView(ft.View):
         self.scheduler.add_job(onServerTime, 'interval', seconds=1)
         self.scheduler.start()
         
-        db = JuryDatabase('db')
-        event = db.getEvent(eventId)
+        event = self.db.getEvent(eventId)
         rows = []
         maxRows = 25 # todo this should be a setting
-        for rating in db.getEventRatings(eventId, maxRows):
-            athlete = db.getAthlete(rating.athleteId)
-            user = db.getUser(athlete.userId)
-            att = db.getAttendance(athlete.id, eventId)
+        for rating in self.db.getEventRatings(eventId, maxRows):
+            athlete = self.db.getAthlete(rating.athleteId)
+            user = self.db.getUser(athlete.userId)
+            att = self.db.getAttendance(athlete.id, eventId)
             rows.append(ratingAsRow(user, athlete, att, event, rating))
         print(f'extracted {len(rows)} ratings')
         self.table = ft.DataTable(

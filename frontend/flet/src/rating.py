@@ -1,6 +1,7 @@
 import os
 import sys
 import flet as ft
+from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, AthleteRatings, Gender
@@ -9,12 +10,10 @@ numFilter = ft.InputFilter(regex_string=r'^(\d+(\.\d*)?|\.\d+)$')
 
 def emptyIfNone(o):
     return '-----' if o is None else o
-class RatingView(ft.View):
+class RatingView(View):
     def __init__(self, page: ft.Page, eventId: int):
-        super().__init__()
-        self.page = page
+        super().__init__(page)
         self.route = f'/rating/{eventId}'
-        self.db = JuryDatabase('db')
 
         self.user = self.page.session.get('user')
         self.event = self.db.getEvent(eventId)

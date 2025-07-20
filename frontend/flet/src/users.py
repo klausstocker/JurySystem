@@ -1,6 +1,7 @@
 import os
 import sys
 import flet as ft
+from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Restrictions
@@ -30,17 +31,16 @@ def userAsRow(user: User, editFunc: callable, deleteFunc: callable):
         ]
     return ft.DataRow(cells=cells)
 
-class UserView(ft.View):
+class UserView(View):
     def __init__(self, page: ft.Page):
-        super().__init__()
-        db = JuryDatabase('db')
+        super().__init__(page)
         
         def deleteFunc(e, userId):
-            user = db.getUser(userId)
+            user = self.db.getUser(userId)
             def yes(e):
-                db.removeUser(userId)
+                self.db.removeUser(userId)
                 dlg.open = False
-                self.table.rows = [userAsRow(user, editFunc, deleteFunc) for user in db.getAllUsers()]
+                self.table.rows = [userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
                 e.control.page.update()
 
             def no(e):
@@ -71,7 +71,7 @@ class UserView(ft.View):
         self.route = '/users'
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[userAsRow(user, editFunc, deleteFunc) for user in db.getAllUsers()]
+                rows=[userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
             )
         self.controls = [
             ft.AppBar(title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
@@ -83,37 +83,29 @@ class UserView(ft.View):
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 
-    def did_mount(self):
-        print('Did mount')
-        self.update()
-
-    def will_unmount(self):
-        print('Will unmount')
-
-class UserEditView(ft.View):
+class UserEditView(View):
     def __init__(self, page: ft.Page, userId: int):
-        super().__init__()
-        self.page = page
+        super().__init__(page)
         self.route = f'/userEdit/{userId}'
-        db = JuryDatabase('db')
+
         createUser = userId == 0
-        
+
         def update(e):
             if createUser:
                 print(f'creating user')
-                db.insertUser(nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, Restrictions[resitrictionsEdit.value])
+                self.db.insertUser(nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, Restrictions[resitrictionsEdit.value])
             else:
                 print(f'saving {userId=}')
-                db.updateUser(userId, nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
+                self.db.updateUser(userId, nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
             self.page.go("/users")
-            
+
         def cancel(e):
             print(f'cancel {userId=}')
             self.page.go("/users")
 
         print(f'get user {userId=}')
         if not createUser:
-            user = db.getUser(userId)
+            user = self.db.getUser(userId)
             print(f'{user.username=}')
         nameEdit = ft.TextField(label="Username", value=None if createUser else user.username)
         passwordEdit = ft.TextField(label="Passworde", value=None if createUser else user.password)
@@ -153,4 +145,4 @@ class UserEditView(ft.View):
                         on_click=cancel)], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
         ]
-            
+
