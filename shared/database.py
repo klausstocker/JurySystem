@@ -84,6 +84,10 @@ class EventCategory:
     birthFrom: datetime
     birthTo: datetime
     rankingType: RankingType
+    rankingAlgo: str = "'gold' if sum > 30 else 'silber' if sum > 20 else 'bronze' if sum > 10 else ''"
+
+    def rank(self, sum: float):
+        return 
     
     @staticmethod
     def fromRow(row):
@@ -143,6 +147,11 @@ class AthleteRatings:
         if discpiline in self.ratings.keys():
             return self.ratings[discpiline].difficulty, self.ratings[discpiline].execution, self.ratings[discpiline].id
         return None, None, None
+
+@dataclass
+class AthleteRanking:
+    ranking: str
+    ratings: AthleteRatings
 
 class JuryDatabase:
     def __init__(self, host: str):
@@ -304,11 +313,25 @@ class JuryDatabase:
             return cnt != 0
         return False
     
+    def getEventCategory(self, eventId: int, eventCategoryName: str) -> EventCategory:
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM `event_categories` WHERE `eventId` = {eventId} AND `name`= "{eventCategoryName}";')
+            return EventCategory.fromRow(cursor.fetchone())
+        return None
+    
     def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
         with self.conn.cursor() as cursor:
             cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId};')
             return Attendance.fromRow(cursor.fetchone())
         return None
+    
+    def getEventCategoryAthleteIds(self, eventId: int, eventCategoryName: str) -> list[int]:
+        athleteIds = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT `athleteId` FROM `attendances` WHERE `eventId` = {eventId} AND `eventCategoryName` = "{eventCategoryName}";')
+            for row in cursor.fetchall():
+                athleteIds.append(int(row['athleteId']))
+        return athleteIds
     
     def getEventRatings(self, eventId: int, max: int) -> list[Rating]:
         ratings = []
@@ -342,16 +365,44 @@ class JuryDatabase:
                 athletes.append(Athlete.fromRow(row))
         return athletes
 
-    def getAthleteRatings(self, athleteId: int, eventId: int) -> AthleteRatings:
-        athlete = self.getAthlete(athleteId)
-        attendance = self.getAttendance(athleteId, eventId)
+
+    def getAthleteRatings(self, athleteId: int, eventId: int) -> list[Rating]:
         ratings = {}
         with self.conn.cursor() as cursor:
             cursor.execute(f'SELECT * FROM `ratings` WHERE `eventId` = {eventId} AND `athleteId` = "{athleteId}";')
             for row in cursor.fetchall():
                 rating = Rating.fromRow(row)
                 ratings[rating.eventDisciplineName] = rating
-        return AthleteRatings(athlete, eventId, attendance.eventCategoryName, ratings)
+        return ratings
+
+    def getAthleteAndRatings(self, athleteId: int, eventId: int) -> AthleteRatings:
+        athlete = self.getAthlete(athleteId)
+        attendance = self.getAttendance(athleteId, eventId)
+        return AthleteRatings(athlete, eventId, attendance.eventCategoryName, self.getAthleteRatings(athleteId, eventId))
+
+    def _getEventCategoryRankings(self, eventId, category: EventCategory) -> list[AthleteRanking]:
+        rankings = []
+        ratings = [self.getAthleteAndRatings(athleteId, eventId) for athleteId in self.getEventCategoryAthleteIds(eventId, category.name)]
+        ratings.sort(key=lambda rating: rating.sum(), reverse=True)
+        if category.rankingType == RankingType.RANKING:
+            rank = 0
+            sum = -1.
+            for rating in ratings:
+                ratingSum = round(rating.sum(), 6)
+                if ratingSum != sum:
+                    rank += 1
+                sum = ratingSum
+                rankings.append(AthleteRanking(str(rank), rating))
+        elif category.rankingType == RankingType.NO_RANKING:
+            for rating in ratings:
+                sum = round(rating.sum(), 6)
+                rankings.append(AthleteRanking(eval(category.rankingAlgo, {}, {'sum':sum}), rating))
+        return rankings
+
+    def getEventCategoryRatings(self, eventId: int, eventCategoryName: str) -> list[AthleteRanking]:
+        category = self.getEventCategory(eventId, eventCategoryName)
+        return self._getEventCategoryRankings(eventId, category)
+
 
     def updateRating(self, ratingId: int, userId: int, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:

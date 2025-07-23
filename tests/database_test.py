@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 import pymysql.cursors
-from shared.database import JuryDatabase, Restrictions, User, Gender
+from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType
 from datetime import datetime
 
 
@@ -40,8 +40,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(athletes), 2)
         self.assertEqual(athletes[0].givenname, 'Klaus')
         self.assertTrue(self.db.athleteHasAttendances(3))
-        self.assertFalse(self.db.athleteHasAttendances(4))
-        
+
         insertedId = self.db.insertAthlete('Daniel', 'Stocker', 3, '2015-03-31', Gender.MALE)
         self.assertEqual(self.db.getAthlete(insertedId).givenname, 'Daniel')
         self.assertTrue(self.db.updateAthlete(insertedId, 'Daniel', 'Stocker1', 3, '2015-03-31', Gender.MALE))
@@ -64,17 +63,28 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(self.db.getEventDisciplines(1)), 4)
         self.assertEqual(len(self.db.getEventGroups(1)), 2)
         self.assertEqual(len(self.db.getEventGroup(1, 'Riege1')), 2)
-        self.assertEqual(len(self.db.getEventGroup(1, 'Riege2')), 1)
+        self.assertEqual(len(self.db.getEventGroup(1, 'Riege2')), 2)
+        self.assertEqual(len(self.db.getEventCategoryAthleteIds(1, 'Kn01')), 3)
     
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
         self.assertEqual(len(self.db.getEventRatings(1, 2)), 2)
-        self.assertAlmostEqual(float(self.db.getAthleteRatings(1, 1).sum()), 14.7)
+        self.assertAlmostEqual(float(self.db.getAthleteAndRatings(1, 1).sum()), 14.7)
         insertedId = self.db.insertRating(2, 1, 5, 'Sprung', 2., 3.)
-        self.assertAlmostEqual(float(self.db.getAthleteRatings(2, 1).sum()), 11.7)
+        self.assertAlmostEqual(float(self.db.getAthleteAndRatings(2, 1).sum()), 19.7)
         self.assertIsNotNone(self.db.updateRating(insertedId, 5, 3., 4.))
-        self.assertAlmostEqual(float(self.db.getAthleteRatings(2, 1).sum()), 13.7)
+        self.assertAlmostEqual(float(self.db.getAthleteAndRatings(2, 1).sum()), 21.7)
         self.db.removeRating(insertedId)
-        
+        rankings = self.db.getEventCategoryRatings(1, 'Kn01')
+        self.assertEqual(rankings[0].ratings.athlete.givenname, 'Klaus')
+        self.assertEqual(rankings[0].ranking, '1')
+        self.assertEqual(rankings[1].ratings.athlete.givenname, 'Christoph')
+        self.assertEqual(rankings[1].ranking, '1')
+        self.assertEqual(rankings[2].ranking, '2')
+        norankings = self.db._getEventCategoryRankings(1, EventCategory('Kn01', 1, Gender.MALE, '01-01-2000', '31-12-2001', RankingType.NO_RANKING))
+        self.assertEqual(norankings[0].ratings.athlete.givenname, 'Klaus')
+        self.assertEqual(norankings[0].ranking, 'bronze')
+
+
 if __name__ == '__main__':
     unittest.main()

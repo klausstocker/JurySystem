@@ -40,7 +40,7 @@ class RatingView(View):
         self.updateControls()
 
     def AthleteRatingAsRow(self, athlete: Athlete, discipline: str, editFunc: callable):
-        ratings = self.db.getAthleteRatings(athlete.id, self.event.id)
+        ratings = self.db.getAthleteAndRatings(athlete.id, self.event.id)
         difficultyText, executionText, ratingId = ratings.ratingOrNone(discipline)
         cells = [
             ft.DataCell(ft.Text(athlete.name())),

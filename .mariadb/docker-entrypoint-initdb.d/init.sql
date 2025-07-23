@@ -115,6 +115,7 @@ CREATE TABLE IF NOT EXISTS `attendances` (
 INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`, `group`) VALUES
   (1, 1, 'Kn01', 'Riege1'),
   (2, 1, 'Kn01', 'Riege1'),
+  (4, 1, 'Kn01', 'Riege2'),
   (3, 1, 'Md01', 'Riege2');
 
 CREATE TABLE IF NOT EXISTS `ratings` (
@@ -135,7 +136,10 @@ CREATE TABLE IF NOT EXISTS `ratings` (
 INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
   (1, 1, 'Reck', 1, 5, 6.7, 2.0),
   (2, 2, 'Reck', 1, 5, 5.7, 1.0),
-  (3, 1, 'Boden', 1, 5, 4.0, 2.0);
+  (3, 1, 'Boden', 1, 5, 4.0, 2.0),
+  (4, 2, 'Boden', 1, 5, 6.0, 2.0),
+  (5, 4, 'Sprung', 1, 5, 6.0, 2.0);
+
 
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
