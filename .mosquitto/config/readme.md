@@ -1,3 +1,5 @@
+### All scripts mentioned in this readme are located in ./mosquitto/config  
+
 # ➕ Add single user 🧞
 Running on localhost at Windows run script: x-add_single_user.ps1  
 Running on remote Linux Host run script: x-add_single_user.sh  
