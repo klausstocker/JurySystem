@@ -15,7 +15,8 @@ Clone repository adds folder **Dockerized-Web-Framework-for-IoT**.
 ⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
-    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh  
+    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh 
+    chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red
     rm -rf ./Dockerized-Web-Framework-for-IoT/*.ps1  
 ```
 
