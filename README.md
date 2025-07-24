@@ -50,9 +50,9 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ### 👉 API-FASTAPI-SQLMODEL  (fastapi using sqlmodel) 
 ### 👉 Node-Red  
 In the case, the service failed to start with some permission error, you must add write permission to anybody  
-to the .node-red folder manually 
+to the .node-red folder manually  
 ```shell
-chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red )
+sudo chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red
 ```
 https://nodered.localhost  or https://nodered.yourdomain.com
 The default credentials for login into Editor & Admin API are **admin/secretPassword**.  
