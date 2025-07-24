@@ -4,6 +4,7 @@ services:
       context: ./.traefik
       dockerfile: Dockerfile
     container_name: traefik
+    restart: always
     ports:
       - 80:80
       - 443:443

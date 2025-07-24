@@ -2,6 +2,7 @@ services:
   node-red:
     image: nodered/node-red:latest
     container_name: nodered
+    restart: always
     environment:
       - TZ=${TZ}
     # ports:

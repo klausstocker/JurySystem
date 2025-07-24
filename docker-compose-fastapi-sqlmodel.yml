@@ -6,6 +6,7 @@ services:
     build:
       context: backend/api-fastapi-sqlmodel
     container_name: api-fastapi-sqlmodel
+    restart: always
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:

@@ -6,6 +6,7 @@ services:
     build:
       context: ./frontend/flet
     container_name: flet
+    restart: always
     environment:
       - FLET_FORCE_WEB_SERVER=true
       - FLET_SERVER_PORT=${PORT_FLET}
