@@ -125,6 +125,9 @@ class Rating:
     def sum(self):
         return self.difficulty + self.execution
     
+    def pretty(self):
+        return '{:.2f}'.format(self.difficulty), '{:.2f}'.format(self.execution)
+    
     def rate(self, difficulty: float, execution: float):
         self.difficulty = difficulty
         self.execution = execution
@@ -349,6 +352,14 @@ class JuryDatabase:
                 disciplines.append(EventDiscipline.fromRow(row))
         return disciplines
 
+    def getEventCategories(self, eventId: int) -> list[EventCategory]:
+        categories = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM `event_categories` WHERE eventId = {eventId} ORDER BY name;')
+            for row in cursor.fetchall():
+                categories.append(EventCategory.fromRow(row))
+        return categories
+
     def getEventGroups(self, eventId: int) -> list[str]:
         groups = []
         with self.conn.cursor() as cursor:
@@ -399,7 +410,7 @@ class JuryDatabase:
                 rankings.append(AthleteRanking(eval(category.rankingAlgo, {}, {'sum':sum}), rating))
         return rankings
 
-    def getEventCategoryRatings(self, eventId: int, eventCategoryName: str) -> list[AthleteRanking]:
+    def getEventCategoryRankings(self, eventId: int, eventCategoryName: str) -> list[AthleteRanking]:
         category = self.getEventCategory(eventId, eventCategoryName)
         return self._getEventCategoryRankings(eventId, category)
 

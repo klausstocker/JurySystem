@@ -65,6 +65,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(self.db.getEventGroup(1, 'Riege1')), 2)
         self.assertEqual(len(self.db.getEventGroup(1, 'Riege2')), 2)
         self.assertEqual(len(self.db.getEventCategoryAthleteIds(1, 'Kn01')), 3)
+        self.assertEqual(self.db.getEventCategories(1)[0].name, 'Kn01')
     
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
@@ -75,7 +76,7 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNotNone(self.db.updateRating(insertedId, 5, 3., 4.))
         self.assertAlmostEqual(float(self.db.getAthleteAndRatings(2, 1).sum()), 21.7)
         self.db.removeRating(insertedId)
-        rankings = self.db.getEventCategoryRatings(1, 'Kn01')
+        rankings = self.db.getEventCategoryRankings(1, 'Kn01')
         self.assertEqual(rankings[0].ratings.athlete.givenname, 'Klaus')
         self.assertEqual(rankings[0].ranking, '1')
         self.assertEqual(rankings[1].ratings.athlete.givenname, 'Christoph')
