@@ -18,3 +18,4 @@ docker-compose-restful-api.yml
 docker-compose-supertokens.yml
 /backend/api-fastapi-pure-sql/
 /.mosquitto/config/pid
+/Dokuments
