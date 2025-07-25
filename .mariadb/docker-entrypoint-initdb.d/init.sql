@@ -81,13 +81,14 @@ CREATE TABLE IF NOT EXISTS `event_categories` (
   `birthFrom` datetime NOT NULL,
   `birthTo` datetime NOT NULL,
   `rankingType` tinyint(4),
+  `rankingAlgo` varchar(500),
   PRIMARY KEY (`name`, `eventId`),
   FOREIGN KEY (`eventId`) REFERENCES events(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`) VALUES
-  ('Kn01', 1, 0, '2020-01-01', '2021-12-31', 0),
-  ('Md01', 1, 1, '2020-01-01', '2021-12-31', 0);
+INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`, `rankingAlgo`) VALUES
+  ('Kn01', 1, 0, '2020-01-01', '2021-12-31', 0, ''),
+  ('Md01', 1, 1, '2020-01-01', '2021-12-31', 1, '"gold" if sum > 30 else "silber" if sum > 20 else "bronze" if sum > 10 else ""');
 
 CREATE TABLE IF NOT EXISTS `event_disciplines` (
   `name` varchar(50) NOT NULL,

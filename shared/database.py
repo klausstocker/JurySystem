@@ -84,14 +84,15 @@ class EventCategory:
     birthFrom: datetime
     birthTo: datetime
     rankingType: RankingType
-    rankingAlgo: str = "'gold' if sum > 30 else 'silber' if sum > 20 else 'bronze' if sum > 10 else ''"
+    rankingAlgo: str
 
-    def rank(self, sum: float):
-        return 
-    
     @staticmethod
     def fromRow(row):
-        return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']))
+        return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']), row['rankingAlgo'])
+
+    @staticmethod
+    def defaultRankingAlgo():
+        return "'gold' if sum > 30 else 'silber' if sum > 20 else 'bronze' if sum > 10 else ''"
 
 @dataclass
 class EventDiscipline:
@@ -400,14 +401,20 @@ class JuryDatabase:
             sum = -1.
             for rating in ratings:
                 ratingSum = round(rating.sum(), 6)
-                if ratingSum != sum:
-                    rank += 1
-                sum = ratingSum
-                rankings.append(AthleteRanking(str(rank), rating))
+                if ratingSum == 0.0:
+                    rankings.append(AthleteRanking('DNF', rating))
+                else:
+                    if ratingSum != sum:
+                        rank += 1
+                    sum = ratingSum
+                    rankings.append(AthleteRanking(str(rank), rating))
         elif category.rankingType == RankingType.NO_RANKING:
             for rating in ratings:
-                sum = round(rating.sum(), 6)
-                rankings.append(AthleteRanking(eval(category.rankingAlgo, {}, {'sum':sum}), rating))
+                ratingSum = round(rating.sum(), 6)
+                if ratingSum == 0.0:
+                    rankings.append(AthleteRanking('DNF', rating))
+                else:
+                    rankings.append(AthleteRanking(eval(category.rankingAlgo, {}, {'sum':ratingSum}), rating))
         return rankings
 
     def getEventCategoryRankings(self, eventId: int, eventCategoryName: str) -> list[AthleteRanking]:

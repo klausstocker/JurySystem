@@ -82,7 +82,9 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(rankings[1].ratings.athlete.givenname, 'Christoph')
         self.assertEqual(rankings[1].ranking, '1')
         self.assertEqual(rankings[2].ranking, '2')
-        norankings = self.db._getEventCategoryRankings(1, EventCategory('Kn01', 1, Gender.MALE, '01-01-2000', '31-12-2001', RankingType.NO_RANKING))
+        norankings = self.db._getEventCategoryRankings(1, \
+            EventCategory('Kn01', 1, Gender.MALE, '01-01-2000', '31-12-2001', \
+                RankingType.NO_RANKING, EventCategory.defaultRankingAlgo()))
         self.assertEqual(norankings[0].ratings.athlete.givenname, 'Klaus')
         self.assertEqual(norankings[0].ranking, 'bronze')
 
