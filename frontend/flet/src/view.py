@@ -6,10 +6,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase
 
 class View(ft.View):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, autocommit=True):
         super().__init__()
         self.page = page
-        self.db = JuryDatabase('db')
+        self.db = JuryDatabase('db', autocommit)
 
     def did_mount(self):
         print(f'{type(self).__name__} did_mount')

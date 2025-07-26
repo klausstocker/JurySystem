@@ -121,6 +121,7 @@ INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`, `group`)
 
 CREATE TABLE IF NOT EXISTS `ratings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `ts` datetime NOT NULL,
   `athleteId` int(10) unsigned NOT NULL,
   `eventDisciplineName` varchar(50) NOT NULL,
   `eventId` int(10) unsigned NOT NULL,
@@ -134,12 +135,12 @@ CREATE TABLE IF NOT EXISTS `ratings` (
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `ratings` (`id`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
-  (1, 1, 'Reck', 1, 5, 6.7, 2.0),
-  (2, 2, 'Reck', 1, 5, 5.7, 1.0),
-  (3, 1, 'Boden', 1, 5, 4.0, 2.0),
-  (4, 2, 'Boden', 1, 5, 6.0, 2.0),
-  (5, 4, 'Sprung', 1, 5, 6.0, 2.0);
+INSERT INTO `ratings` (`id`, `ts`, `athleteId`, `eventDisciplineName`, `eventId`, `userId`, `difficulty`, `execution`) VALUES
+  (1, '2025-05-25', 1, 'Reck', 1, 5, 6.7, 2.0),
+  (2, '2025-05-25', 2, 'Reck', 1, 5, 5.7, 1.0),
+  (3, '2025-05-25', 1, 'Boden', 1, 5, 4.0, 2.0),
+  (4, '2025-05-25', 2, 'Boden', 1, 5, 6.0, 2.0),
+  (5, '2025-05-25', 4, 'Sprung', 1, 5, 6.0, 2.0);
 
 
 

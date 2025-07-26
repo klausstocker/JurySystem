@@ -94,7 +94,7 @@ class AthleteView(View):
 
 class AthleteEditView(View):
     def __init__(self, page: ft.Page, athleteId: int):
-        super().__init__()
+        super().__init__(page)
         self.route = f'/athleteEdit/{athleteId}'
         createAthlete = athleteId == 0
         user = self.page.session.get('user')
@@ -102,10 +102,10 @@ class AthleteEditView(View):
         def update(e):
             if createAthlete:
                 print(f'creating athlete')
-                self.db.insertAthlete(givenNameEdit.value, surnameEdit.value, user.id, birthEdit.value, Gender[genderEdit.value])
+                self.db.insertAthlete(givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(birthEdit.value), Gender[genderEdit.value])
             else:
                 print(f'saving {athleteId=}')
-                self.db.updateAthlete(athleteId, givenNameEdit.value, surnameEdit.value, user.id, birthEdit.value, Gender[genderEdit.value])
+                self.db.updateAthlete(athleteId, givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(birthEdit.value), Gender[genderEdit.value])
             self.page.go("/athletes")
             
         def cancel(e):

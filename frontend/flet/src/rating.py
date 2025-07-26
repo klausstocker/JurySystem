@@ -2,6 +2,7 @@ import os
 import sys
 import flet as ft
 from view import View
+from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, AthleteRatings, Gender
@@ -48,12 +49,18 @@ class RatingView(View):
             ft.DataCell(ft.Text(ratings.sum())),
             ft.DataCell(ft.Text(emptyIfNone(difficultyText))),
             ft.DataCell(ft.Text(emptyIfNone(executionText))),
-            ft.DataCell(ft.IconButton(
+            ft.DataCell(ft.Row(spacing=0, controls=[
+                ft.IconButton(
                     icon=ft.Icons.EDIT,
                     icon_color=ft.Colors.GREEN_300,
                     tooltip="Edit Rating",
-                    on_click=lambda e: editFunc(e, ratings, discipline))),
-            ]
+                    on_click=lambda e: editFunc(e, ratings, discipline)),
+                ft.IconButton(
+                    icon=ft.Icons.DELETE,
+                    icon_color=ft.Colors.RED_300,
+                    tooltip="Delete",
+                    on_click=lambda e: self.db.removeRating(ratingId))]))
+        ]
         return ft.DataRow(cells=cells)
         
     def updateControls(self):

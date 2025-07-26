@@ -58,7 +58,11 @@ class Athlete:
     
     def birthFormated(self):
         return self.birth.strftime('%d.%m.%Y')
-    
+
+    @staticmethod
+    def birthFromString(birth: str):
+        return datetime.strptime(birth, '%d.%m.%Y')
+
 class Progress(Enum):
     PLANNED = 0
     ACTIVE = 1
@@ -116,6 +120,7 @@ class Attendance:
 @dataclass
 class Rating:
     id: int
+    ts: datetime
     athleteId: int
     eventId: int
     userId: int
@@ -130,12 +135,13 @@ class Rating:
         return '{:.2f}'.format(self.difficulty), '{:.2f}'.format(self.execution)
     
     def rate(self, difficulty: float, execution: float):
+        self.ts = datetime.now()
         self.difficulty = difficulty
         self.execution = execution
     
     @staticmethod
     def fromRow(row):
-        return Rating(row['id'], row['athleteId'], row['eventId'], row['userId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
+        return Rating(row['id'], row['ts'], row['athleteId'], row['eventId'], row['userId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
 
 @dataclass
 class AthleteRatings:
@@ -158,12 +164,13 @@ class AthleteRanking:
     ratings: AthleteRatings
 
 class JuryDatabase:
-    def __init__(self, host: str):
+    def __init__(self, host: str, autocommit=False):
         self.conn = pymysql.connect(host=host,
                             user='JurySystem',
                             password='asdfuas347lkasudhr',
                             database='JurySystem',
-                            cursorclass=pymysql.cursors.DictCursor)
+                            cursorclass=pymysql.cursors.DictCursor,
+                            autocommit=autocommit)
         
     def __del__(self):
         self.conn.close()
@@ -344,6 +351,12 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 ratings.append(Rating.fromRow(row))
         return ratings
+    
+    def getRecentRatingTs(self, eventId: int) -> datetime:
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT MAX(`ts`) as maxTs FROM `ratings`;')
+            return cursor.fetchone()['maxTs']
+        return None
 
     def getEventDisciplines(self, eventId: int) -> list[EventDiscipline]:
         disciplines = []
@@ -424,7 +437,7 @@ class JuryDatabase:
 
     def updateRating(self, ratingId: int, userId: int, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:
-            sql = f"UPDATE `ratings` SET `userId`='{userId}', `difficulty`='{difficulty}', `execution`='{execution}' WHERE `id`='{ratingId}'"
+            sql = f"UPDATE `ratings` SET`ts`='{datetime.now()}', `userId`='{userId}', `difficulty`='{difficulty}', `execution`='{execution}' WHERE `id`='{ratingId}'"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
@@ -434,7 +447,7 @@ class JuryDatabase:
 
     def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:
-            sql = f"INSERT INTO `ratings` (athleteId, eventId, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
+            sql = f"INSERT INTO `ratings` (athleteId, eventId, ts, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{datetime.now()}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
