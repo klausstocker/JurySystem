@@ -41,7 +41,7 @@ class LiveEventView(View):
 
         self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(onServerTime, 'interval', seconds=1)
-        self.scheduler.start()
+
         self.event = self.db.getEvent(eventId)
         self.recentRatingTs = None
         self.updateTableIfNewer()
@@ -50,6 +50,7 @@ class LiveEventView(View):
             ft.AppBar(title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table
         ]
+        self.scheduler.start()
     
     def updateTableIfNewer(self):
         ratingTs = self.db.getRecentRatingTs(self.event.id)
