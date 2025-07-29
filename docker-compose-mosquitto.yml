@@ -4,7 +4,7 @@
        container_name: mosquitto
        restart: always
        volumes:
-          # :ro is not essary
+          # :ro is not necessary
           - ./.mosquitto/config:/mosquitto/config
           - ./.mosquitto/log:/mosquitto/log
           - ./.mosquitto/data:/mosquitto/data
