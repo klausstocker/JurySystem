@@ -2,7 +2,6 @@ services:
   openssh-client:
       image: alpine:latest
       container_name: openssh-client
-      # image: ghcr.io/querateam/docker-ssh/client
       restart: always
       stdin_open: true # docker run -i
       tty: true        # docker run -t
