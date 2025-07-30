@@ -1,0 +1,34 @@
+services:
+  openssh-client:
+      image: alpine:latest
+      container_name: openssh-client
+      # image: ghcr.io/querateam/docker-ssh/client
+      restart: always
+      stdin_open: true # docker run -i
+      tty: true        # docker run -t
+      environment:
+        - AUTOSSH_FIRST_POLL=30
+        - AUTOSSH_POLL=60
+        - AUTOSSH_LOGFILE=/usr/autossh-log.txt
+        - TZ=${TZ}
+      volumes:
+        - ./.openssh-client/.ssh:/root/.ssh
+        - ./.openssh-client/autossh-log.txt:/usr/autossh-log.txt
+      command:
+        - /bin/sh
+        - -c
+        - |
+          apk --update add openssh-client autossh mc bash rsync
+          dos2unix ~/.ssh/id_*
+          chown -R root:root ~/.ssh
+          chown -R root:root ~/.ssh/*
+          chmod 700 ~/.ssh
+          chmod 600 ~/.ssh/id_*
+          autossh -M 22066 -N tunnel-forwarder
+        # The monitoring port (-M xxxxx) must be unique for one ssh server
+        # Error: remote port forwarding failed for listen port xxxxx
+        # indicates that it is already used. Choose another port
+        # and retry. -M 0 disables monitoring of tunnel.
+      networks:
+        - backnet
+
