@@ -146,3 +146,4 @@ Requires Docker compose > 2.27 (check in terminal: docker compose version)
 
 ### /mariadb/certs/./generate_certificates.sh
 
+https://linuxize.com/post/how-to-setup-passwordless-ssh-login/

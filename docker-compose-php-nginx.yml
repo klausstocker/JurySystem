@@ -5,8 +5,10 @@ services:
     image: trafex/php-nginx
     container_name: php-nginx
     restart: always
-    # ports:
-    #  - ${PORT_PHP_NGINX}:8080
+    expose:
+      - 8080
+    ports:
+      - ${PORT_PHP_NGINX}:8080
     volumes:
       # default site
       - ./frontend/web_php/html:/var/www/html

@@ -1,7 +1,7 @@
 services:
   node-red:
     image: nodered/node-red:latest
-    container_name: nodered
+    container_name: node-red
     restart: always
     environment:
       - TZ=${TZ}
