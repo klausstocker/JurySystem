@@ -15,6 +15,7 @@ services:
       - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
     volumes:
       - ./.node-red:/data
+    # not sure if command: works
     command:
       - /bin/sh
       - -c
