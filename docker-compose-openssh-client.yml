@@ -6,21 +6,22 @@ services:
       stdin_open: true # docker run -i
       tty: true        # docker run -t
       environment:
+        - TZ=${TZ}
         - AUTOSSH_FIRST_POLL=30
         - AUTOSSH_POLL=60
-        - AUTOSSH_LOGFILE=/usr/autossh-log.txt
-        - TZ=${TZ}
+        - AUTOSSH_LOGFILE=/usr/log.txt
       volumes:
         - ./.openssh-client/.ssh:/root/.ssh
-        - ./.openssh-client/autossh-log.txt:/usr/autossh-log.txt
+        - ./.openssh-client/log.txt:/usr/log.txt
+      networks:
+        - backnet
       command:
         - /bin/sh
         - -c
         - |
-          apk --update add openssh-client autossh mc bash rsync
+          apk add --no-cache openssh-client autossh mc bash rsync tzdata
           dos2unix ~/.ssh/id_*
           chown -R root:root ~/.ssh
-          chown -R root:root ~/.ssh/*
           chmod 700 ~/.ssh
           chmod 600 ~/.ssh/id_*
           autossh -M 22066 -N tunnel-forwarder
@@ -28,6 +29,3 @@ services:
         # Error: remote port forwarding failed for listen port xxxxx
         # indicates that it is already used. Choose another port
         # and retry. -M 0 disables monitoring of tunnel.
-      networks:
-        - backnet
-
