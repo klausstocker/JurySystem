@@ -24,7 +24,7 @@ services:
           chown -R root:root ~/.ssh
           chmod 700 ~/.ssh
           chmod 600 ~/.ssh/id_*
-          autossh -M 22066 -N tunnel-forwarder
+          autossh -M ${PORT_MONITOR_SSH_CLIENT} -N tunnel-forwarder
         # The monitoring port (-M xxxxx) must be unique for one ssh server
         # Error: remote port forwarding failed for listen port xxxxx
         # indicates that it is already used. Choose another port
