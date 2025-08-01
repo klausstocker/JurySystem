@@ -15,7 +15,11 @@ services:
       - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
     volumes:
       - ./.node-red:/data
-      - /etc/localtime:/etc/localtime
+    command:
+      - /bin/sh
+      - -c
+      - |
+        chmod o+w /data
     networks:
       - backnet
 
