@@ -18,3 +18,5 @@ docker-compose-restful-api.yml
 docker-compose-supertokens.yml
 /backend/api-fastapi-pure-sql/
 /.mosquitto/config/pid
+*.pyc
+/.mariadb/db_data

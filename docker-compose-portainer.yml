@@ -1,6 +1,6 @@
 services:
   portainer:
-    image: portainer/portainer-ce:2.21.2
+    image: portainer/portainer-ce:2.27.9
     command: -H unix:///var/run/docker.sock
     container_name: portainer
     restart: always
