@@ -6,9 +6,7 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt update \
-    && apt install -y wget \
-    && apt install -y unzip \
+RUN apt update && apt install -y wget unzip tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && wget https://github.com/fkrenn12/API-MQTT-Gateway/archive/master.zip \
     && unzip master.zip \
