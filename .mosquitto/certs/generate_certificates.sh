@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 #########################################################################
-#Name: generate-certs.sh
+#Name: generate-certificates.sh
 #Subscription: This Script generates ssl certs
 ##by A. Laub
 #andreas[-at-]laub-home.de

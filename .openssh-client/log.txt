@@ -1,0 +1,12 @@
+2025/07/30 18:08:23 autossh[13]: starting ssh (count 1)
+2025/07/30 18:08:23 autossh[13]: ssh child pid is 14
+2025/07/30 18:09:56 autossh[14]: starting ssh (count 1)
+2025/07/30 18:09:56 autossh[14]: ssh child pid is 15
+2025/07/30 18:14:29 autossh[13]: starting ssh (count 1)
+2025/07/30 18:14:29 autossh[13]: ssh child pid is 14
+2025/07/30 18:16:35 autossh[12]: starting ssh (count 1)
+2025/07/30 18:16:35 autossh[12]: ssh child pid is 13
+2025/07/30 18:18:47 autossh[13]: starting ssh (count 1)
+2025/07/30 18:18:47 autossh[13]: ssh child pid is 14
+2025/07/30 18:21:08 autossh[13]: starting ssh (count 1)
+2025/07/30 18:21:08 autossh[13]: ssh child pid is 14

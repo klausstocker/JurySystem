@@ -4,7 +4,7 @@
        container_name: mosquitto
        restart: always
        volumes:
-          # :ro is not essary
+          # :ro is not necessary
           - ./.mosquitto/config:/mosquitto/config
           - ./.mosquitto/log:/mosquitto/log
           - ./.mosquitto/data:/mosquitto/data
@@ -32,15 +32,10 @@
          - /bin/sh
          - -c
          - |
-           apk update
-           apk add openssl
-           chmod +x /mosquitto/certs/generate_certificates.sh 
-           chmod +x /mosquitto/config/*.sh 
+           apk add --no-cache openssl mc
+           chmod +x /mosquitto/certs/generate_certificates.sh /mosquitto/config/*.sh 
            sh /mosquitto/certs/./generate_certificates.sh  
            mosquitto -c /mosquitto/config/mosquitto.conf | pidof mosquitto > /mosquitto/config/pid
-       expose:
-         - ${PORT_MQTT_UNSECURE}
-         - ${PORT_MQTT_WS_UNSECURE}
        networks:
          - backnet
 
