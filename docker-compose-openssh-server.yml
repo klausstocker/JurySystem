@@ -1,0 +1,40 @@
+
+services:
+  openssh-server:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: openssh-server
+    hostname: openssh-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TZ}
+      #- PUBLIC_KEY=yourpublickey #optional
+      #- PUBLIC_KEY_FILE=/path/to/file #optional
+      #- PUBLIC_KEY_DIR=/path/to/directory/containing/_only_/pubkeys #optional
+      #- PUBLIC_KEY_URL=https://github.com/username.keys #optional
+      - SUDO_ACCESS=false #optional
+      - PASSWORD_ACCESS=true #optional
+      - USER_PASSWORD=sshTunnelPasswd #optional
+      #- USER_PASSWORD_FILE=#optional
+      - USER_NAME=sshtunnel #optional
+      - LOG_STDOUT= #optional
+    volumes:
+      - ./.openssh-server/config:/config
+    ports:
+      - "${PORT_SSH_SERVER}:2222"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nodered-local.entrypoints=websecure"
+      - "traefik.http.routers.nodered-local.rule=Host(`nodered-local.${DOMAIN}`)"
+      - "traefik.http.routers.nodered-local.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nodered-local.service=ssh1"
+      - "traefik.http.services.ssh1.loadbalancer.server.port=9999"
+
+      - "traefik.http.routers.php-local.entrypoints=websecure"
+      - "traefik.http.routers.php-local.rule=Host(`php.${DOMAIN}`)"
+      - "traefik.http.routers.php-local.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.php-local.service=ssh2"
+      - "traefik.http.services.ssh2.loadbalancer.server.port=6666"
+    networks:
+      - backnet

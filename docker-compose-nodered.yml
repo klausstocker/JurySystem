@@ -1,7 +1,8 @@
 services:
   node-red:
     image: nodered/node-red:latest
-    container_name: nodered
+    container_name: node-red
+    restart: always
     environment:
       - TZ=${TZ}
     # ports:
@@ -14,6 +15,12 @@ services:
       - "traefik.http.routers.nodered.tls.certresolver=letsencrypt"
     volumes:
       - ./.node-red:/data
+    # not sure if command: works
+    command:
+      - /bin/sh
+      - -c
+      - |
+        chmod o+w /data
     networks:
       - backnet
 

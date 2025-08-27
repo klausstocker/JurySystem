@@ -15,7 +15,8 @@ Clone repository adds folder **Dockerized-Web-Framework-for-IoT**.
 ⭐ Clone repository
 ```shell
     git clone https://github.com/fkrenn12/Dockerized-Web-Framework-for-IoT.git  
-    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh  
+    chmod +x ./Dockerized-Web-Framework-for-IoT/*.sh 
+    chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red
     rm -rf ./Dockerized-Web-Framework-for-IoT/*.ps1  
 ```
 
@@ -34,8 +35,10 @@ In **Windows Powershell** ( not cmd !! )  use following commands.
 ```  
 It will create a new folder: Dockerized-Web-Framework-for-IoT  
 ## Editing defaults  
-⭐ Edit .env and docker-composer.yml  
-⭐ Execute x-rebuild_and_start.local.development.ps1
+⭐ Edit .env.prod (DOMAIN must be set) and docker-composer.yml (choose your services)  
+⭐ Execute x-rebuild_and_start.local.development.ps1 on windows development environment
+⭐ Execute x-rebuild_and_start.production.sh on linux production environment
+
 # Selectable Services
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
@@ -46,9 +49,14 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 -->
 ### 👉 API-FASTAPI-SQLMODEL  (fastapi using sqlmodel) 
 ### 👉 Node-Red  
-https://nodered.localhost  
+In the case, the service failed to start with some permission error, you must add write permission to anybody  
+to the .node-red folder manually  
+```shell
+sudo chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red
+```
+https://nodered.localhost  or https://nodered.yourdomain.com
 The default credentials for login into Editor & Admin API are **admin/secretPassword**.  
-The default credentials for Dashboard are **user/user**.  
+The default credentials for Dashboard (must be imported in nodered first) are **user/user**.  
 To set new password edit in Security section in file settings.json 
 ```
 adminAuth: {
@@ -138,3 +146,4 @@ Requires Docker compose > 2.27 (check in terminal: docker compose version)
 
 ### /mariadb/certs/./generate_certificates.sh
 
+https://linuxize.com/post/how-to-setup-passwordless-ssh-login/
