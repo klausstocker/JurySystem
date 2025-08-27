@@ -15,6 +15,7 @@ class HomeView(View):
             ft.AppBar(title=ft.Text(f"Jury System, user: {username}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.ElevatedButton("Users", on_click=lambda _: self.page.go("/users")),
             ft.ElevatedButton("Athletes", on_click=lambda _: self.page.go("/athletes")),
+            ft.ElevatedButton("Rating", on_click=lambda _: self.page.go("/rating/1")),
             ft.ElevatedButton("Settings", on_click=lambda _: self.page.go("/settings")),
             ft.ElevatedButton("Logout", on_click=self.logout),
         ]
