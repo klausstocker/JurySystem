@@ -17,7 +17,6 @@ class RankingView(View):
         super().__init__(page)
         self.route = f'/ranking/{eventId}'
 
-        self.user = self.page.session.get('user')
         self.event = self.db.getEvent(eventId)
         self.disciplines = self.db.getEventDisciplines(eventId)
         self.categories = self.db.getEventCategories(eventId)
