@@ -18,9 +18,9 @@ class HomeView(View):
             controls=[
                 ft.TextButton("Users", on_click=lambda _: self.page.go("/users"),width= 120, height = 40,),
                 ft.TextButton("Athletes", on_click=lambda _: self.page.go("/athletes"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
+                ft.TextButton("Events", on_click=lambda _: self.page.go("/events"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
                 ft.TextButton("Rating", on_click=lambda _: self.page.go("/rating/1"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
                 ft.TextButton("Settings", on_click=lambda _: self.page.go("/settings"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
-                
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=40  
