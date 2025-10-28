@@ -80,6 +80,9 @@ class Event:
     def fromRow(row):
         return Event(row['id'], row['name'], row['userId'], row['date'], Progress(row['progress']))
 
+    def dateFormated(self):
+        return self.date.strftime('%d.%m.%Y')
+
 @dataclass
 class EventCategory:
     name: str

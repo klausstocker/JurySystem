@@ -6,6 +6,9 @@ from view import View
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, Gender
 
+class TextButton(ft.TextButton):
+    def __init__(self, text = None, icon = None, icon_color = None, content = None, style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)), autofocus = None, url = None, url_target = None, clip_behavior = None, on_click = None, on_long_press = None, on_hover = None, on_focus = None, on_blur = None, ref = None, key = None, width= 120, height = 40, left = None, top = None, right = None, bottom = None, expand = None, expand_loose = None, col = None, opacity = None, rotate = None, scale = None, offset = None, aspect_ratio = None, animate_opacity = None, animate_size = None, animate_position = None, animate_rotation = None, animate_scale = None, animate_offset = None, on_animation_end = None, tooltip = None, badge = None, visible = None, disabled = None, data = None, adaptive = None):
+        super().__init__(text, icon, icon_color, content, style, autofocus, url, url_target, clip_behavior, on_click, on_long_press, on_hover, on_focus, on_blur, ref, key, width, height, left, top, right, bottom, expand, expand_loose, col, opacity, rotate, scale, offset, aspect_ratio, animate_opacity, animate_size, animate_position, animate_rotation, animate_scale, animate_offset, on_animation_end, tooltip, badge, visible, disabled, data, adaptive)
 
 class HomeView(View):
     def __init__(self, page: ft.Page):
@@ -17,10 +20,10 @@ class HomeView(View):
         menu = ft.Row(
             controls=[
                 ft.TextButton("Users", on_click=lambda _: self.page.go("/users"),width= 120, height = 40,),
-                ft.TextButton("Athletes", on_click=lambda _: self.page.go("/athletes"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
-                ft.TextButton("Rating", on_click=lambda _: self.page.go("/rating/1"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
-                ft.TextButton("Settings", on_click=lambda _: self.page.go("/settings"),width= 120, height = 40,style=ft.ButtonStyle(text_style=ft.TextStyle(size=16))),
-                
+                TextButton("Athletes", on_click=lambda _: self.page.go("/athletes")),
+                TextButton("Events", on_click=lambda _: self.page.go("/events")),
+                TextButton("Rating", on_click=lambda _: self.page.go("/rating/1")),
+                TextButton("Settings", on_click=lambda _: self.page.go("/settings")),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=40  
