@@ -4,30 +4,11 @@ import flet as ft
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
-from shared.database import JuryDatabase, Athlete, Gender
+from shared.database import JuryDatabase, Athlete, Gender, Event, Progress
 
 
 def header():
-    return ['', '', 'given name', 'surname', 'birth', 'gender']
-
-def athleteAsRow(athlete: Athlete, editFunc: callable, deleteFunc: callable):
-    cells = [
-        ft.DataCell(ft.IconButton(
-                    icon=ft.Icons.EDIT,
-                    icon_color=ft.Colors.GREEN_300,
-                    tooltip="Edit",
-                    on_click=lambda e: editFunc(e, athlete.id))),
-        ft.DataCell(ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color=ft.Colors.RED_300,
-                    tooltip="Delete",
-                    on_click=lambda e: deleteFunc(e, athlete.id))),
-        ft.DataCell(ft.Text(athlete.givenname)),
-        ft.DataCell(ft.Text(athlete.surname)),
-        ft.DataCell(ft.Text(athlete.birthFormated())),
-        ft.DataCell(ft.Text(athlete.gender.name))
-        ]
-    return ft.DataRow(cells=cells)
+    return ['', '', '', 'given name', 'surname', 'birth', 'gender']
 
 class AthleteView(View):
     def __init__(self, page: ft.Page):
@@ -35,13 +16,35 @@ class AthleteView(View):
         self.route = '/athletes'
 
         user = self.page.session.get('user')
-        
+
+        def updateRows(e):
+            print('updateRows')
+            self.table.rows = [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+            e.control.page.update()
+
+        options = []
+        for event in self.db.getAllEvents():
+            options.append(
+                ft.dropdownm2.Option(
+                    key=event.id,
+                    text=f'{event.name} / {event.dateFormated()}'
+                )
+            )
+
+        self.eventCtrl = ft.Dropdown(
+            editable=False,
+            label="select event",
+            options=options,
+            width=200,
+            on_change=updateRows
+        )
+
         def deleteFunc(e, athleteId):
             athlete = self.db.getAthlete(athleteId)
             def yes(e):
                 self.db.removeAthlete(athleteId)
                 dlg.open = False
-                self.table.rows = [athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+                self.table.rows = [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
                 e.control.page.update()
 
             def no(e):
@@ -71,13 +74,14 @@ class AthleteView(View):
         def printPdf(e):
             host = self.page.url[5:]
             page.launch_url(f'https://api.{host}/athletes/{user.id}')
-            
+
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+                rows=[self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
             )
         self.controls = [
             ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            self.eventCtrl,
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
@@ -90,6 +94,41 @@ class AthleteView(View):
                           on_click=printPdf)]),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
+        
+    def athleteAsRow(self, athlete: Athlete, editFunc: callable, deleteFunc: callable):
+        def onChange(e):
+            msg = 'nominate' if e.control.value else 'denominate'
+            print(f'{msg} {athlete.name()} for event {self.eventCtrl.key=}, {self.eventCtrl.value}')
+
+        print(f'selected event {self.eventCtrl.value}')
+        checkBoxEnabled = False
+        checkBoxValue = False
+        if self.eventCtrl.value:
+            event = self.db.getEvent(self.eventCtrl.value)
+            checkBoxEnabled = event.progress == Progress.PLANNED
+            checkBoxValue = False
+            if checkBoxEnabled:
+                checkBoxValue = True if self.db.getAttendance(athlete.id, self.eventCtrl.value) else False
+
+        cells = [
+            ft.DataCell(ft.IconButton(
+                        icon=ft.Icons.EDIT,
+                        icon_color=ft.Colors.GREEN_300,
+                        tooltip="Edit",
+                        on_click=lambda e: editFunc(e, athlete.id))),
+            ft.DataCell(ft.IconButton(
+                        icon=ft.Icons.DELETE,
+                        icon_color=ft.Colors.RED_300,
+                        tooltip="Delete",
+                        on_click=lambda e: deleteFunc(e, athlete.id))),
+            ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
+            ft.DataCell(ft.Text(athlete.givenname)),
+            ft.DataCell(ft.Text(athlete.surname)),
+            ft.DataCell(ft.Text(athlete.birthFormated())),
+            ft.DataCell(ft.Text(athlete.gender.name))
+            ]
+        return ft.DataRow(cells=cells)
+
 
 
 class AthleteEditView(View):

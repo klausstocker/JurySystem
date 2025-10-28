@@ -292,6 +292,14 @@ class JuryDatabase:
                 events.append(Event.fromRow(row))
         return events
     
+    def getAllEvents(self) -> List[Event]:
+        events = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM events;')
+            for row in cursor.fetchall():
+                events.append(Event.fromRow(row))
+        return events
+    
     def getEvent(self, eventId: int) -> Event:
         with self.conn.cursor() as cursor:
             cursor.execute(f'SELECT * FROM events WHERE id = {eventId};')
