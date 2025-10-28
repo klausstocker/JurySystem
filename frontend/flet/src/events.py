@@ -36,7 +36,7 @@ class EventView(View):
         user = self.page.session.get('user')
         
         def deleteFunc(e, eventId):
-            athlete = self.db.getEvent(eventId)
+            event = self.db.getEvent(eventId)
             def yes(e):
                 self.db.removeEvent(eventId)
                 dlg.open = False
@@ -50,7 +50,7 @@ class EventView(View):
 
             dlg = ft.AlertDialog(
                 modal=True,
-                content=ft.Text(f"Delete athlete '{athlete.name()}'?"),
+                content=ft.Text(f"Delete event '{event.name}' / {event.dateFormated()} ?"),
                 actions=[
                     ft.TextButton("Yes", on_click=yes),
                     ft.TextButton("No", on_click=no),
@@ -77,7 +77,7 @@ class EventView(View):
                 rows=[eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
             )
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Events of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
