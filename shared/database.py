@@ -82,6 +82,9 @@ class Event:
 
     def dateFormated(self):
         return self.date.strftime('%d.%m.%Y')
+    
+    def descr(self):
+        return f'{event.name} / {event.dateFormated()}'
 
 @dataclass
 class EventCategory:
@@ -115,10 +118,11 @@ class Attendance:
     athleteId: int
     eventId: int
     eventCategoryName: str
+    group: str
     
     @staticmethod
     def fromRow(row):
-        return Attendance(row['athleteId'], row['eventId'], row['eventCategoryName'])
+        return Attendance(row['athleteId'], row['eventId'], row['eventCategoryName'], row['group'])
 
 @dataclass
 class Rating:
@@ -376,14 +380,14 @@ class JuryDatabase:
     
     def getEventCategory(self, eventId: int, eventCategoryName: str) -> EventCategory:
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM `event_categories` WHERE `eventId` = {eventId} AND `name`= "{eventCategoryName}";')
-            return EventCategory.fromRow(cursor.fetchone())
+            if cursor.execute(f'SELECT * FROM `event_categories` WHERE `eventId` = {eventId} AND `name`= "{eventCategoryName}";'):
+                return EventCategory.fromRow(cursor.fetchone())
         return None
     
     def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId} AND hidden = 0;')
-            return Attendance.fromRow(cursor.fetchone())
+            if cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId} AND hidden = 0;'):
+                return Attendance.fromRow(cursor.fetchone())
         return None
     
     def getEventCategoryAthleteIds(self, eventId: int, eventCategoryName: str) -> list[int]:

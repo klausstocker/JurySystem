@@ -3,6 +3,7 @@ from home import HomeView, LoginView
 from settings import SiteView
 from users import UserView, UserEditView
 from athletes import AthleteView, AthleteEditView
+from attendance import AttendanceView
 from events import EventView
 from rating import RatingView
 from ranking import RankingView
@@ -48,6 +49,9 @@ class Navigator:
         elif self.page.route.startswith('/athleteEdit'):
             athleteId = int(self.page.route.split('/')[-1])
             self.page.views.append(AthleteEditView(self.page, athleteId))
+        elif self.page.route.startswith('/attendances'):
+            eventId = int(self.page.route.split('/')[-1])
+            self.page.views.append(AttendanceView(self.page, eventId))
         elif self.page.route == '/events':
             self.page.views.append(EventView(self.page))
         elif self.page.route.startswith('/rating'):

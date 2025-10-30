@@ -17,9 +17,11 @@ class AthleteView(View):
 
         user = self.page.session.get('user')
 
+        def createRows():
+            return [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+
         def updateRows(e):
-            print('updateRows')
-            self.table.rows = [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+            self.table.rows = createRows()
             e.control.page.update()
 
         options = []
@@ -27,7 +29,7 @@ class AthleteView(View):
             options.append(
                 ft.dropdownm2.Option(
                     key=event.id,
-                    text=f'{event.name} / {event.dateFormated()}'
+                    text=event.descr()
                 )
             )
 
@@ -44,8 +46,7 @@ class AthleteView(View):
             def yes(e):
                 self.db.removeAthlete(athleteId)
                 dlg.open = False
-                self.table.rows = [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
-                e.control.page.update()
+                updateRows(e)
 
             def no(e):
                 print('cancel')
@@ -77,7 +78,7 @@ class AthleteView(View):
 
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
+                rows=createRows()
             )
         self.controls = [
             ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
@@ -107,9 +108,8 @@ class AthleteView(View):
         if self.eventCtrl.value:
             event = self.db.getEvent(self.eventCtrl.value)
             checkBoxEnabled = event.progress == Progress.PLANNED
-            checkBoxValue = False
             if checkBoxEnabled:
-                checkBoxValue = True if self.db.getAttendance(athlete.id, self.eventCtrl.value) else False
+                checkBoxValue = self.db.getAttendance(athlete.id, self.eventCtrl.value) is not None
 
         cells = [
             ft.DataCell(ft.IconButton(

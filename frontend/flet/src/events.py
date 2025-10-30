@@ -50,7 +50,7 @@ class EventView(View):
 
             dlg = ft.AlertDialog(
                 modal=True,
-                content=ft.Text(f"Delete event '{event.name}' / {event.dateFormated()} ?"),
+                content=ft.Text(f"Delete event {event.descr()} ?"),
                 actions=[
                     ft.TextButton("Yes", on_click=yes),
                     ft.TextButton("No", on_click=no),
