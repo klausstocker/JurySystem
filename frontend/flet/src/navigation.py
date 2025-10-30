@@ -50,8 +50,7 @@ class Navigator:
             athleteId = int(self.page.route.split('/')[-1])
             self.page.views.append(AthleteEditView(self.page, athleteId))
         elif self.page.route.startswith('/attendances'):
-            eventId = int(self.page.route.split('/')[-1])
-            self.page.views.append(AttendanceView(self.page, eventId))
+            self.page.views.append(AttendanceView(self.page))
         elif self.page.route == '/events':
             self.page.views.append(EventView(self.page))
         elif self.page.route.startswith('/rating'):

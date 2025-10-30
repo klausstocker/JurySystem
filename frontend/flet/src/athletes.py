@@ -8,7 +8,7 @@ from shared.database import JuryDatabase, Athlete, Gender, Event, Progress
 
 
 def header():
-    return ['', '', '', 'given name', 'surname', 'birth', 'gender']
+    return ['', '', 'given name', 'surname', 'birth', 'gender']
 
 class AthleteView(View):
     def __init__(self, page: ft.Page):
@@ -23,23 +23,6 @@ class AthleteView(View):
         def updateRows(e):
             self.table.rows = createRows()
             e.control.page.update()
-
-        options = []
-        for event in self.db.getAllEvents():
-            options.append(
-                ft.dropdownm2.Option(
-                    key=event.id,
-                    text=event.descr()
-                )
-            )
-
-        self.eventCtrl = ft.Dropdown(
-            editable=False,
-            label="select event",
-            options=options,
-            width=400,
-            on_change=updateRows
-        )
 
         def deleteFunc(e, athleteId):
             athlete = self.db.getAthlete(athleteId)
@@ -82,8 +65,6 @@ class AthleteView(View):
             )
         self.controls = [
             ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            self.eventCtrl,
-            ft.ElevatedButton("nominate", on_click= lambda _: self.page.go(f"/attendances/{event.id}")),
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
@@ -98,19 +79,6 @@ class AthleteView(View):
         ]
         
     def athleteAsRow(self, athlete: Athlete, editFunc: callable, deleteFunc: callable):
-        def onChange(e):
-            msg = 'nominate' if e.control.value else 'denominate'
-            print(f'{msg} {athlete.name()} for event {self.eventCtrl.key=}, {self.eventCtrl.value}')
-
-        print(f'selected event {self.eventCtrl.value}')
-        checkBoxEnabled = False
-        checkBoxValue = False
-        if self.eventCtrl.value:
-            event = self.db.getEvent(self.eventCtrl.value)
-            checkBoxEnabled = event.progress == Progress.PLANNED
-            if checkBoxEnabled:
-                checkBoxValue = self.db.getAttendance(athlete.id, self.eventCtrl.value) is not None
-
         cells = [
             ft.DataCell(ft.IconButton(
                         icon=ft.Icons.EDIT,
@@ -122,7 +90,6 @@ class AthleteView(View):
                         icon_color=ft.Colors.RED_300,
                         tooltip="Delete",
                         on_click=lambda e: deleteFunc(e, athlete.id))),
-            ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),

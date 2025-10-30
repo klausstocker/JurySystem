@@ -53,14 +53,14 @@ class Athlete:
     def fromRow(row):
         return Athlete(row['id'], row['givenname'], row['surname'], row['userId'], row['birth'], Gender(row['gender']), row['hidden'] != 0)
     
-    def name(self):
+    def name(self) -> str:
         return f'{self.givenname} {self.surname}'
     
-    def birthFormated(self):
+    def birthFormated(self) -> str:
         return self.birth.strftime('%d.%m.%Y')
 
     @staticmethod
-    def birthFromString(birth: str):
+    def birthFromString(birth: str) -> datetime:
         return datetime.strptime(birth, '%d.%m.%Y')
 
 class Progress(Enum):
@@ -80,11 +80,11 @@ class Event:
     def fromRow(row):
         return Event(row['id'], row['name'], row['userId'], row['date'], Progress(row['progress']))
 
-    def dateFormated(self):
+    def dateFormated(self) -> str:
         return self.date.strftime('%d.%m.%Y')
     
-    def descr(self):
-        return f'{event.name} / {event.dateFormated()}'
+    def descr(self) -> str:
+        return f'{self.name} / {self.dateFormated()}'
 
 @dataclass
 class EventCategory:
@@ -101,7 +101,7 @@ class EventCategory:
         return EventCategory(row['name'], row['eventId'], Gender(row['gender']), row['birthFrom'], row['birthTo'], RankingType(row['rankingType']), row['rankingAlgo'])
 
     @staticmethod
-    def defaultRankingAlgo():
+    def defaultRankingAlgo() -> str:
         return "'gold' if sum > 30 else 'silber' if sum > 20 else 'bronze' if sum > 10 else ''"
 
 @dataclass
@@ -135,10 +135,10 @@ class Rating:
     difficulty: float
     execution: float
     
-    def sum(self):
+    def sum(self) -> float:
         return self.difficulty + self.execution
     
-    def pretty(self):
+    def pretty(self) -> str:
         return '{:.2f}'.format(self.difficulty), '{:.2f}'.format(self.execution)
     
     def rate(self, difficulty: float, execution: float):
@@ -157,7 +157,7 @@ class AthleteRatings:
     eventCategoryName: str
     ratings: dict[str, Rating]
     
-    def sum(self):
+    def sum(self) -> float:
         return sum(r.sum() for r in self.ratings.values())
     
     def ratingOrNone(self, discpiline: str):

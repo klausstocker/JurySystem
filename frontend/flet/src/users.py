@@ -35,12 +35,15 @@ class UserView(View):
     def __init__(self, page: ft.Page):
         super().__init__(page)
         
+        def createRows():
+            return [userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
+        
         def deleteFunc(e, userId):
             user = self.db.getUser(userId)
             def yes(e):
                 self.db.removeUser(userId)
                 dlg.open = False
-                self.table.rows = [userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
+                self.table.rows = createRows()
                 e.control.page.update()
 
             def no(e):
@@ -71,7 +74,7 @@ class UserView(View):
         self.route = '/users'
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
+                rows=createRows()
             )
         self.controls = [
             ft.AppBar(title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),

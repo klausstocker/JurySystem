@@ -35,12 +35,15 @@ class EventView(View):
         print("test")
         user = self.page.session.get('user')
         
+        def createRows():
+            return [eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
+        
         def deleteFunc(e, eventId):
             event = self.db.getEvent(eventId)
             def yes(e):
                 self.db.removeEvent(eventId)
                 dlg.open = False
-                self.table.rows = [eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(eventId)]
+                self.table.rows = createRows()
                 e.control.page.update()
 
             def no(e):
@@ -74,7 +77,7 @@ class EventView(View):
             
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=[eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
+                rows=createRows()
             )
         self.controls = [
             ft.AppBar(title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),

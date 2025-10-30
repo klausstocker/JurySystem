@@ -11,57 +11,53 @@ def header():
     return ['', 'given name', 'surname', 'birth', 'gender', 'category', 'group']
 
 class AttendanceView(View):
-    def __init__(self, page: ft.Page, eventId: int):
+    def __init__(self, page: ft.Page):
         super().__init__(page)
-        self.route = '/attendances/{eventId}'
+        self.route = '/attendances'
 
         user = self.page.session.get('user')
         isHost = user.restrictions == Restrictions.HOST
         
-        event = self.db.getEvent(eventId)
-        
         def printPdf(e):
+            if self.eventCtrl.value is None:
+                return
+            eventId = self.eventCtrl.value
             host = self.page.url[5:]
             page.launch_url(f'https://api.{host}/attendances/{eventId}/{user.id}')
 
         def createRows():
-            return [self.attendanceAsRow(attendance, deleteFunc) for attendance in self.db.getAttendances(event.id, user.id)]
+            if self.eventCtrl.value is None:
+                return []
+            event = self.db.getEvent(self.eventCtrl.value)
+            return [self.attendanceAsRow(athlete, event) for athlete in self.db.getAthletes(user.id)]
             
-        def updateRows():
-            self.table.rows = self.createRows()
-
-
-        def deleteFunc(e, athleteId):
-            athlete = self.db.getAthlete(athleteId)
-            def yes(e):
-                self.db.removeAthlete(athleteId)
-                dlg.open = False
-                updateRows()
-                e.control.page.update()
-
-            def no(e):
-                print('cancel')
-                dlg.open = False
-                e.control.page.update()
-
-            dlg = ft.AlertDialog(
-                modal=True,
-                content=ft.Text(f"Delete attendance of athlete '{athlete.name()}'?"),
-                actions=[
-                    ft.TextButton("Yes", on_click=yes),
-                    ft.TextButton("No", on_click=no),
-                ],
-                actions_alignment=ft.MainAxisAlignment.END)
-            e.control.page.overlay.append(dlg)
-            dlg.open = True
+        def updateRows(e):
+            self.table.rows = createRows()
             e.control.page.update()
+
+        options = []
+        for event in self.db.getAllEvents():
+            options.append(
+                ft.dropdownm2.Option(
+                    key=event.id,
+                    text=event.descr()
+                )
+            )
+
+        self.eventCtrl = ft.Dropdown(
+            editable=False,
+            label="select event",
+            options=options,
+            width=400,
+            on_change=updateRows
+        )
 
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=createRows()
             )
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Athletes of {user.team} attending {event.descr()}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(f'Attendances of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            self.eventCtrl,
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.SAVE,
@@ -70,21 +66,33 @@ class AttendanceView(View):
                           on_click=printPdf)]),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
-        
-    def attendanceAsRow(self, attendance: Attendance, deleteFunc: callable):
-        athlete = self.db.getAthlete(attendance.athleteId)
+
+    def attendanceAsRow(self, athlete: Athlete, event:Event):
+        attendance = self.db.getAttendance(athlete.id, event.id)
+
+        def onChange(e):
+            msg = 'nominate' if e.control.value else 'denominate'
+            print(f'{msg} {athlete.name()} for event {event.descr()}')
+
+        checkBoxEnabled = event.progress == Progress.PLANNED
+        checkBoxValue = attendance is not None
+
         cells = [
-            ft.DataCell(ft.IconButton(
-                        icon=ft.Icons.DELETE,
-                        icon_color=ft.Colors.RED_300,
-                        tooltip="Delete",
-                        on_click=lambda e: deleteFunc(e, athlete.id))),
+            ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),
             ft.DataCell(ft.Text(athlete.gender.name)),
-            ft.DataCell(ft.Text(attendance.eventCategoryName)),
-            ft.DataCell(ft.Text(attendance.group))
+            ]
+        if attendance is not None:
+            cells += [
+                ft.DataCell(ft.Text(attendance.eventCategoryName)),
+                ft.DataCell(ft.Text(attendance.group))
+            ]
+        else:
+            cells += [
+                ft.DataCell(ft.Text('')),
+                ft.DataCell(ft.Text(''))
             ]
         return ft.DataRow(cells=cells)
 

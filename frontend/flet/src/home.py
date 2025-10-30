@@ -21,6 +21,7 @@ class HomeView(View):
             controls=[
                 ft.TextButton("Users", on_click=lambda _: self.page.go("/users"),width= 120, height = 40,),
                 TextButton("Athletes", on_click=lambda _: self.page.go("/athletes")),
+                TextButton("Attendances", on_click=lambda _: self.page.go("/attendances")),
                 TextButton("Events", on_click=lambda _: self.page.go("/events")),
                 TextButton("Rating", on_click=lambda _: self.page.go("/rating/1")),
                 TextButton("Settings", on_click=lambda _: self.page.go("/settings")),
