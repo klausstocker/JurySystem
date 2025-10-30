@@ -2,10 +2,10 @@ import os
 import sys
 import unittest
 import pymysql.cursors
-from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType
 from datetime import datetime
 
-
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType
 class TestDatabase(unittest.TestCase):
 
     def __init__(self, methodName = "runTest"):
@@ -52,6 +52,14 @@ class TestDatabase(unittest.TestCase):
         self.db.hideAthlete(3, False)
         self.assertFalse(self.db.getAthlete(3).hidden)
 
+    def test_attendance(self):
+        self.assertEqual(len(self.db.getAttendances(1, 4)), 2)
+        self.db.addAttendance(1, 5, 'Md02')
+        self.db.setAttendanceCategory(1, 5, 'Md01')
+        self.assertEqual(len(self.db.getAttendances(1, 4)), 3)
+        self.db.hideAttendance(1, 5, True)
+        self.assertEqual(len(self.db.getAttendances(1, 4)), 2)
+        self.db.deleteAttendance(1 ,5, 'Md01')
 
     def test_events(self):
         events = self.db.getEvents(2)

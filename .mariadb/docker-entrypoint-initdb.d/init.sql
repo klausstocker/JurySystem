@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `expires` datetime DEFAULT NULL,
   `restrictions` tinyint(4) DEFAULT NULL,
   `locked` tinyint(4) DEFAULT NULL,
-  `hidden` tinyint(4) DEFAULT NULL,
+  `hidden` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -39,16 +39,17 @@ CREATE TABLE IF NOT EXISTS `athletes` (
   `userId` int(10) unsigned NOT NULL,
   `birth` datetime DEFAULT NULL,
   `gender` tinyint(4) DEFAULT NULL,
-  `hidden` tinyint(4) DEFAULT NULL,
+  `hidden` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender`, `hidden`) VALUES
-	(1, 'Klaus', 'Stocker', 3, '1978-07-15', 0, 0),
-	(2, 'Christoph', 'Hogl', 4, '1977-07-13', 0, 0),
-	(3, 'Johanna', 'Stocker', 3, '2010-05-20', 1, 0),
-  (4, 'Herbet', 'Mayer', 4, '2010-05-20', 0, 0);
+  (1, 'Klaus', 'Stocker', 3, '1978-07-15', 0, 0),
+  (2, 'Christoph', 'Hogl', 4, '1977-07-13', 0, 0),
+  (3, 'Johanna', 'Stocker', 3, '2010-05-20', 1, 0),
+  (4, 'Herbet', 'Mayer', 4, '2010-05-20', 0, 0),
+  (5, 'Sophia', 'Mayer', 4, '2010-05-20', 1, 0);
 
 CREATE TABLE IF NOT EXISTS `events` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -108,16 +109,17 @@ CREATE TABLE IF NOT EXISTS `attendances` (
   `eventId` int(10) unsigned NOT NULL,
   `eventCategoryName` varchar(50) NOT NULL,
   `group` varchar(50) NOT NULL,
+  `hidden` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`athleteId`, `eventId`, `eventCategoryName`),
   FOREIGN KEY (`eventId`) REFERENCES events(`id`),
   FOREIGN KEY (`athleteId`) REFERENCES athletes(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`, `group`) VALUES
-  (1, 1, 'Kn01', 'Riege1'),
-  (2, 1, 'Kn01', 'Riege1'),
-  (4, 1, 'Kn01', 'Riege2'),
-  (3, 1, 'Md01', 'Riege2');
+INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`, `group`, `hidden`) VALUES
+  (1, 1, 'Kn01', 'Riege1', 0),
+  (2, 1, 'Kn01', 'Riege1', 0),
+  (4, 1, 'Kn01', 'Riege2', 0),
+  (3, 1, 'Md01', 'Riege2', 0);
 
 CREATE TABLE IF NOT EXISTS `ratings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

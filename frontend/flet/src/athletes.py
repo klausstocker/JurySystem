@@ -35,7 +35,7 @@ class AthleteView(View):
             editable=False,
             label="select event",
             options=options,
-            width=200,
+            width=400,
             on_change=updateRows
         )
 
@@ -82,6 +82,7 @@ class AthleteView(View):
         self.controls = [
             ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.eventCtrl,
+            ft.ElevatedButton("nominate", on_click= lambda _: self.page.go(f"/attendances/{event.id}")),
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,

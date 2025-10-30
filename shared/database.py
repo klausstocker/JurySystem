@@ -174,7 +174,7 @@ class JuryDatabase:
                             database='JurySystem',
                             cursorclass=pymysql.cursors.DictCursor,
                             autocommit=autocommit)
-        
+
     def __del__(self):
         self.conn.close()
     
@@ -287,6 +287,45 @@ class JuryDatabase:
                 return cnt != 0
         return False
     
+    def getAttendances(self, eventId, userId):
+        attendances = []
+        with self.conn.cursor() as cursor:
+            sql = f"SELECT * FROM `attendances` JOIN `athletes` ON `attendances`.`athleteId` = `athletes`.`id` WHERE `athletes`.`userId` = {userId} AND `eventId` = {eventId} AND `attendances`.`hidden` = 0;"
+            cursor.execute(sql)
+            for row in cursor.fetchall():
+                if len(row['eventCategoryName']) > 0:
+                    attendances.append(Attendance.fromRow(row))
+        return attendances
+    
+    def addAttendance(self, eventId: int, athleteId: int, categoryName):
+        with self.conn.cursor() as cursor:
+            sql = f"INSERT INTO `attendances` (`athleteId`, `eventId`, `eventCategoryName`, `group`) VALUES ('{athleteId}', '{eventId}', '{categoryName}', '');"
+            cnt = cursor.execute(sql)
+            if cnt != 1:
+                return None
+            self.conn.commit()
+            return cursor.lastrowid
+        return None
+    
+    def setAttendanceCategory(self, eventId: int, athleteId: int, category: str):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `attendances` SET `eventCategoryName` = '{category}' WHERE `athleteId` = {athleteId} AND `eventId` = {eventId};"
+            cursor.execute(sql)
+            self.conn.commit()
+
+    def hideAttendance(self, eventId: int, athleteId: int, hide: bool):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `attendances` SET `hidden` = {1 if hide else 0} WHERE `athleteId` = {athleteId} AND `eventId` = {eventId};"
+            cursor.execute(sql)
+            self.conn.commit()
+
+    def deleteAttendance(self, eventId: int, athleteId: int, category: str):
+        '''may break integrity, only used for automatic tests'''
+        with self.conn.cursor() as cursor:
+            sql = f"DELETE FROM `attendances` WHERE `athleteId` = {athleteId} AND `eventId` = {eventId} AND `eventCategoryName` = '{category}';"
+            cursor.execute(sql)
+            self.conn.commit()
+    
     def getEvents(self, userId: int) -> List[Event]:
         events = []
         with self.conn.cursor() as cursor:
@@ -343,14 +382,14 @@ class JuryDatabase:
     
     def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId};')
+            cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId} AND hidden = 0;')
             return Attendance.fromRow(cursor.fetchone())
         return None
     
     def getEventCategoryAthleteIds(self, eventId: int, eventCategoryName: str) -> list[int]:
         athleteIds = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT `athleteId` FROM `attendances` WHERE `eventId` = {eventId} AND `eventCategoryName` = "{eventCategoryName}";')
+            cursor.execute(f'SELECT `athleteId` FROM `attendances` WHERE `eventId` = {eventId} AND `eventCategoryName` = "{eventCategoryName}" AND `hidden` = 0;')
             for row in cursor.fetchall():
                 athleteIds.append(int(row['athleteId']))
         return athleteIds
@@ -388,7 +427,7 @@ class JuryDatabase:
     def getEventGroups(self, eventId: int) -> list[str]:
         groups = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT DISTINCT `group` FROM `attendances` WHERE eventId = {eventId} ORDER BY `group`;')
+            cursor.execute(f'SELECT DISTINCT `group` FROM `attendances` WHERE eventId = {eventId} AND `hidden` = 0 ORDER BY `group`;')
             for row in cursor.fetchall():
                 groups.append(row['group'])
         return groups
@@ -396,7 +435,7 @@ class JuryDatabase:
     def getEventGroup(self, eventId: int, group: str) -> list[Athlete]:
         athletes = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT `athletes`.* FROM `attendances` JOIN `athletes` ON athletes.id=attendances.athleteId WHERE `attendances`.`eventId` = {eventId} AND `attendances`.`group` = "{group}";')
+            cursor.execute(f'SELECT `athletes`.* FROM `attendances` JOIN `athletes` ON athletes.id=attendances.athleteId WHERE `attendances`.`eventId` = {eventId} AND `attendances`.`group` = "{group}" AND `attendances`.`hidden` = 0;')
             for row in cursor.fetchall():
                 athletes.append(Athlete.fromRow(row))
         return athletes
