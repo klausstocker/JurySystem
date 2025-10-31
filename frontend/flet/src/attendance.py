@@ -11,13 +11,13 @@ def header():
     return ['', 'given name', 'surname', 'birth', 'gender', 'category', 'group']
 
 class AttendanceView(View):
+    def user(self) -> User:
+        return self.page.session.get('user')
+    
     def __init__(self, page: ft.Page):
         super().__init__(page)
         self.route = '/attendances'
 
-        user = self.page.session.get('user')
-        isHost = user.restrictions == Restrictions.HOST
-        
         def printPdf(e):
             if self.eventCtrl.value is None:
                 return
@@ -29,7 +29,14 @@ class AttendanceView(View):
             if self.eventCtrl.value is None:
                 return []
             event = self.db.getEvent(self.eventCtrl.value)
-            return [self.attendanceAsRow(athlete, event) for athlete in self.db.getAthletes(user.id)]
+            categories = self.db.getEventCategories(event.id)
+            athletes = []
+            if self.user().isHost():
+                for attendance in self.db.getEventAttendances(event.id):
+                    athletes.append(self.db.getAthlete(attendance.athleteId))
+            else:
+                athletes = self.db.getAthletes(self.user().id)
+            return [self.attendanceAsRow(athlete, event, categories) for athlete in athletes]
             
         def updateRows(e):
             self.table.rows = createRows()
@@ -55,8 +62,9 @@ class AttendanceView(View):
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
             )
+        title = f'Attendances of {self.user().username if self.user().isHost() else self.user().team}'
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Attendances of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.eventCtrl,
             self.table,
             ft.Row(spacing=0, controls=[
@@ -67,32 +75,60 @@ class AttendanceView(View):
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
 
-    def attendanceAsRow(self, athlete: Athlete, event:Event):
-        attendance = self.db.getAttendance(athlete.id, event.id)
-
+    def attendanceAsRow(self, athlete: Athlete, event:Event, categories: list):
         def onChange(e):
-            msg = 'nominate' if e.control.value else 'denominate'
-            print(f'{msg} {athlete.name()} for event {event.descr()}')
+            attendance = self.db.getAttendance(athlete.id, event.id)
+            if e.control.value:
+                print(f'nominate {athlete.name()} for {event.descr()}')
+                if attendance:
+                    categoryCell.content.value = attendance.eventCategoryName
+                    groupCell.content.value = attendance.group
+                    groupCell.content.disabled = not self.user().isHost()
+                else:
+                    groupCell.content.disabled = True
+                categoryCell.content.disabled = False
+                categoryCell.content.options = [ft.dropdownm2.Option(d.name) for d in categories]
+            else:
+                print(f'denominate {athlete.name()} for {event.descr()}')
+                self.db.hideAttendance(event.id, athlete.id, True)
+                categoryCell.content.value = ''
+                groupCell.content.value = ''
+                categoryCell.content.disabled = True
+                groupCell.content.disabled = True
+                categoryCell.content.options = []
+            self.page.update()
 
+        def onUpdateCategory(e):
+            self.db.setAttendanceCategory(event.id, athlete.id, e.control.value)
+            groupCell.content.disabled = not self.user().isHost()
+            self.page.update()
+
+        def onUpdateGroup(e):
+            self.db.setAttendanceGroup(event.id, athlete.id, e.control.value)
+
+        attendance = self.db.getAttendance(athlete.id, event.id)
         checkBoxEnabled = event.progress == Progress.PLANNED
         checkBoxValue = attendance is not None
-
+        categoryCell = ft.DataCell(ft.Dropdown(
+                    disabled=not attendance,
+                    options=list() if attendance is None else [ft.dropdownm2.Option(d.name) for d in categories],
+                    value=attendance.eventCategoryName if attendance else None,
+                    on_change=onUpdateCategory
+                    ))
+        groupCell = ft.DataCell(ft.TextField(
+                    disabled=not attendance or not self.user().isHost(),
+                    value=attendance.group if attendance else None,
+                    on_change=onUpdateGroup,
+                    expand=True,
+                    ))
         cells = [
             ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),
             ft.DataCell(ft.Text(athlete.gender.name)),
-            ]
-        if attendance is not None:
-            cells += [
-                ft.DataCell(ft.Text(attendance.eventCategoryName)),
-                ft.DataCell(ft.Text(attendance.group))
-            ]
-        else:
-            cells += [
-                ft.DataCell(ft.Text('')),
-                ft.DataCell(ft.Text(''))
+            categoryCell,
+            groupCell
             ]
         return ft.DataRow(cells=cells)
 

@@ -55,10 +55,14 @@ class TestDatabase(unittest.TestCase):
     def test_attendance(self):
         self.assertEqual(len(self.db.getAttendances(1, 4)), 2)
         self.db.addAttendance(1, 5, 'Md02')
+        self.assertEqual(self.db.getAttendance(5, 1).eventCategoryName, 'Md02')
         self.db.setAttendanceCategory(1, 5, 'Md01')
+        self.assertEqual(self.db.getAttendance(5, 1).eventCategoryName, 'Md01')
         self.assertEqual(len(self.db.getAttendances(1, 4)), 3)
         self.db.hideAttendance(1, 5, True)
         self.assertEqual(len(self.db.getAttendances(1, 4)), 2)
+        self.db.setAttendanceCategory(1, 5, 'Md01')
+        self.assertEqual(len(self.db.getAttendances(1, 4)), 3)
         self.db.deleteAttendance(1 ,5, 'Md01')
 
     def test_events(self):

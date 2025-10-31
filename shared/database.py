@@ -34,6 +34,9 @@ class User:
     def valid(self) -> bool:
         return datetime.now() < self.expires and not self.locked
     
+    def isHost(self) ->bool:
+        return self.restrictions == Restrictions.HOST
+    
     @staticmethod
     def fromRow(row):
         return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0)
@@ -268,10 +271,10 @@ class JuryDatabase:
 
     def athleteHasAttendances(self, athleteId):
         with self.conn.cursor() as cursor:
-            sql = f"SELECT * FROM `attendances` WHERE `athleteId` = {athleteId} ;"
+            sql = f"SELECT * FROM `attendances` WHERE `athleteId` = {athleteId};"
             return cursor.execute(sql) != 0
         return False
-    
+
     def hideAthlete(self, athleteId: int, hide: bool):
         with self.conn.cursor() as cursor:
             sql = f"UPDATE `athletes` SET `hidden` = {1 if hide else 0} WHERE `athletes`.`id` = {athleteId};"
@@ -312,8 +315,18 @@ class JuryDatabase:
         return None
     
     def setAttendanceCategory(self, eventId: int, athleteId: int, category: str):
+        attendance = self._getAttendance(athleteId, eventId)
+        if attendance is None:
+            self.addAttendance(eventId, athleteId, category)
+            return
         with self.conn.cursor() as cursor:
-            sql = f"UPDATE `attendances` SET `eventCategoryName` = '{category}' WHERE `athleteId` = {athleteId} AND `eventId` = {eventId};"
+            sql = f"UPDATE `attendances` SET `eventCategoryName` = '{category}', `hidden` = 0 WHERE `athleteId` = {athleteId} AND `eventId` = {eventId};"
+            cursor.execute(sql)
+            self.conn.commit()
+
+    def setAttendanceGroup(self, eventId: int, athleteId: int, group: str):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `attendances` SET `group` = '{group}' WHERE `athleteId` = {athleteId} AND `eventId` = {eventId};"
             cursor.execute(sql)
             self.conn.commit()
 
@@ -383,13 +396,27 @@ class JuryDatabase:
             if cursor.execute(f'SELECT * FROM `event_categories` WHERE `eventId` = {eventId} AND `name`= "{eventCategoryName}";'):
                 return EventCategory.fromRow(cursor.fetchone())
         return None
-    
+
+    def _getAttendance(self, athleteId: int, eventId: int) -> Attendance:
+        with self.conn.cursor() as cursor:
+            if cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId};'):
+                return Attendance.fromRow(cursor.fetchone())
+        return None
+
     def getAttendance(self, athleteId: int, eventId: int) -> Attendance:
         with self.conn.cursor() as cursor:
             if cursor.execute(f'SELECT * FROM attendances WHERE athleteId = {athleteId} AND eventId = {eventId} AND hidden = 0;'):
                 return Attendance.fromRow(cursor.fetchone())
         return None
-    
+ 
+    def getEventAttendances(self, eventId: int) -> list[Attendance]:
+        attendances = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT * FROM attendances WHERE eventId = {eventId} AND hidden = 0;')
+            for row in cursor.fetchall():
+                attendances.append(Attendance.fromRow(row))
+        return attendances
+
     def getEventCategoryAthleteIds(self, eventId: int, eventCategoryName: str) -> list[int]:
         athleteIds = []
         with self.conn.cursor() as cursor:
