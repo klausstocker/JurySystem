@@ -294,7 +294,7 @@ class JuryDatabase:
                 return cnt != 0
         return False
     
-    def getAttendances(self, eventId, userId):
+    def getAttendances(self, eventId, userId) -> list[Attendance]:
         attendances = []
         with self.conn.cursor() as cursor:
             sql = f"SELECT * FROM `attendances` JOIN `athletes` ON `attendances`.`athleteId` = `athletes`.`id` WHERE `athletes`.`userId` = {userId} AND `eventId` = {eventId} AND `attendances`.`hidden` = 0;"
