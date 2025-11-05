@@ -31,13 +31,16 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
 class EventView(View):
     def __init__(self, page: ft.Page):
         super().__init__(page)
-        self.route = '/events'
-        print("test")
+        self.route = "/events"
+
         user = self.page.session.get('user')
-        
-        def createRows():
-            return [eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
-        
+
+        def addFunc(e):
+            self.page.go("/eventEdit/0")
+
+        def editFunc(e, eventId):
+            self.page.go(f"/eventEdit/{eventId}")
+
         def deleteFunc(e, eventId):
             event = self.db.getEvent(eventId)
             def yes(e):
@@ -63,31 +66,78 @@ class EventView(View):
             dlg.open = True
             e.control.page.update()
 
-        def editFunc(e, athleteId):
-            print(f'edit {athleteId=}')
-            #self.page.go(f'/athleteEdit/{athleteId}')
-        
-        def addFunc(e):
-            print(f'add event')
-            #self.page.go(f'/athleteEdit/0')
-            
-        #def printPdf(e):
-        #    host = self.page.url[5:]
-        #    page.launch_url(f'https://api.{host}/athletes/{user.id}')
-            
+        def createRows():
+            return [eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
+
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=createRows()
-            )
+            columns=[ft.DataColumn(ft.Text(h)) for h in header()],
+            rows=createRows()
+        )
+
         self.controls = [
             ft.AppBar(title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
-            ft.Row(spacing=0, controls=[
-                ft.IconButton(ft.Icons.ADD_CIRCLE,
-                    icon_color=ft.Colors.BLUE_300,
-                    tooltip="Add",
-                    on_click=addFunc)]),
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
+            ft.Row(
+                spacing=0,
+                controls=[
+                    ft.IconButton(
+                        ft.Icons.ADD_CIRCLE,
+                        icon_color=ft.Colors.BLUE_300,
+                        tooltip="Neues Event",
+                        on_click=addFunc
+                    )
+                ]
+            ),
+            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
         ]
 
+class EventEditView(View):
+    def __init__(self, page: ft.Page, eventId: int):
+        super().__init__(page)
+        self.route = f"/eventEdit/{eventId}"
+        createEvent = eventId == 0
 
+        if not page.session.contains_key("events_data"):
+            page.session.set("events_data", [])
+        events_data = page.session.get("events_data")
+
+        event = next((ev for ev in events_data if ev["id"] == eventId), None)
+        if event is None:
+            event = {"id": eventId, "name": "", "date": ""}
+
+        name_input = ft.TextField(label="Event Name", width=300, value=event["name"])
+        date_input = ft.TextField(label="Datum (YYYY-MM-DD)", width=300, value=event["date"])
+
+        def saveEvent(e):
+            name = name_input.value.strip()
+            date = date_input.value.strip()
+
+            if not name or not date:
+                self.page.open(ft.SnackBar(ft.Text("Bitte Name und Datum eingeben!"), bgcolor="red"))
+                return
+
+            if createEvent:
+                new_id = max([ev["id"] for ev in events_data], default=0) + 1
+                events_data.append({"id": new_id, "name": name, "date": date})
+            else:
+                for ev in events_data:
+                    if ev["id"] == eventId:
+                        ev["name"] = name
+                        ev["date"] = date
+
+            page.session.set("events_data", events_data)
+            self.page.go("/events")
+
+        def cancel(e):
+            self.page.go("/events")
+
+        self.controls = [
+            ft.AppBar(title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
+                      bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            name_input,
+            date_input,
+            ft.Row(spacing=0, controls=[
+                ft.IconButton(icon=ft.Icons.CHECK_CIRCLE, icon_color=ft.Colors.GREEN_300, tooltip="Speichern", on_click=saveEvent),
+                ft.IconButton(icon=ft.Icons.CANCEL, icon_color=ft.Colors.RED_300, tooltip="Abbrechen", on_click=cancel),
+            ]),
+        ]
