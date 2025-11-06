@@ -1,10 +1,11 @@
 import os
 import sys
 import flet as ft
+import datetime
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
-from shared.database import JuryDatabase, Event
+from shared.database import JuryDatabase, Event, Progress
 
 
 def header():
@@ -97,16 +98,12 @@ class EventEditView(View):
         self.route = f"/eventEdit/{eventId}"
         createEvent = eventId == 0
 
-        if not page.session.contains_key("events_data"):
-            page.session.set("events_data", [])
-        events_data = page.session.get("events_data")
+        user = self.page.session.get('user')
 
-        event = next((ev for ev in events_data if ev["id"] == eventId), None)
-        if event is None:
-            event = {"id": eventId, "name": "", "date": ""}
+        event = self.db.getEvent(eventId) if not createEvent else Event(0, "", user.id, datetime.datetime.now(), Progress.PLANNED)
 
-        name_input = ft.TextField(label="Event Name", width=300, value=event["name"])
-        date_input = ft.TextField(label="Datum (YYYY-MM-DD)", width=300, value=event["date"])
+        name_input = ft.TextField(label="Event Name", width=300, value=event.name)
+        date_input = ft.TextField(label="Datum (d.m.Y)", width=300, value=event.dateFormated())
 
         def saveEvent(e):
             name = name_input.value.strip()
@@ -117,15 +114,10 @@ class EventEditView(View):
                 return
 
             if createEvent:
-                new_id = max([ev["id"] for ev in events_data], default=0) + 1
-                events_data.append({"id": new_id, "name": name, "date": date})
+                self.db.insertEvent(name, user.id, Event.dateFromString(date))
             else:
-                for ev in events_data:
-                    if ev["id"] == eventId:
-                        ev["name"] = name
-                        ev["date"] = date
+                self.db.updateEvent(event.id, name, user.id, Event.dateFromString(date))
 
-            page.session.set("events_data", events_data)
             self.page.go("/events")
 
         def cancel(e):

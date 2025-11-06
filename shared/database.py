@@ -82,6 +82,11 @@ class Event:
     @staticmethod
     def fromRow(row):
         return Event(row['id'], row['name'], row['userId'], row['date'], Progress(row['progress']))
+    
+    @staticmethod
+    def dateFromString(date: str) -> datetime:
+        return datetime.strptime(date, '%d.%m.%Y')
+
 
     def dateFormated(self) -> str:
         return self.date.strftime('%d.%m.%Y')
@@ -361,8 +366,8 @@ class JuryDatabase:
     
     def getEvent(self, eventId: int) -> Event:
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM events WHERE id = {eventId};')
-            return Event.fromRow(cursor.fetchone())
+            if cursor.execute(f'SELECT * FROM events WHERE id = {eventId};') > 0:
+                return Event.fromRow(cursor.fetchone())
         return None
     
     def insertEvent(self, name: str, userId: int, date: datetime):
