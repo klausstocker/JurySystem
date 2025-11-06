@@ -25,7 +25,7 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
                     on_click=lambda e: deleteFunc(e, event.id))),
         ft.DataCell(ft.Text(event.name)),
         ft.DataCell(ft.Text(event.dateFormated())),
-        ft.DataCell(ft.Text(event.progress))
+        ft.DataCell(ft.Text(event.progress()))
         ]
     return ft.DataRow(cells=cells)
 

@@ -107,7 +107,7 @@ class AttendanceView(View):
             self.db.setAttendanceGroup(event.id, athlete.id, e.control.value)
 
         attendance = self.db.getAttendance(athlete.id, event.id)
-        checkBoxEnabled = event.progress == Progress.PLANNED
+        checkBoxEnabled = event.progress() == Progress.PLANNED
         checkBoxValue = attendance is not None
         categoryCell = ft.DataCell(ft.Dropdown(
                     disabled=not attendance,

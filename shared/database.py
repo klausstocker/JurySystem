@@ -1,6 +1,6 @@
 import pymysql.cursors
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from enum import Enum
 from typing import List
 
@@ -70,18 +70,16 @@ class Progress(Enum):
     PLANNED = 0
     ACTIVE = 1
     FINISHED = 2
-    DELETED = 3
 @dataclass
 class Event:
     id: int
     name: str
     userId: int
     date: datetime
-    progress: Progress
 
     @staticmethod
     def fromRow(row):
-        return Event(row['id'], row['name'], row['userId'], row['date'], Progress(row['progress']))
+        return Event(row['id'], row['name'], row['userId'], row['date'])
     
     @staticmethod
     def dateFromString(date: str) -> datetime:
@@ -93,6 +91,14 @@ class Event:
     
     def descr(self) -> str:
         return f'{self.name} / {self.dateFormated()}'
+    
+    def progress(self) -> Progress:
+        today = date.today()
+        if today < self.date.date():
+            return Progress.PLANNED
+        if today > self.date.date():
+            return Progress.FINISHED
+        return Progress.ACTIVE
 
 @dataclass
 class EventCategory:
@@ -351,7 +357,7 @@ class JuryDatabase:
     def getEvents(self, userId: int) -> List[Event]:
         events = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM events WHERE userId = {userId};')
+            cursor.execute(f'SELECT * FROM events WHERE userId = {userId} AND `deleted` = 0;')
             for row in cursor.fetchall():
                 events.append(Event.fromRow(row))
         return events
@@ -390,11 +396,18 @@ class JuryDatabase:
 
     def removeEvent(self, eventId: int) -> bool:
         with self.conn.cursor() as cursor:
-            sql = f"DELETE FROM `events` WHERE `events`.`id` = {eventId} ;"
+            sql = f"UPDATE `events` SET `deleted`= 1 WHERE `events`.`id` = {eventId} ;"
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0
         return False
+    
+    def deleteEvent(self, eventId: int):
+        '''delte event (only used for tests)'''
+        with self.conn.cursor() as cursor:
+            sql = f"DELETE FROM `events` WHERE `events`.`id` = {eventId} ;"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
     
     def getEventCategory(self, eventId: int, eventCategoryName: str) -> EventCategory:
         with self.conn.cursor() as cursor:

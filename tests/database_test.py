@@ -71,7 +71,7 @@ class TestDatabase(unittest.TestCase):
         insertedId = self.db.insertEvent('LM', 2, '2026-01-01')
         self.assertTrue(self.db.updateEvent(insertedId, 'LM1', 2, '2026-01-02'))
         self.assertEqual(self.db.getEvent(insertedId).name, 'LM1')
-        self.assertTrue(self.db.removeEvent(insertedId))
+        self.db.deleteEvent(insertedId)
         self.assertEqual(len(self.db.getEventDisciplines(1)), 4)
         self.assertEqual(len(self.db.getEventGroups(1)), 2)
         self.assertEqual(len(self.db.getEventGroup(1, 'Riege1')), 2)
