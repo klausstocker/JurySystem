@@ -1,0 +1,30 @@
+doctype html
+html(lang="de")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title {{athlete.name()}} - {{event.descr()}}
+    style.
+      body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .signature-img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 200px; /* Anpassen an die Bildgröße */
+      }
+  body
+    h1 {{athlete.name()}}
+    p erreichte bei der
+    h2 {{event.name}}
+    p
+      | im Geräteturnen
+      br
+      | in der Klasse {{attendance.eventCategoryName}}
+      br
+      | den 3. Rang
+    p {{event.dateFormated()}}
+    img.src(class="signature-img" alt="Unterschrift" src="signature.png")
