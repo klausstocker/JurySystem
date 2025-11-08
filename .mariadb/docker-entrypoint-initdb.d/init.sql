@@ -56,12 +56,12 @@ CREATE TABLE IF NOT EXISTS `events` (
   `name` varchar(50) NOT NULL,
   `userId` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
-  `progress` tinyint(4) DEFAULT 0,
+  `deleted` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `events` (`id`, `name`, `userId`, `date`, `progress`) VALUES
+INSERT INTO `events` (`id`, `name`, `userId`, `date`, `deleted`) VALUES
   (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 0);
 
 CREATE TABLE IF NOT EXISTS `event_judges` (
