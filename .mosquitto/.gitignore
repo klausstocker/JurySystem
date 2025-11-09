@@ -1,5 +1,0 @@
-log/
-data/
-certs/ca.*
-certs/server.*
-certs/client.*

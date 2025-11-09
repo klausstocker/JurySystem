@@ -43,58 +43,24 @@ It will create a new folder: Dockerized-Web-Framework-for-IoT
 ## *Applications and Web*
 ### 👉 APP (Running python scripts in container)
 ### 👉 Flet (Framework for web application in pure Python)
-### 👉 Wordpress (widely used content management system)
 <!---
 ### 👉 API-FASTAPI-PURE-SQL
 -->
 ### 👉 API-FASTAPI-SQLMODEL  (fastapi using sqlmodel) 
-### 👉 Node-Red  
-In the case, the service failed to start with some permission error, you must add write permission to anybody  
-to the .node-red folder manually  
-```shell
-sudo chmod o+w ./Dockerized-Web-Framework-for-IoT/.node-red
-```
-https://nodered.localhost  or https://nodered.yourdomain.com
-The default credentials for login into Editor & Admin API are **admin/secretPassword**.  
-The default credentials for Dashboard (must be imported in nodered first) are **user/user**.  
-To set new password edit in Security section in file settings.json 
-```
-adminAuth: {
-        type: "credentials",
-        users: [{
-            username: "admin",
-            password: "$2a$12$lozyn8x8FZGzho/ZyvNS5OmzTfWySUAruqYSFv.btCEuMfJW0iu3K",
-            permissions: "*"
-        }]
-    }
-httpNodeAuth: {user:"user",pass:"$2a$12$B4eUfhmTowaDVnB9qLeEU.uofryi75w.FMmaXit788ngGsNN3Cw0W"},
-httpStaticAuth: {user:"user",pass:"$2a$12$B4eUfhmTowaDVnB9qLeEU.uofryi75w.FMmaXit788ngGsNN3Cw0W"},
-```
-Generating new hashes (https://bcrypt-generator.com/). Replace it with copy and paste.     
-More about securing node-red: https://nodered.org/docs/user-guide/runtime/securing-node-red  
+
 
 ### 👉 NGINX-PHP (HTML and PHP Webserver)
 https://web.localhost/index.php
 ## *Database*
-### 👉 MariaDB + Adminer + Phpmyadmin 
-https://phpmyadmin.localhost , https://adminer.localhost 
+### 👉 MariaDB + Phpmyadmin 
+https://phpmyadmin.localhost
 
 | Target access | Subdomain  | Username | Password | Database |
-|---------------|------------|----------|----------|----------|
+| ------------- | ---------- | -------- | -------- | -------- |
 | mariadb       | phpmyadmin | root     | example  | ALL      |
 | mariadb       | phpmyadmin | foo      | foo      | foo      |
-| mariadb       | adminer    | root     | example  | ALL      |
-| mariadb       | adminer    | foo      | foo      | foo      |
 
-At first login update the default password.  
-### 👉 InfluxDB  + Telegraf + Grafana
-https://influxdb.localhost , https://grafana.localhost  
 
-| Target access | Subdomain | Default Username | Default Password | Database |
-|---------------|-----------|----------|----------|----------|
-| grafana       | grafana   | admin    | admin    | ALL      |  
-
-At first start, **InfluxDB** will request to set up an initial user.
 <!---
 ### 👉 RESTful API for mysql/mariadb
 https://github.com/krink-code/db-api?tab=readme-ov-file  
@@ -124,22 +90,10 @@ At first start, **Portainer** will request to set up an initial administrator.
 https://traefik.localhost  
 
 | Target access | Subdomain | Default Username | Default Password |
-|---------------|-----------|----------|----------|
-| traefik       | traefik   | admin    | admin    |
+| ------------- | --------- | ---------------- | ---------------- |
+| traefik       | traefik   | admin            | admin            |
 
 You will find instructions in file .env to change user and password.    
-### 👉 Mosquitto MQTT  
-| Protocol  | Binding   | Port | Default Username | Default Password | Encryption(tls) |
-|-----------|-----------|------|------------------|------------------|-----------------|
-| mqtt      | localhost | 1883 |                  |                  |        No       |
-| mqtt      | 0.0.0.0   | 8883 | admin            | admin            |       Yes       |
-| websocket | localhost | 8083 |                  |                  |        No       |
-| websocket | 0.0.0.0   | 8091 | admin            | admin            |       Yes       |
-
-Useful links:  
-[How to add, delete users and set password](.mosquitto/config/readme.md)  
-[Mosquitto.org configuration manual](https://mosquitto.org/man/mosquitto-conf-5.html)  
-### 👉 API-MQTT Gateway
 
 ### System requirements  
 Requires Docker compose > 2.27 (check in terminal: docker compose version)

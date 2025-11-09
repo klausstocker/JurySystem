@@ -61,26 +61,6 @@ services:
       networks:
         - backnet
 
-    adminer:
-      image: adminer
-      container_name: adminer
-      restart: always
-      # ports:
-      #  - "${PORT_ADMINER}:8080"
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.adminer.rule=Host(`${SUBDOMAIN_ADMINER}${DOMAIN}`)"
-        - "traefik.http.routers.adminer.entrypoints=websecure"
-        - "traefik.http.routers.adminer.tls.certresolver=letsencrypt"
-        - "traefik.http.services.adminer.loadbalancer.server.port=8080"
-        - "traefik.http.routers.adminer.tls=true"
-      depends_on:
-        - db
-        # db:
-        #  condition: service_healthy
-      networks:
-        - backnet
-
     # Max Scale - it is running but has some issues
     # username is admin and the password is mariadb
     maxscale:
