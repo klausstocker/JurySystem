@@ -1,12 +1,14 @@
+import io
 import os
 import sys
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 from datetime import datetime
+import qrcode
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete
@@ -81,3 +83,24 @@ async def certificate(eventId: int):
     filename = f'{alphaNum(event.name)}.pdf'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(pdf_file, headers=headers, media_type='application/pdf')
+
+
+def get_bytes(image):
+    img_byte_arr = io.BytesIO()
+    image.save(img_byte_arr, format='png')
+    return img_byte_arr.getvalue()
+
+@api.get('/qrcodes/login/{userId}', response_class=HTMLResponse)
+async def qrCodesLogin(userId: int) ->Response:
+    db = JuryDatabase('db')
+    user = db.getUser(userId)
+    if user is None:
+        raise HTTPException(
+            status_code=404,
+            detail="user not found"
+        )
+    img = qrcode.make(f'https://localhost/login/{user.id}/{user.password}')
+    filename = f'login_{alphaNum(user.username)}.png'
+    headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
+    return Response(get_bytes(img), headers=headers, media_type='application/png')
+    

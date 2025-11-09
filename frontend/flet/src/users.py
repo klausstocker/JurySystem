@@ -7,36 +7,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Restrictions
 
 def header():
-    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']
-
-def userAsRow(user: User, editFunc: callable, deleteFunc: callable):
-    cells = [
-        ft.DataCell(ft.IconButton(
-                    icon=ft.Icons.EDIT,
-                    icon_color=ft.Colors.GREEN_300,
-                    tooltip="Edit",
-                    on_click=lambda e: editFunc(e, user.id))),
-        ft.DataCell(ft.IconButton(
-                    icon=ft.Icons.DELETE,
-                    icon_color=ft.Colors.RED_300,
-                    tooltip="Delete",
-                    on_click=lambda e: deleteFunc(e, user.id))),
-        ft.DataCell(ft.Text(user.username)),
-        ft.DataCell(ft.Text(user.email)),
-        ft.DataCell(ft.Text(user.team)),
-        ft.DataCell(ft.Text(user.registered)),
-        ft.DataCell(ft.Text(user.expires)),
-        ft.DataCell(ft.Text(user.restrictions.name)),
-        ft.DataCell(ft.Checkbox(value=user.locked, disabled=True))
-        ]
-    return ft.DataRow(cells=cells)
+    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt', 'qr']
 
 class UserView(View):
     def __init__(self, page: ft.Page):
         super().__init__(page)
-        
+
         def createRows():
-            return [userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
+            return [self.userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
         
         def deleteFunc(e, userId):
             user = self.db.getUser(userId)
@@ -85,6 +63,35 @@ class UserView(View):
                     on_click=addFunc),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
+        
+    def userAsRow(self, user: User, editFunc: callable, deleteFunc: callable):
+        def downlodQR(e):
+            e.page.launch_url(f'https://api.{self.host()}/qrcodes/login/{user.id}')
+
+        cells = [
+            ft.DataCell(ft.IconButton(
+                        icon=ft.Icons.EDIT,
+                        icon_color=ft.Colors.GREEN_300,
+                        tooltip="Edit",
+                        on_click=lambda e: editFunc(e, user.id))),
+            ft.DataCell(ft.IconButton(
+                        icon=ft.Icons.DELETE,
+                        icon_color=ft.Colors.RED_300,
+                        tooltip="Delete",
+                        on_click=lambda e: deleteFunc(e, user.id))),
+            ft.DataCell(ft.Text(user.username)),
+            ft.DataCell(ft.Text(user.email)),
+            ft.DataCell(ft.Text(user.team)),
+            ft.DataCell(ft.Text(user.registered)),
+            ft.DataCell(ft.Text(user.expires)),
+            ft.DataCell(ft.Text(user.restrictions.name)),
+            ft.DataCell(ft.Checkbox(value=user.locked, disabled=True)),
+            ft.DataCell(ft.IconButton(
+                icon=ft.Icons.QR_CODE_2_ROUNDED,
+                tooltip="qr-code for login",
+                on_click=downlodQR))
+            ]
+        return ft.DataRow(cells=cells)
 
 class UserEditView(View):
     def __init__(self, page: ft.Page, userId: int):

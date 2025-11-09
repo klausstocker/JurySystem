@@ -51,8 +51,7 @@ class RankingView(View):
             )
 
         def printPdf():
-            host = self.page.url[5:]
-            self.page.launch_url(f'https://api.{host}/ranking/{self.event.id}/{self.categoryEdit.value}')
+            self.page.launch_url(f'https://api.{self.host()}/ranking/{self.event.id}/{self.categoryEdit.value}')
 
         self.controls = [
             ft.AppBar(title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),

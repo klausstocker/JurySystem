@@ -22,8 +22,7 @@ class AttendanceView(View):
             if self.eventCtrl.value is None:
                 return
             eventId = self.eventCtrl.value
-            host = self.page.url[5:]
-            page.launch_url(f'https://api.{host}/attendances/{self.user().id}/{eventId}')
+            page.launch_url(f'https://api.{self.host()}/attendances/{self.user().id}/{eventId}')
 
         def createRows():
             if self.eventCtrl.value is None:

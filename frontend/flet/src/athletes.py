@@ -56,8 +56,7 @@ class AthleteView(View):
             self.page.go(f'/athleteEdit/0')
             
         def printPdf(e):
-            host = self.page.url[5:]
-            page.launch_url(f'https://api.{host}/athletes/{user.id}')
+            page.launch_url(f'https://api.{self.host()}/athletes/{user.id}')
 
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],

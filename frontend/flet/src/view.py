@@ -17,3 +17,6 @@ class View(ft.View):
 
     def will_unmount(self):
         print(f'{type(self).__name__} will_unmount')
+        
+    def host(self) -> str:
+        return self.page.url[5:]
