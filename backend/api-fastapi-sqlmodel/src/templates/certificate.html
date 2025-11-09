@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ event.descr() }}</title>
+  </head>
+  <body>
+    <style>
+      body {
+        text-align: center;
+        font-family: Georgia, serif;;
+        margin: 20px;
+      }
+      .signature-img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 200px;
+      }
+    </style>
+    {% for attendance, athlete in athleteAttendances %}
+      <h1 style="break-before: page;">{{ athlete.name() }}</h1>
+      <p>erreichte bei der</p>
+      <h2>{{ event.name }}</h2>
+      <p>
+        im Geräteturnen<br>
+        in der Klasse {{ attendance.eventCategoryName }}<br>
+        den 3. Rang
+      </p>
+      <p>{{ event.dateFormated() }}</p>
+      <img class="signature-img" alt="Unterschrift" src="static/signature.png">
+    {% endfor %}
+</body>
+</html>

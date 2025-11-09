@@ -5,4 +5,3 @@ python-dotenv==1.0.1
 uvicorn[standard]==0.34.*
 jinja2
 weasyprint
-pdf_reports

@@ -6,7 +6,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
-from pdf_reports import pug_to_html, write_report, ReportWriter
 from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -63,18 +62,22 @@ async def attendances(userId: int, eventId: int):
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
-@api.get('/certificate/{eventId}/{athleteId}', response_class=HTMLResponse)
-async def certificate(eventId: int, athleteId: int):
+@api.get('/certificate/{eventId}', response_class=HTMLResponse)
+async def certificate(eventId: int):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
-    athlete = db.getAthlete(athleteId)
-    attendance = db.getAttendance(athleteId, eventId)
-    html = pug_to_html("templates/certificate.pug", title=f'{athlete.name()} - {event.name}', event=event, athlete=athlete, attendance=attendance)
-    pdf = write_report(html, base_url='static')
-    filename = f'{alphaNum(athlete.name())}_{alphaNum(event.name)}.pdf'
+    athleteAttendances = []
+    for attendance in db.getEventAttendances(eventId):
+        athleteAttendances.append((attendance, db.getAthlete(attendance.athleteId)))
+
+    template = env.get_template('certificate.html')
+    context = {
+        "title": f'{event.name}',
+        "event": event,
+        "athleteAttendances": athleteAttendances
+    }
+    rendered_html = template.render(context)
+    pdf_file = HTML(string=rendered_html, base_url=".").write_pdf()
+    filename = f'{alphaNum(event.name)}.pdf'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
-    return Response(pdf, headers=headers, media_type='application/pdf')
-
-
-
-
+    return Response(pdf_file, headers=headers, media_type='application/pdf')
