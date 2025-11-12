@@ -7,6 +7,8 @@ services:
       context: backend/api-fastapi-sqlmodel
     container_name: api-fastapi-sqlmodel
     restart: always
+    environment:
+      - DOMAIN=${DOMAIN}
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:
@@ -26,5 +28,4 @@ services:
         uvicorn main:api --reload --workers 1 --host "0.0.0.0" --port ${PORT_API} --proxy-headers
     depends_on:
       - db
-      # db:
-      #  condition: service_healthy
+      - redis

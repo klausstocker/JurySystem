@@ -66,7 +66,7 @@ class UserView(View):
         
     def userAsRow(self, user: User, editFunc: callable, deleteFunc: callable):
         def downlodQR(e):
-            e.page.launch_url(f'https://api.{self.host()}/qrcodes/login/{user.id}')
+            e.page.launch_url(f'https://api.{self.host()}/qrcodes/login/{self.token()}/{user.id}')
 
         cells = [
             ft.DataCell(ft.IconButton(

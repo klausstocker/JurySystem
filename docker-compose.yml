@@ -3,6 +3,7 @@ include:
   - docker-compose-portainer.yml  # service portainer declared
   - docker-compose-traefik.yml  # service traefik declared
   - docker-compose-mariadb.yml  # services db, phpmyadmin, maxscale declared
+  - docker-compose-redis.yml  # redis server which provides fast key-value  storage
 
   # uncomment needed services
   - docker-compose-python-app.yml  # service app declared | depends on: db

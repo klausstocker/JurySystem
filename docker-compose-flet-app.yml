@@ -22,3 +22,6 @@ services:
       - "traefik.http.routers.flet-app.entrypoints=websecure"
       - "traefik.http.services.flet-app.loadbalancer.server.port=${PORT_FLET}"
       - "traefik.http.routers.flet-app.tls.certresolver=letsencrypt"
+    depends_on:
+      - db
+      - redis

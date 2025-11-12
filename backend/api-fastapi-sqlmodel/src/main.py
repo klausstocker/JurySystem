@@ -9,9 +9,12 @@ from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 from datetime import datetime
 import qrcode
+from redis import StrictRedis
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete
+
+r = StrictRedis(host='redis', port=6379, db=0, password='redispass', decode_responses=True)
 
 api = FastAPI()
 
@@ -90,8 +93,13 @@ def get_bytes(image):
     image.save(img_byte_arr, format='png')
     return img_byte_arr.getvalue()
 
-@api.get('/qrcodes/login/{userId}', response_class=HTMLResponse)
-async def qrCodesLogin(userId: int) ->Response:
+@api.get('/qrcodes/login/{token}/{userId}', response_class=HTMLResponse)
+async def qrCodesLogin(userId: int, token: str, request: Request) ->Response:
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
     db = JuryDatabase('db')
     user = db.getUser(userId)
     if user is None:
@@ -99,7 +107,7 @@ async def qrCodesLogin(userId: int) ->Response:
             status_code=404,
             detail="user not found"
         )
-    img = qrcode.make(f'https://localhost/login/{user.id}/{user.password}')
+    img = qrcode.make(f'https://{os.environ['DOMAIN']}/login/{user.id}/{user.password}')
     filename = f'login_{alphaNum(user.username)}.png'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')

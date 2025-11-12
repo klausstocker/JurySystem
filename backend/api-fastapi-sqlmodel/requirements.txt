@@ -6,3 +6,4 @@ uvicorn[standard]==0.34.*
 jinja2
 weasyprint
 qrcode[pil]
+redis[hiredis]

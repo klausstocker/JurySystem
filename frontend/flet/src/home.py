@@ -1,6 +1,7 @@
 import os
 import sys
 import flet as ft
+import secrets
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -82,6 +83,7 @@ class LoginView(View):
             if userId is not None:
                 print("Redirecting...")
                 self.page.session.set('user', self.db.getUser(userId))
+                self.setToken(secrets.token_urlsafe())
                 if self.page.session.contains_key('target'):
                     target = self.page.session.get('target')
                     self.page.session.remove('target')
