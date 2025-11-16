@@ -6,6 +6,7 @@ from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType, allowedCategories
+from shared.rights import Route, allowedRoutes
 class TestDatabase(unittest.TestCase):
 
     def __init__(self, methodName = "runTest"):
@@ -105,6 +106,11 @@ class TestDatabase(unittest.TestCase):
         athlete = self.db.getAthlete(6)
         filtered = allowedCategories(allCats, athlete)
         self.assertEqual(len(filtered), 1)
+
+    def test_rights(self):
+        host = self.db.getUser(2)
+        allowed = allowedRoutes(host)
+        self.assertEqual(len(allowed), 5)
 
 if __name__ == '__main__':
     unittest.main()

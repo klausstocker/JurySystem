@@ -9,7 +9,7 @@ class Restrictions(Enum):
     HOST = 1
     JUDGE = 2
     ADMIN = 3
-    
+
 class Gender(Enum):
     MALE = 0
     FEMALE = 1
