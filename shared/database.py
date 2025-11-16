@@ -70,6 +70,7 @@ class Progress(Enum):
     PLANNED = 0
     ACTIVE = 1
     FINISHED = 2
+
 @dataclass
 class Event:
     id: int
@@ -117,6 +118,14 @@ class EventCategory:
     @staticmethod
     def defaultRankingAlgo() -> str:
         return "'gold' if sum > 30 else 'silber' if sum > 20 else 'bronze' if sum > 10 else ''"
+    
+
+def allowedCategories(categories: list[EventCategory], athlete: Athlete) -> list[EventCategory]:
+    ret = []
+    for category in categories:
+        if athlete.gender == category.gender and category.birthFrom <= athlete.birth <= category.birthTo:
+            ret.append(category)
+    return ret
 
 @dataclass
 class EventDiscipline:

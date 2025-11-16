@@ -5,7 +5,7 @@ import pymysql.cursors
 from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType
+from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType, allowedCategories
 class TestDatabase(unittest.TestCase):
 
     def __init__(self, methodName = "runTest"):
@@ -37,7 +37,7 @@ class TestDatabase(unittest.TestCase):
         
     def test_athlete(self):
         athletes = self.db.getAthletes(3)
-        self.assertEqual(len(athletes), 2)
+        self.assertEqual(len(athletes), 3)
         self.assertEqual(athletes[0].givenname, 'Klaus')
         self.assertTrue(self.db.athleteHasAttendances(3))
 
@@ -100,6 +100,11 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(norankings[0].ratings.athlete.givenname, 'Klaus')
         self.assertEqual(norankings[0].ranking, 'bronze')
 
+    def test_categories(self):
+        allCats = self.db.getEventCategories(1)
+        athlete = self.db.getAthlete(6)
+        filtered = allowedCategories(allCats, athlete)
+        self.assertEqual(len(filtered), 1)
 
 if __name__ == '__main__':
     unittest.main()

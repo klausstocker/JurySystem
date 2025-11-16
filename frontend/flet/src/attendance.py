@@ -4,7 +4,7 @@ import flet as ft
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
-from shared.database import JuryDatabase, User, Athlete, Attendance, Gender, Event, Progress, Restrictions
+from shared.database import JuryDatabase, User, Athlete, Attendance, Gender, Event, Progress, Restrictions, allowedCategories
 
 
 def header():
@@ -86,7 +86,8 @@ class AttendanceView(View):
                 else:
                     groupCell.content.disabled = True
                 categoryCell.content.disabled = False
-                categoryCell.content.options = [ft.dropdownm2.Option(d.name) for d in categories]
+                allowed = allowedCategories(categories, athlete)
+                categoryCell.content.options = [ft.dropdownm2.Option(d.name) for d in allowed]
             else:
                 print(f'denominate {athlete.name()} for {event.descr()}')
                 self.db.hideAttendance(event.id, athlete.id, True)
@@ -108,9 +109,10 @@ class AttendanceView(View):
         attendance = self.db.getAttendance(athlete.id, event.id)
         checkBoxEnabled = event.progress() == Progress.PLANNED
         checkBoxValue = attendance is not None
+        allowed = allowedCategories(categories, athlete)
         categoryCell = ft.DataCell(ft.Dropdown(
                     disabled=not attendance,
-                    options=list() if attendance is None else [ft.dropdownm2.Option(d.name) for d in categories],
+                    options=list() if attendance is None else [ft.dropdownm2.Option(d.name) for d in allowed],
                     value=attendance.eventCategoryName if attendance else None,
                     on_change=onUpdateCategory
                     ))

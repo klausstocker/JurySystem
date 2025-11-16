@@ -49,7 +49,8 @@ INSERT INTO `athletes` (`id`, `givenname`, `surname`, `userId`, `birth`, `gender
   (2, 'Christoph', 'Hogl', 4, '1977-07-13', 0, 0),
   (3, 'Johanna', 'Stocker', 3, '2010-05-20', 1, 0),
   (4, 'Herbet', 'Mayer', 4, '2010-05-20', 0, 0),
-  (5, 'Sophia', 'Mayer', 4, '2010-05-20', 1, 0);
+  (5, 'Sophia', 'Mayer', 4, '2010-05-20', 1, 0),
+  (6, 'Stocker', 'Daniel', 3, '2015-03-31', 0, 0);
 
 CREATE TABLE IF NOT EXISTS `events` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -88,8 +89,9 @@ CREATE TABLE IF NOT EXISTS `event_categories` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`, `rankingAlgo`) VALUES
-  ('Kn01', 1, 0, '2020-01-01', '2021-12-31', 0, ''),
-  ('Md01', 1, 1, '2020-01-01', '2021-12-31', 1, '"gold" if sum > 30 else "silber" if sum > 20 else "bronze" if sum > 10 else ""');
+  ('Kn01', 1, 0, '1900-01-01', '2000-12-31', 0, ''),
+  ('Kn02', 1, 0, '2000-01-01', '2099-12-31', 0, ''),
+  ('Md01', 1, 1, '1900-01-01', '2099-12-31', 1, '"gold" if sum > 30 else "silber" if sum > 20 else "bronze" if sum > 10 else ""');
 
 CREATE TABLE IF NOT EXISTS `event_disciplines` (
   `name` varchar(50) NOT NULL,
