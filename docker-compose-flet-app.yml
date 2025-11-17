@@ -11,6 +11,7 @@ services:
       - FLET_FORCE_WEB_SERVER=true
       - FLET_SERVER_PORT=${PORT_FLET}
       - FLET_APP_LIFETIME_MINUTES=10
+      - DOMAIN=${DOMAIN}
     # ports:
     #  - "${PORT_FLET}:${PORT_FLET}"
     volumes:
