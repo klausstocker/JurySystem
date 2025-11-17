@@ -105,6 +105,7 @@ class LoginView(View):
             color="white",
             on_click=loginbtn
         )
+        public_ranking_button = ft.ElevatedButton("View Public Rankings", on_click=lambda _: self.page.go("/public/ranking/1"))
 
         
         self.controls = [
@@ -114,7 +115,8 @@ class LoginView(View):
                         title,
                         username,
                         password,
-                        login_button
+                        login_button,
+                        public_ranking_button
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,

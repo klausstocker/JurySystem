@@ -31,6 +31,14 @@ class Navigator:
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to live event {eventId}')
             self.page.views.append(LiveEventView(self.page, eventId))
+            self.page.update()
+            return
+        elif self.page.route.startswith('/public/ranking'):
+            eventId = int(self.page.route.split('/')[-1])
+            print(f'switch to public ranking {eventId}')
+            self.page.views.append(RankingView(self.page, eventId))
+            self.page.update()
+            return
         elif self.page.route == '/login':
             self.page.views.append(LoginView(self.page))
         elif self.page.session.get('user') is None:
@@ -59,9 +67,6 @@ class Navigator:
         elif self.page.route.startswith('/rating'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(RatingView(self.page, eventId))
-        elif self.page.route.startswith('/ranking'):
-            eventId = int(self.page.route.split('/')[-1])
-            self.page.views.append(RankingView(self.page, eventId))
         self.page.update()
 
     def view_pop(self, view):
