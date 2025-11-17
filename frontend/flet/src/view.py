@@ -21,7 +21,7 @@ class View(ft.View):
         print(f'{type(self).__name__} will_unmount')
 
     def host(self) -> str:
-        return self.page.url[5:]
+        return self.page.url[10:]
 
     def token(self):
         return self.page.session.get('token')
