@@ -9,7 +9,7 @@ from shared.database import JuryDatabase, Event, Progress
 
 
 def header():
-    return ['', '', 'name', 'date', 'progress']
+    return ['edit', 'delete', 'name', 'date', 'progress', 'categories']
 
 def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
     cells = [
@@ -25,7 +25,11 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
                     on_click=lambda e: deleteFunc(e, event.id))),
         ft.DataCell(ft.Text(event.name)),
         ft.DataCell(ft.Text(event.dateFormated())),
-        ft.DataCell(ft.Text(event.progress()))
+        ft.DataCell(ft.Text(event.progress())),
+        ft.DataCell(ft.IconButton(icon=ft.Icons.CATEGORY,
+                                icon_color=ft.Colors.BLUE_300,
+                                tooltip="Categories",
+                                on_click=lambda e: e.control.page.go(f"/categories/{event.id}"))),
         ]
     return ft.DataRow(cells=cells)
 
@@ -100,7 +104,7 @@ class EventEditView(View):
 
         user = self.page.session.get('user')
 
-        event = self.db.getEvent(eventId) if not createEvent else Event(0, "", user.id, datetime.datetime.now(), Progress.PLANNED)
+        event = self.db.getEvent(eventId) if not createEvent else Event(0, "", user.id, datetime.datetime.now())
 
         name_input = ft.TextField(label="Event Name", width=300, value=event.name)
         date_input = ft.TextField(label="Datum (d.m.Y)", width=300, value=event.dateFormated())
