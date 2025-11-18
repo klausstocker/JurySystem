@@ -20,8 +20,6 @@ class View(ft.View):
     def will_unmount(self):
         print(f'{type(self).__name__} will_unmount')
 
-    def host(self) -> str:
-        return os.environ['DOMAIN']
 
     def token(self):
         return self.page.session.get('token')
@@ -29,3 +27,11 @@ class View(ft.View):
     def setToken(self, token: str):
         self.page.session.set('token', token)
         self.redis.setex(token, 3600, 1)
+
+    @staticmethod
+    def host() -> str:
+        return os.environ['DOMAIN']
+    
+    @staticmethod
+    def api() -> str:
+        return os.environ['SUBDOMAIN_API'] + View.host()
