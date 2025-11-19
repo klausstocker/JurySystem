@@ -9,7 +9,7 @@ from shared.database import JuryDatabase, Athlete, AthleteRatings, AthleteRankin
 def ratingCell(ratings: AthleteRatings, discipline: str):
     if discipline not in ratings.ratings.keys():
         return ft.DataCell(ft.Text('---'))
-    difficulty, execution = ratings.ratings[discipline].pretty()
+    difficulty, execution = ratings.ratings[discipline].prettyTuple()
     return ft.DataCell(ft.Row(spacing=5, controls=[ft.Text(difficulty), ft.Text(execution)]))
     
 class RankingView(View):

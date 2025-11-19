@@ -71,15 +71,19 @@ async def attendances(userId: int, eventId: int):
 async def ranking(eventId: int, category: str):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
+    disciplines = db.getEventDisciplines(eventId)
     data = []
     for rank in db.getEventCategoryRankings(eventId, category):
         athlete = rank.ratings.athlete
+        ratingData = []
+        for discipline in disciplines:
+            ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
         user = db.getUser(athlete.userId)
-        data.append([rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
+        data.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
 
     context = {
             "title": f'Rankings for {event.descr()} / {category}',
-            "headers": ['rank', 'name', 'team', 'rating'],
+            "headers": ['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'],
             "data": data
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')
