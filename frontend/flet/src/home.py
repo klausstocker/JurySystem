@@ -38,7 +38,7 @@ class HomeView(View):
                     style=ft.ButtonStyle(
                         bgcolor = {
                             ft.ControlState.DEFAULT: "lightblue",
-                            ft.ControlState.HOVERED: "#42DDF5FF",
+                            ft.ControlState.HOVERED: "#FFFFFFFF",
                         },
                         text_style=ft.TextStyle(size=16),
                     )    
@@ -97,12 +97,23 @@ class LoginView(View):
         title = ft.Text("Anmeldung zum Jurysystem",size = 40, weight="bold")
         username = ft.TextField(label="User name", width=400, border_color= "white")
         password = ft.TextField(label="Password", password=True, border_color= "white", can_reveal_password=True, on_submit=loginbtn, width=400)
+    
         login_button = ft.ElevatedButton(
-            "Login Now",
-            bgcolor="blue",
-            color="white",
-            on_click=loginbtn
+            "Login",
+            on_click=loginbtn,
+            color="black", 
+            width= 80,
+            height= 30,
+
+            style=ft.ButtonStyle(
+                bgcolor = {
+                    ft.ControlState.DEFAULT: "lightblue",
+                    ft.ControlState.HOVERED: "#FFFFFFFF",
+                },
+                text_style=ft.TextStyle(size=16),
+            )
         )
+          
         public_ranking_button = ft.ElevatedButton("View Public Rankings", on_click=lambda _: self.page.go("/public/ranking/1"))
 
         
@@ -118,7 +129,7 @@ class LoginView(View):
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=20
+                    spacing=15
                 ),
                 expand=True,
                 alignment=ft.alignment.center

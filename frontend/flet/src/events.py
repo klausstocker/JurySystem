@@ -103,12 +103,38 @@ class EventEditView(View):
         event = self.db.getEvent(eventId) if not createEvent else Event(0, "", user.id, datetime.datetime.now(), Progress.PLANNED)
 
         name_input = ft.TextField(label="Event Name", width=300, value=event.name)
-        date_input = ft.TextField(label="Datum (d.m.Y)", width=300, value=event.dateFormated())
+        event_date_str = event.dateFormated()
+
+        self.event_date = ft.TextField(
+            label="event date",
+            value=event_date_str,
+            disabled=True,
+            width=115
+        )
+
+        def onChangeDate(e):
+            d = e.control.value
+            if d:
+                self.event_date.value = d.strftime("%d.%m.%Y")
+                self.page.update()
+
+        date_input = ft.ElevatedButton(
+            "Pick date",
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda e: page.open(
+                ft.DatePicker(
+                    first_date=datetime.datetime(year=1980, month=1, day=1),
+                    last_date=datetime.datetime(year=2025, month=12, day=31),
+                    on_change=onChangeDate
+                )
+            ),
+        )
+
 
         def saveEvent(e):
             name = name_input.value.strip()
-            date = date_input.value.strip()
-
+            date = self.event_date.value.strip()
+            
             if not name or not date:
                 self.page.open(ft.SnackBar(ft.Text("Bitte Name und Datum eingeben!"), bgcolor="red"))
                 return
@@ -127,6 +153,7 @@ class EventEditView(View):
             ft.AppBar(title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
                       bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             name_input,
+            self.event_date,
             date_input,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(icon=ft.Icons.CHECK_CIRCLE, icon_color=ft.Colors.GREEN_300, tooltip="Speichern", on_click=saveEvent),
