@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime
 import flet as ft
 from view import View
 
@@ -108,24 +109,56 @@ class AthleteEditView(View):
         def update(e):
             if createAthlete:
                 print(f'creating athlete')
-                self.db.insertAthlete(givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(birthEdit.value), Gender[genderEdit.value])
+                self.db.insertAthlete(givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(self.birthEdit.value), Gender[genderEdit.value])
             else:
                 print(f'saving {athleteId=}')
-                self.db.updateAthlete(athleteId, givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(birthEdit.value), Gender[genderEdit.value])
+                self.db.updateAthlete(athleteId, givenNameEdit.value, surnameEdit.value, user.id, Athlete.birthFromString(self.birthEdit.value), Gender[genderEdit.value])
             self.page.go("/athletes")
             
         def cancel(e):
             print(f'cancel {athleteId=}')
             self.page.go("/athletes")
 
+        def onChangeBirth(e):
+            self.birthEdit.value = e.control.value.strftime("%d.%m.%Y")
+            self.page.update()
+
         print(f'get athlete {athleteId=}')
         if not createAthlete:
             athlete = self.db.getAthlete(athleteId)
-            print(f'edit {athlete.name()}')
-        givenNameEdit = ft.TextField(label="given name", value=None if createAthlete else athlete.givenname)
-        surnameEdit = ft.TextField(label="surname", value=None if createAthlete else athlete.surname)
+            birth_value = athlete.birthFormated()
+        else:
+            birth_value = ""
+        givenNameEdit = ft.TextField(label="Given name", value=None if createAthlete else athlete.givenname)
+        surnameEdit = ft.TextField(label="Surname", value=None if createAthlete else athlete.surname)
         teamEdit = ft.TextField(label="Team", value=user.team, disabled=True)
-        birthEdit = ft.TextField(label="birth", value=None if createAthlete else athlete.birthFormated())
+        self.birthEdit = ft.TextField(
+            label="Birth",
+            value=birth_value,
+            disabled=True,
+            width=115
+        )
+        birthPicker = ft.ElevatedButton(
+            "Pick date",
+            icon=ft.Icons.CALENDAR_MONTH,
+            on_click=lambda e: page.open(
+                ft.DatePicker(
+                    first_date=datetime.datetime(year=1980, month=1, day=1),
+                    last_date=datetime.datetime(year=2025, month=12, day=31),
+                    on_change = onChangeBirth
+                )
+            ),
+        )
+        birth_row = ft.Row(
+            controls=[
+                self.birthEdit,
+                birthPicker
+            ],
+            spacing=10,
+            vertical_alignment=ft.CrossAxisAlignment.CENTER,
+        )
+        
+    
         genderEdit = ft.Dropdown(
             label="gender",
             width = 300,
@@ -136,7 +169,7 @@ class AthleteEditView(View):
             givenNameEdit,
             surnameEdit,
             teamEdit,
-            birthEdit,
+            birth_row,
             genderEdit,
             ft.Row(spacing=0, controls=[
                     ft.IconButton(

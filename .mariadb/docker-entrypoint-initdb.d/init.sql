@@ -63,7 +63,8 @@ CREATE TABLE IF NOT EXISTS `events` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `events` (`id`, `name`, `userId`, `date`, `deleted`) VALUES
-  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 0);
+  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 0),
+  (2, 'Bezirksmeisterschaften 2026', 2, '2026-05-28', 0);
 
 CREATE TABLE IF NOT EXISTS `event_judges` (
   `eventId` int(10) unsigned NOT NULL,
