@@ -96,13 +96,28 @@ class LoginView(View):
 
         userEdit = ft.TextField(label="User name", width=400, border_color= "white")
         passEdit = ft.TextField(label="Password", password=True, border_color= "white", can_reveal_password=True, on_submit=loginbtn, width=400)
+        login_button = ft.ElevatedButton(
+            "Login",
+            on_click=loginbtn,
+            color="black", 
+            width= 80,
+            height= 30,
+
+            style=ft.ButtonStyle(
+                bgcolor = {
+                    ft.ControlState.DEFAULT: "lightblue",
+                    ft.ControlState.HOVERED: "#FFFFFFFF",
+                },
+                text_style=ft.TextStyle(size=16),
+            )
+        )
 
         controls = [
             ft.Text("Anmeldung zum Jurysystem",size = 40, weight="bold"),
-            userEdit, passEdit,
-            ft.ElevatedButton("Login Now", bgcolor="blue", color="white", on_click=loginbtn)
+            userEdit, passEdit,login_button
         ]
 
+        print(len(self.db.getAllEvents()))
         for e in self.db.getAllEvents():
             if e.progress() == Progress.FINISHED:
                 controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}")))
