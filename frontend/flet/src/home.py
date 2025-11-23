@@ -121,6 +121,8 @@ class LoginView(View):
         for e in self.db.getAllEvents():
             if e.progress() == Progress.FINISHED:
                 controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}")))
+            if e.progress() == Progress.ACTIVE:
+                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/liveEvent/{id}")))
 
         self.controls = [
             ft.Container(

@@ -9,13 +9,13 @@ from shared.database import JuryDatabase, Athlete, AthleteRatings, AthleteRankin
 def ratingCell(ratings: AthleteRatings, discipline: str):
     if discipline not in ratings.ratings.keys():
         return ft.DataCell(ft.Text('---'))
-    difficulty, execution = ratings.ratings[discipline].pretty()
+    difficulty, execution = ratings.ratings[discipline].prettyTuple()
     return ft.DataCell(ft.Row(spacing=5, controls=[ft.Text(difficulty), ft.Text(execution)]))
     
 class RankingView(View):
     def __init__(self, page: ft.Page, eventId: int):
         super().__init__(page)
-        self.route = f'/ranking/{eventId}'
+        self.route = f'public/ranking/{eventId}'
 
         self.event = self.db.getEvent(eventId)
         self.disciplines = self.db.getEventDisciplines(eventId)
@@ -50,8 +50,8 @@ class RankingView(View):
                 rows= [self.AthleteRankingAsRow(ranking) for ranking in self.rankings]
             )
 
-        def printPdf():
-            self.page.launch_url(f'https://api.{self.host()}/ranking/{self.event.id}/{self.categoryEdit.value}')
+        def printPdf(e):
+            self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
 
         self.controls = [
             ft.AppBar(title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),

@@ -157,18 +157,22 @@ class Rating:
     eventDisciplineName: str
     difficulty: float
     execution: float
-    
+
     def sum(self) -> float:
         return self.difficulty + self.execution
-    
-    def pretty(self) -> str:
+
+    def prettyTuple(self):
         return '{:.2f}'.format(self.difficulty), '{:.2f}'.format(self.execution)
-    
+
+    def pretty(self) -> str:
+        d, e = self.prettyTuple()
+        return f'{d} / {e}'
+
     def rate(self, difficulty: float, execution: float):
         self.ts = datetime.now()
         self.difficulty = difficulty
         self.execution = execution
-    
+
     @staticmethod
     def fromRow(row):
         return Rating(row['id'], row['ts'], row['athleteId'], row['eventId'], row['userId'], row['eventDisciplineName'], row['difficulty'], row['execution'])
@@ -183,10 +187,15 @@ class AthleteRatings:
     def sum(self) -> float:
         return sum(r.sum() for r in self.ratings.values())
     
-    def ratingOrNone(self, discpiline: str):
-        if discpiline in self.ratings.keys():
-            return self.ratings[discpiline].difficulty, self.ratings[discpiline].execution, self.ratings[discpiline].id
+    def ratingOrNone(self, discipline: str):
+        if discipline in self.ratings.keys():
+            return self.ratings[discipline].difficulty, self.ratings[discipline].execution, self.ratings[discipline].id
         return None, None, None
+
+    def prettyOrDefault(self, discipline: str, default='---') -> str:
+        if discipline in self.ratings.keys():
+            return self.ratings[discipline].pretty()
+        return default
 
 @dataclass
 class AthleteRanking:

@@ -67,6 +67,28 @@ async def attendances(userId: int, eventId: int):
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
+@api.get('/ranking/{eventId}/{category}', response_class=HTMLResponse)
+async def ranking(eventId: int, category: str):
+    db = JuryDatabase('db')
+    event = db.getEvent(eventId)
+    disciplines = db.getEventDisciplines(eventId)
+    data = []
+    for rank in db.getEventCategoryRankings(eventId, category):
+        athlete = rank.ratings.athlete
+        ratingData = []
+        for discipline in disciplines:
+            ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
+        user = db.getUser(athlete.userId)
+        data.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
+
+    context = {
+            "title": f'Rankings for {event.descr()} / {category}',
+            "headers": ['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'],
+            "data": data
+        }
+    return createResponse('table.html', context, f'ranking_{category}.pdf')
+
+
 @api.get('/certificate/{eventId}', response_class=HTMLResponse)
 async def certificate(eventId: int):
     db = JuryDatabase('db')
@@ -107,8 +129,8 @@ async def qrCodesLogin(userId: int, token: str, request: Request) ->Response:
             status_code=404,
             detail="user not found"
         )
-    img = qrcode.make(f'https://{os.environ['DOMAIN']}/login/{user.id}/{user.password}')
+    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_FLET'] + os.environ['DOMAIN']}/login/{user.id}/{user.password}')
     filename = f'login_{alphaNum(user.username)}.png'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')
-    
+
