@@ -111,6 +111,11 @@ class TestDatabase(unittest.TestCase):
         host = self.db.getUser(2)
         allowed = allowedRoutes(host)
         self.assertEqual(len(allowed), 5)
+        testRoute = Route("myroute1", "/base/{userId}/{eventId}", [])
+        self.assertEqual(testRoute.route(userId=2, eventId=3), "/base/2/3")
+        testRoute2 = Route("myroute2", "/base", [])
+        self.assertEqual(testRoute2.route(), "/base")
+        self.assertIsNone(testRoute.route())
 
 if __name__ == '__main__':
     unittest.main()

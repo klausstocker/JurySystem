@@ -17,10 +17,29 @@ class HomeView(View):
         super().__init__(page)
         self.route = '/'
         user = page.session.get('user')
+        event = page.session.get('event')
         username = '' if user is None else user.username
+        eventId = None if event is None else event.id
         controls = []
         for allowed in allowedRoutes(user):
-            controls.append(TextButton(allowed.name, on_click=lambda _,r=allowed.route: self.page.go(r)))
+            route = allowed.route() if eventId is None else allowed.route(eventId=eventId)
+            if route is not None:
+                controls.append(TextButton(allowed.name(), on_click=lambda _,r=route: self.page.go(r)))
+
+        if user is not None and user.isHost():
+            options = []
+            for event in self.db.getEvents(user.id):
+                options.append(ft.dropdownm2.Option(
+                        key=event.id,
+                        text=event.descr()
+                    ))
+
+            controls.append(ft.Dropdown(
+                label="select event",
+                options=options,
+                value=event.id,
+                on_change=lambda e: self.session.set('event', e.value)
+            ))
 
         menu = ft.Row(
             controls=controls,

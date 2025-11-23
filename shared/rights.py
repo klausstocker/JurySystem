@@ -5,23 +5,37 @@ from database import *
 
 @dataclass
 class Route():
-    name: str
-    route: str
-    allowed: list[Restrictions]
+    _name: str
+    _route: str
+    _allowed: list[Restrictions]
+
+    def route(self, **kwargs) -> str:
+        for v in kwargs.values():
+            if v is None:
+                return None
+        try:
+            return self._route.format(**kwargs)
+        except KeyError:
+            pass
+        return None
+    
+    def name(self):
+        return self._name
     
     def isAllowed(self, user: User) -> bool:
-        for allowed in self.allowed:
+        for allowed in self._allowed:
             if user.restrictions.value == allowed.value:
                 return True
         return False
+
 
 routes = [
     Route("Users", "/users", [Restrictions.ADMIN]),
     Route("Athletes", "/athletes", [Restrictions.TRAINER]),
     Route("Attendances", "/attendances", [Restrictions.HOST, Restrictions.TRAINER]),
     Route("Events", "/events", [Restrictions.HOST, Restrictions.TRAINER]),
-    Route("Rating", "/rating/1", [Restrictions.HOST, Restrictions.JUDGE]),
-    Route("Ranking", "/ranking/1", [Restrictions.HOST]),
+    Route("Rating", "/rating/{eventId}", [Restrictions.HOST, Restrictions.JUDGE]),
+    Route("Ranking", "/ranking/{eventId}", [Restrictions.HOST]),
     Route("Settings", "/settings", Restrictions)
 ]
 
