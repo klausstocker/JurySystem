@@ -8,6 +8,7 @@ from events import EventView, EventEditView
 from rating import RatingView
 from ranking import RankingView
 from live_event import LiveEventView
+from categories import CategoriesView
 
 
 class RouteErrorView(ft.View):
@@ -37,6 +38,11 @@ class Navigator:
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to public ranking {eventId}')
             self.page.views.append(RankingView(self.page, eventId))
+            self.page.update()
+            return
+        elif self.page.route.startswith("/categories"):
+            eventId = int(self.page.route.split("/")[-1])
+            self.page.views.append(CategoriesView(self.page, eventId))
             self.page.update()
             return
         elif self.page.route == '/login':
