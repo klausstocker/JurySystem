@@ -46,9 +46,9 @@ class RatingView(View):
         cells = [
             ft.DataCell(ft.Text(athlete.name())),
             ft.DataCell(ft.Text(ratings.eventCategoryName)),
-            ft.DataCell(ft.Text(ratings.sum())),
-            ft.DataCell(ft.Text(emptyIfNone(difficultyText))),
-            ft.DataCell(ft.Text(emptyIfNone(executionText))),
+            ft.DataCell(ft.Text('{:.1f}'.format(ratings.sum()))),
+            ft.DataCell(ft.Text('-----' if difficultyText is None else '{:.1f}'.format(difficultyText))),
+            ft.DataCell(ft.Text('-----' if executionText is None else '{:.1f}'.format(executionText))),
             ft.DataCell(ft.Row(spacing=0, controls=[
                 ft.IconButton(
                     icon=ft.Icons.EDIT,
@@ -80,14 +80,15 @@ class RatingView(View):
                 else:
                     self.db.updateRating(ratingId, self.user.id, difficultyEdt.value,
                                          executionEdt.value)
-                self.page.close(self.bs)
+                self.page.close(self.dlg)
                 self.updateControls()
             def cancel(e):
                 print(f'cancel athlete="{ratings.athlete.name()}"')
-                self.page.close(self.bs)
+                self.page.close(self.dlg)
 
-            self.bs = ft.BottomSheet(
-                ft.Container(
+            self.dlg = ft.AlertDialog(
+                modal=True,
+                content=ft.Container(
                     ft.Column(
                         [
                             ft.Text(discipline),
@@ -107,21 +108,23 @@ class RatingView(View):
                                         icon_color=ft.Colors.RED_300,
                                         tooltip="Cancel",
                                         on_click=cancel)
-                                ], scroll=ft.ScrollMode.AUTO)
+                                ], alignment=ft.MainAxisAlignment.CENTER)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         tight=True,
                     ),
-                    padding=50,
+                    padding=20,
                 )
             )
-            self.page.overlay.append(self.bs)
+            self.page.overlay.append(self.dlg)
             self.page.update()
-            self.page.open(self.bs)
+            self.page.open(self.dlg)
 
         
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '', '']],
-                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes]
+                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes],
+                column_spacing=10,
+                vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
             )
 
         self.controls = [
@@ -132,5 +135,3 @@ class RatingView(View):
             self.table,
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))]
         self.page.update()
-
-
