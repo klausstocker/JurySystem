@@ -168,6 +168,9 @@ class Rating:
         d, e = self.prettyTuple()
         return f'{d} / {e}'
 
+    def prettySum(self):
+        return '{:.2f}'.format(self.sum())
+
     def rate(self, difficulty: float, execution: float):
         self.ts = datetime.now()
         self.difficulty = difficulty
