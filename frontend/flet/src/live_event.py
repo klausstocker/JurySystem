@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Athlete, Attendance, Event, Progress, Rating
 
 def header():
-    return ['Name', 'Team', 'Category', 'Discipline', 'Difficulty', 'Execution', 'Sum']
+    return ['Name', 'Team', 'Category', 'Discipline', 'Rating']
 
 def ratingAsRow(user: User, athlete: Athlete, attendance: Attendance, event: Event, rating: Rating):
     cells = [
@@ -18,9 +18,7 @@ def ratingAsRow(user: User, athlete: Athlete, attendance: Attendance, event: Eve
         ft.DataCell(ft.Text(user.team)),
         ft.DataCell(ft.Text(attendance.eventCategoryName)),
         ft.DataCell(ft.Text(rating.eventDisciplineName)),
-        ft.DataCell(ft.Text(rating.difficulty)),
-        ft.DataCell(ft.Text(rating.execution)),
-        ft.DataCell(ft.Text(rating.sum()))
+        ft.DataCell(ft.Text(rating.prettySum())),
         ]
     return ft.DataRow(cells=cells)
 
@@ -68,6 +66,7 @@ class LiveEventView(View):
         print(f'extracted {len(rows)} ratings')
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
-                rows=rows
+                rows=rows,
+                column_spacing=10
             )
 

@@ -168,6 +168,9 @@ class Rating:
         d, e = self.prettyTuple()
         return f'{d} / {e}'
 
+    def prettySum(self):
+        return '{:.2f}'.format(self.sum())
+
     def rate(self, difficulty: float, execution: float):
         self.ts = datetime.now()
         self.difficulty = difficulty
@@ -551,6 +554,16 @@ class JuryDatabase:
         category = self.getEventCategory(eventId, eventCategoryName)
         return self._getEventCategoryRankings(eventId, category)
 
+    def insertEventCategory(self, category: EventCategory) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = "INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`, `rankingAlgo`) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+            try:
+                cursor.execute(sql, (category.name, category.eventId, category.gender.value, category.birthFrom, category.birthTo, category.rankingType.value, category.rankingAlgo))
+                self.conn.commit()
+                return True
+            except Exception as e:
+                print(f"Error inserting event category: {e}")
+                return False
 
     def updateRating(self, ratingId: int, userId: int, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:
