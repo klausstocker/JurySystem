@@ -3,8 +3,8 @@ FROM python:3.13-slim
 WORKDIR /usr/src/app
 
 # set environment variables - has advantages for python in docker container
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # install python dependencies
 RUN pip install --upgrade pip
