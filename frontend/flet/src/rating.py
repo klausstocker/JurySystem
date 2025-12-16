@@ -12,8 +12,8 @@ numFilter = ft.InputFilter(regex_string=r'^(\d+(\.\d*)?|\.\d+)$')
 def emptyIfNone(o):
     return '-----' if o is None else o
 class RatingView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, eventId: int):
+        super().__init__(page, db, redis)
         self.route = f'/rating/{eventId}'
 
         self.user = self.page.session.get('user')

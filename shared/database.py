@@ -1,4 +1,5 @@
 import pymysql.cursors
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from enum import Enum
@@ -30,6 +31,7 @@ class User:
     restrictions: Restrictions
     locked: bool
     hidden: bool
+    token: str
     
     def valid(self) -> bool:
         return datetime.now() < self.expires and not self.locked
@@ -39,7 +41,7 @@ class User:
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0)
+        return User(row['id'], row['username'], row['password'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0, row['token'])
 
 
 @dataclass
@@ -217,19 +219,40 @@ class JuryDatabase:
     def __del__(self):
         self.conn.close()
     
-    def validateUser(self, username, password):
+    def validateUser(self, username: str, password: str):
         with self.conn.cursor() as cursor:
            if cursor.execute(f'SELECT * FROM users WHERE username="{username}";') != 1:
                return None
            row = cursor.fetchone()
            user = User.fromRow(row)
+           if len(user.password) == 0:
+               return None
            if user.password != password and user.valid():
+               return None
+           return user.id
+       
+    def validateUserByToken(self, username: str, token: str):
+        with self.conn.cursor() as cursor:
+           if cursor.execute(f'SELECT * FROM users WHERE username="{username}";') != 1:
+               return None
+           row = cursor.fetchone()
+           user = User.fromRow(row)
+           if len(user.token) == 0:
+               return None
+           if user.token != token and user.valid():
                return None
            return user.id
 
     def getUser(self, userId: int) -> User:
         with self.conn.cursor() as cursor:
             sql = f'SELECT * FROM users WHERE id="{userId}";'
+            cursor.execute(sql)
+            return User.fromRow(cursor.fetchone())
+        return None
+    
+    def getUserByName(self, userName: str) -> User:
+        with self.conn.cursor() as cursor:
+            sql = f'SELECT * FROM users WHERE username="{userName}";'
             cursor.execute(sql)
             return User.fromRow(cursor.fetchone())
         return None
@@ -261,6 +284,15 @@ class JuryDatabase:
             return cnt != 0
         return False
     
+    def setUserToken(self, userId: int, token: str) -> None:
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `users` SET `token` = '{token}' WHERE `users`.`id` = {userId};"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+    
+    def recreateUserToken(self, userId: int) -> None:
+        self.setUserToken(userId, secrets.token_urlsafe())
+
     def getAllUsers(self) -> List[User]:
         users = []
         with self.conn.cursor() as cursor:

@@ -12,8 +12,8 @@ def header():
     return ['', '', 'given name', 'surname', 'birth', 'gender']
 
 class AthleteView(View):
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
         self.route = '/athletes'
 
         user = self.page.session.get('user')

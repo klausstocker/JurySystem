@@ -10,8 +10,8 @@ def header():
     return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt', 'qr']
 
 class UserView(View):
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
 
         def createRows():
             return [self.userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
@@ -94,8 +94,8 @@ class UserView(View):
         return ft.DataRow(cells=cells)
 
 class UserEditView(View):
-    def __init__(self, page: ft.Page, userId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, userId: int):
+        super().__init__(page, db, redis)
         self.route = f'/userEdit/{userId}'
 
         createUser = userId == 0

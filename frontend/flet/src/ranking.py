@@ -13,8 +13,8 @@ def ratingCell(ratings: AthleteRatings, discipline: str):
     return ft.DataCell(ft.Row(spacing=5, controls=[ft.Text(difficulty), ft.Text(execution)]))
     
 class RankingView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, eventId: int):
+        super().__init__(page, db, redis)
         self.route = f'public/ranking/{eventId}'
 
         self.event = self.db.getEvent(eventId)

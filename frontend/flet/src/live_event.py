@@ -23,8 +23,8 @@ def ratingAsRow(user: User, athlete: Athlete, attendance: Attendance, event: Eve
     return ft.DataRow(cells=cells)
 
 class LiveEventView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page, True)
+    def __init__(self, page: ft.Page, db, redis, eventId):
+        super().__init__(page, db, redis)
         self.page = page
         self.route =f'/public/liveEvent/{eventId}'
 

@@ -21,16 +21,17 @@ CREATE TABLE IF NOT EXISTS `users` (
   `restrictions` tinyint(4) DEFAULT NULL,
   `locked` tinyint(4) DEFAULT NULL,
   `hidden` tinyint(4) DEFAULT 0,
+  `token` varchar(50) DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`, `expires`, `restrictions`, `locked`, `hidden`) VALUES
-	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 3, 0, 0),
-	(2, 'host', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0, 0),
-	(3, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0),
-	(4, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0),
-	(5, 'judge', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 2, 0, 0);
+INSERT INTO `users` (`id`, `username`, `password`, `email`, `team`, `registered`, `expires`, `restrictions`, `locked`, `hidden`, `token`) VALUES
+	(1, 'admin', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 3, 0, 0, ''),
+	(2, 'host', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 1, 0, 0, ''),
+	(3, 'michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0, ''),
+	(4, 'tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 0, 0, 0, ''),
+	(5, 'judge', 'pass', 'john.doe@example.com', '', '2025-06-12 11:24:32', '2099-06-12 11:24:34', 2, 0, 0, 'asdfasdf');
 
 CREATE TABLE IF NOT EXISTS `athletes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,

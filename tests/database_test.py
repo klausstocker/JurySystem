@@ -20,12 +20,19 @@ class TestDatabase(unittest.TestCase):
     def test_user(self):
         self.assertTrue(self.db.validateUser('admin', 'pass'))
         self.assertFalse(self.db.validateUser('admin', 'pass1'))
+        judge = self.db.getUserByName('judge')
+        self.db.recreateUserToken(judge.id)
+        self.assertFalse(self.db.validateUserByToken('judge', 'asdfasdf'))
+        self.db.setUserToken(judge.id, 'asdfasdf')
+        self.assertTrue(self.db.validateUserByToken('judge', 'asdfasdf'))
+        self.assertFalse(self.db.validateUserByToken('judge', ''))
+        self.assertFalse(self.db.validateUserByToken('admin', 'qwer'))
 
         user = self.db.getUser(1)
         self.assertEqual(user.restrictions, Restrictions.ADMIN)
         self.assertTrue(user.valid())
         
-        insertedId = self.db.insertUser('judenau', 'pass', 'judena@sportunion.at', '', Restrictions.TRAINER)
+        insertedId = self.db.insertUser('judenau', 'pass', 'judenau@sportunion.at', '', Restrictions.TRAINER)
         insertedUser = self.db.getUser(insertedId)
         self.assertEqual(insertedUser.username, 'judenau')
         self.assertEqual(insertedUser.locked, 0)
