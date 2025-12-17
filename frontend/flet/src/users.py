@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Restrictions
 
 def header():
-    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt', 'qr']
+    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt', 'qr', '']
 
 class UserView(View):
     def __init__(self, page: ft.Page, db, redis):
@@ -68,6 +68,9 @@ class UserView(View):
         def downlodQR(e):
             e.page.launch_url(f'https://{View.api()}/qrcodes/login/{self.token()}/{user.id}')
 
+        def recreateQr(e):
+            self.db.recreateUserToken(user.id)
+
         cells = [
             ft.DataCell(ft.IconButton(
                         icon=ft.Icons.EDIT,
@@ -88,8 +91,12 @@ class UserView(View):
             ft.DataCell(ft.Checkbox(value=user.locked, disabled=True)),
             ft.DataCell(ft.IconButton(
                 icon=ft.Icons.QR_CODE_2_ROUNDED,
-                tooltip="qr-code for login",
-                on_click=downlodQR))
+                tooltip="qr-code for token login",
+                on_click=downlodQR)),
+            ft.DataCell(ft.IconButton(
+                icon=ft.Icons.AUTORENEW_ROUNDED,
+                tooltip="renew token for qr-code login",
+                on_click=recreateQr))
             ]
         return ft.DataRow(cells=cells)
 
