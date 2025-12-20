@@ -68,8 +68,63 @@ class RatingView(View):
         def editRating(e, ratings: AthleteRatings, discipline: str):
             print(f'edit athlete="{ratings.athlete.name()}"')
             difficultyContent, executionContent, ratingId = ratings.ratingOrNone(discipline)
-            difficultyEdt = ft.TextField(label="difficulty", value=difficultyContent, width=200, input_filter=numFilter)
-            executionEdt = ft.TextField(label="execution", value=executionContent, width=200, input_filter=numFilter)
+            
+            d_val = "{:.2f}".format(difficultyContent) if difficultyContent is not None else ""
+            e_val = "{:.2f}".format(executionContent) if executionContent is not None else ""
+
+            difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT, border_color=ft.Colors.BLUE, border_width=2)
+            executionEdt = ft.TextField(label="execution", value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
+
+            active_field = ["difficulty"]
+
+            def set_difficulty(e):
+                active_field[0] = "difficulty"
+                difficultyEdt.border_color = ft.Colors.BLUE
+                difficultyEdt.border_width = 2
+                executionEdt.border_color = None
+                executionEdt.border_width = 1
+                difficultyEdt.update()
+                executionEdt.update()
+
+            def set_execution(e):
+                active_field[0] = "execution"
+                difficultyEdt.border_color = None
+                difficultyEdt.border_width = 1
+                executionEdt.border_color = ft.Colors.BLUE
+                executionEdt.border_width = 2
+                difficultyEdt.update()
+                executionEdt.update()
+            
+            difficultyEdt.on_focus = set_difficulty
+            executionEdt.on_focus = set_execution
+
+            def add_char(char):
+                target = difficultyEdt if active_field[0] == "difficulty" else executionEdt
+                if target.value is None: target.value = ""
+                
+                if target.value == "0" and char == "0":
+                    return
+                if target.value == "0" and char != ".":
+                    target.value = char
+                else:
+                    target.value += char
+                target.update()
+
+            def backspace(e):
+                target = difficultyEdt if active_field[0] == "difficulty" else executionEdt
+                if target.value and len(target.value) > 0:
+                    target.value = target.value[:-1]
+                    target.update()
+
+            def digit_btn(digit):
+                return ft.ElevatedButton(text=str(digit), on_click=lambda _: add_char(str(digit)), expand=1)
+
+            keypad = ft.Column([
+                ft.Row([digit_btn(7), digit_btn(8), digit_btn(9)], spacing=2),
+                ft.Row([digit_btn(4), digit_btn(5), digit_btn(6)], spacing=2),
+                ft.Row([digit_btn(1), digit_btn(2), digit_btn(3)], spacing=2),
+                ft.Row([ft.ElevatedButton(".", on_click=lambda _: add_char("."), expand=1), digit_btn(0), ft.ElevatedButton(content=ft.Icon(ft.Icons.BACKSPACE_OUTLINED), on_click=backspace, expand=1)], spacing=2)
+            ], spacing=2, width=200)
 
             def update(e):
                 print(f'update athlete="{ratings.athlete.name()}"')
@@ -96,6 +151,7 @@ class RatingView(View):
                             ft.Text(f'{ratings.eventCategoryName} {ratings.athlete.birthFormated()}'),
                             difficultyEdt,
                             executionEdt,
+                            keypad,
                             ft.Row(spacing=0, controls=
                                 [
                                     ft.IconButton(
@@ -110,9 +166,9 @@ class RatingView(View):
                                         on_click=cancel)
                                 ], alignment=ft.MainAxisAlignment.CENTER)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        tight=True,
+                        tight=True, scroll=ft.ScrollMode.AUTO
                     ),
-                    padding=20,
+                    padding=10,
                 )
             )
             self.page.overlay.append(self.dlg)
@@ -129,9 +185,11 @@ class RatingView(View):
 
         self.controls = [
             ft.AppBar(title=ft.Text(f'Rating'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
-            self.disciplineEdit,
-            self.groupEdit,
-            self.table,
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))]
+            ft.Column(controls=[
+                ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
+                ft.Row([self.disciplineEdit, self.groupEdit], wrap=True),
+                ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
+                ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+            ], scroll=ft.ScrollMode.AUTO, expand=True)
+        ]
         self.page.update()
