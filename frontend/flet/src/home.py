@@ -13,8 +13,8 @@ class TextButton(ft.TextButton):
         super().__init__(text, icon, icon_color, content, style, autofocus, url, url_target, clip_behavior, on_click, on_long_press, on_hover, on_focus, on_blur, ref, key, width, height, left, top, right, bottom, expand, expand_loose, col, opacity, rotate, scale, offset, aspect_ratio, animate_opacity, animate_size, animate_position, animate_rotation, animate_scale, animate_offset, on_animation_end, tooltip, badge, visible, disabled, data, adaptive)
 
 class HomeView(View):
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
         self.route = '/'
         user = page.session.get('user')
         username = '' if user is None else user.username
@@ -74,8 +74,8 @@ class HomeView(View):
 
 
 class LoginView(View):
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
         self.route = '/login'
 
         def loginbtn(e):

@@ -34,8 +34,8 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
     return ft.DataRow(cells=cells)
 
 class EventView(View):
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
         self.route = "/events"
 
         user = self.page.session.get('user')
@@ -97,8 +97,8 @@ class EventView(View):
         ]
 
 class EventEditView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, eventId: int):
+        super().__init__(page, db, redis)
         self.route = f"/eventEdit/{eventId}"
         createEvent = eventId == 0
 

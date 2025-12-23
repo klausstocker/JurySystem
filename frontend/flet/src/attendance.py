@@ -14,8 +14,8 @@ class AttendanceView(View):
     def user(self) -> User:
         return self.page.session.get('user')
     
-    def __init__(self, page: ft.Page):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
         self.route = '/attendances'
 
         def printPdf(e):

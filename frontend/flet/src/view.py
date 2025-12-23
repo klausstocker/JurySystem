@@ -7,11 +7,11 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase
 
 class View(ft.View):
-    def __init__(self, page: ft.Page, autocommit=True):
+    def __init__(self, page: ft.Page, db, redis, autocommit=True):
         super().__init__()
         self.page = page
-        self.db = JuryDatabase('db', autocommit)
-        self.redis = StrictRedis(host='redis', port=6379, db=0, password='redispass', decode_responses=True)
+        self.db = db
+        self.redis = redis
 
     def did_mount(self):
         print(f'{type(self).__name__} did_mount')

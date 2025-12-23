@@ -129,7 +129,7 @@ async def qrCodesLogin(userId: int, token: str, request: Request) ->Response:
             status_code=404,
             detail="user not found"
         )
-    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_FLET'] + os.environ['DOMAIN']}/login/{user.id}/{user.password}')
+    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_FLET'] + os.environ['DOMAIN']}/autoLogin/{user.username}/{user.token}')
     filename = f'login_{alphaNum(user.username)}.png'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')

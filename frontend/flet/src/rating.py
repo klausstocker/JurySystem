@@ -15,8 +15,8 @@ def formatPoints(value):
     return '{:.1f}'.format(value)
 
 class RatingView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, eventId: int):
+        super().__init__(page, db, redis)
         self.route = f'/rating/{eventId}'
 
         self.user = self.page.session.get('user')
