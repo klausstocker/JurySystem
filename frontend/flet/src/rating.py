@@ -9,8 +9,11 @@ from shared.database import JuryDatabase, Athlete, AthleteRatings, Gender
 
 numFilter = ft.InputFilter(regex_string=r'^(\d+(\.\d*)?|\.\d+)$')
 
-def emptyIfNone(o):
-    return '-----' if o is None else o
+def formatPoints(value):
+    if value is None:
+        return '-----'
+    return '{:.1f}'.format(value)
+
 class RatingView(View):
     def __init__(self, page: ft.Page, eventId: int):
         super().__init__(page)
@@ -47,8 +50,8 @@ class RatingView(View):
             ft.DataCell(ft.Text(athlete.name())),
             ft.DataCell(ft.Text(ratings.eventCategoryName)),
             ft.DataCell(ft.Text('{:.1f}'.format(ratings.sum()))),
-            ft.DataCell(ft.Text('-----' if difficultyText is None else '{:.1f}'.format(difficultyText))),
-            ft.DataCell(ft.Text('-----' if executionText is None else '{:.1f}'.format(executionText))),
+            ft.DataCell(ft.Text(formatPoints(difficultyText))),
+            ft.DataCell(ft.Text(formatPoints(executionText))),
             ft.DataCell(ft.Row(spacing=0, controls=[
                 ft.IconButton(
                     icon=ft.Icons.EDIT,
@@ -75,46 +78,41 @@ class RatingView(View):
             difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT, border_color=ft.Colors.BLUE, border_width=2)
             executionEdt = ft.TextField(label="execution", value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
 
-            active_field = ["difficulty"]
+            self.active_field = difficultyEdt
+
+            def highlight_field(front, back):
+                self.active_field = front
+                front.border_width = 2
+                front.border_color = None
+                back.border_width = 1
+                front.update()
+                back.update()
 
             def set_difficulty(e):
-                active_field[0] = "difficulty"
-                difficultyEdt.border_color = ft.Colors.BLUE
-                difficultyEdt.border_width = 2
-                executionEdt.border_color = None
-                executionEdt.border_width = 1
-                difficultyEdt.update()
-                executionEdt.update()
+                highlight_field(difficultyEdt, executionEdt)
 
             def set_execution(e):
-                active_field[0] = "execution"
-                difficultyEdt.border_color = None
-                difficultyEdt.border_width = 1
-                executionEdt.border_color = ft.Colors.BLUE
-                executionEdt.border_width = 2
-                difficultyEdt.update()
-                executionEdt.update()
-            
+                highlight_field(executionEdt, difficultyContent)
+
             difficultyEdt.on_focus = set_difficulty
             executionEdt.on_focus = set_execution
 
             def add_char(char):
-                target = difficultyEdt if active_field[0] == "difficulty" else executionEdt
-                if target.value is None: target.value = ""
+                if self.active_field.value is None:
+                    self.active_field.value = ""
                 
-                if target.value == "0" and char == "0":
+                if self.active_field.value == "0" and char == "0":
                     return
-                if target.value == "0" and char != ".":
-                    target.value = char
+                if self.active_field.value == "0" and char != ".":
+                    self.active_field.value = char
                 else:
-                    target.value += char
-                target.update()
+                    self.active_field.value += char
+                self.active_field.update()
 
             def backspace(e):
-                target = difficultyEdt if active_field[0] == "difficulty" else executionEdt
-                if target.value and len(target.value) > 0:
-                    target.value = target.value[:-1]
-                    target.update()
+                if self.active_field.value and len(self.active_field.value) > 0:
+                    self.active_field.value = self.active_field.value[:-1]
+                    self.active_field.update()
 
             def digit_btn(digit):
                 return ft.ElevatedButton(text=str(digit), on_click=lambda _: add_char(str(digit)), expand=1)
