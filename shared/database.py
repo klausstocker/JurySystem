@@ -542,7 +542,37 @@ class JuryDatabase:
                 athletes.append(Athlete.fromRow(row))
         return athletes
 
+    def getEventsofJudge(self, judgeId: int) -> list[Event]:
+        events = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT `events`.* FROM `event_judges` JOIN `events` ON events.id=event_judges.eventId WHERE `event_judges`.`userId` = {judgeId} AND `events`.`deleted`=0;')
+            for row in cursor.fetchall():
+                events.append(Event.fromRow(row))
+        return events
 
+    def getEventJudges(self, eventId: int) -> list[User]:
+        users = []
+        with self.conn.cursor() as cursor:
+            cursor.execute(f'SELECT `users`.* FROM `event_judges` JOIN `users` ON users.id=event_judges.userId WHERE `event_judges`.`eventId` = {eventId};')
+            for row in cursor.fetchall():
+                users.append(User.fromRow(row))
+        return users
+    
+    def addEventJudge(self, eventId: int, judgeId: int):
+        with self.conn.cursor() as cursor:
+            cnt = cursor.execute(f'INSERT INTO `event_judges` (`eventId`, `userId`) VALUES ("{eventId}", "{judgeId}");')
+            if cnt != 1:
+                return
+            self.conn.commit()
+
+    def removeEventJudge(self, eventId: int, judgeId: int) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = f'DELETE FROM event_judges WHERE `event_judges`.`eventId` = {eventId} AND `event_judges`.`userId` = {judgeId};'
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
+    
     def getAthleteRatings(self, athleteId: int, eventId: int) -> list[Rating]:
         ratings = {}
         with self.conn.cursor() as cursor:

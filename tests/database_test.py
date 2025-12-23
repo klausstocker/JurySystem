@@ -86,6 +86,17 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(self.db.getEventGroup(1, 'Riege2')), 2)
         self.assertEqual(len(self.db.getEventCategoryAthleteIds(1, 'Kn01')), 3)
         self.assertEqual(self.db.getEventCategories(1)[0].name, 'Kn01')
+        events = self.db.getEventsofJudge(5)
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0].name, 'Bezirksmeisterschaften 2025')
+        judges = self.db.getEventJudges(1)
+        self.assertEqual(judges[0].id, 5)
+        self.db.addEventJudge(2, 3)
+        self.db.addEventJudge(2, 4)
+        judges = self.db.getEventJudges(2)
+        self.assertEqual(len(judges), 2)
+        self.assertTrue(self.db.removeEventJudge(2, 3))
+        self.assertTrue(self.db.removeEventJudge(2, 4))
     
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
