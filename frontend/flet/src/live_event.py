@@ -67,6 +67,6 @@ class LiveEventView(View):
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
                 rows=rows,
-                column_spacing=10
+                column_spacing=5,
+                vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
             )
-

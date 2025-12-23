@@ -27,7 +27,6 @@ class Navigator:
     def route_change(self, route):
         print(f'{route=}')
         self.page.views.clear()
-        self.page.views.append(HomeView(self.page))
         if self.page.route.startswith('/public/liveEvent'):
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to live event {eventId}')
@@ -52,6 +51,7 @@ class Navigator:
             self.page.session.set('target', self.page.route)
             self.page.views.append(LoginView(self.page))
         elif self.page.route == '/settings':
+            self.page.views.append(HomeView(self.page))
             self.page.views.append(SiteView(self.page))
         elif self.page.route == '/users':
             self.page.views.append(UserView(self.page))
@@ -63,6 +63,7 @@ class Navigator:
         elif self.page.route.startswith('/athleteEdit'):
             athleteId = int(self.page.route.split('/')[-1])
             self.page.views.append(AthleteEditView(self.page, athleteId))
+            self.page.views.insert(0, HomeView(self.page))
         elif self.page.route.startswith('/attendances'):
             self.page.views.append(AttendanceView(self.page))
         elif self.page.route == '/events':
@@ -73,6 +74,8 @@ class Navigator:
         elif self.page.route.startswith('/rating'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(RatingView(self.page, eventId))
+        else:
+            self.page.views.append(HomeView(self.page))
         self.page.update()
 
     def view_pop(self, view):
