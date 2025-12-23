@@ -98,10 +98,9 @@ class Navigator:
             self.page.views.append(EventEditView(self.page, self.db, self.redis, eventId))
         elif self.page.route.startswith('/rating'):
             eventId = int(self.page.route.split('/')[-1])
-            self.page.views.append(RatingView(self.page, eventId))
-        else:
-            self.page.views.append(HomeView(self.page))
             self.page.views.append(RatingView(self.page, self.db, self.redis, eventId))
+        else:
+            self.page.views.append(HomeView(self.page, self.db, self.redis))
         self.page.update()
 
     def view_pop(self, view):
