@@ -10,8 +10,8 @@ from shared.database import Gender, RankingType, EventCategory
 
 
 class CategoriesView(View):
-    def __init__(self, page: ft.Page, eventId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, eventId: int):
+        super().__init__(page, db, redis)
         self.route = f"/categories/{eventId}"
         self.eventId = eventId
         self.existing_categories: List[EventCategory] = []

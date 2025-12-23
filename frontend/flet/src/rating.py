@@ -45,13 +45,16 @@ class RatingView(View):
 
     def AthleteRatingAsRow(self, athlete: Athlete, discipline: str, editFunc: callable):
         ratings = self.db.getAthleteAndRatings(athlete.id, self.event.id)
-        difficultyText, executionText, ratingId = ratings.ratingOrNone(discipline)
+        _, _, ratingId = ratings.ratingOrNone(discipline)
+        def remove(e):
+            self.db.removeRating(ratingId)
+            self.updateControls()
+
         cells = [
             ft.DataCell(ft.Text(athlete.name())),
             ft.DataCell(ft.Text(ratings.eventCategoryName)),
             ft.DataCell(ft.Text('{:.1f}'.format(ratings.sum()))),
-            ft.DataCell(ft.Text(formatPoints(difficultyText))),
-            ft.DataCell(ft.Text(formatPoints(executionText))),
+            ft.DataCell(ft.Text(ratings.prettyOrDefault(discipline))),
             ft.DataCell(ft.Row(spacing=0, controls=[
                 ft.IconButton(
                     icon=ft.Icons.EDIT,
@@ -62,7 +65,7 @@ class RatingView(View):
                     icon=ft.Icons.DELETE,
                     icon_color=ft.Colors.RED_300,
                     tooltip="Delete",
-                    on_click=lambda e: self.db.removeRating(ratingId))]))
+                    on_click=remove)]))
         ]
         return ft.DataRow(cells=cells)
         
@@ -175,7 +178,7 @@ class RatingView(View):
 
         
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '', '']],
+                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '']],
                 rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes],
                 column_spacing=10,
                 vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)

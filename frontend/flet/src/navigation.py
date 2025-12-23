@@ -41,22 +41,21 @@ class Navigator:
     def route_change(self, route):
         print(f'{route=}')
         self.page.views.clear()
-        self.page.views.append(HomeView(self.page, self.db, self.redis))
         if self.page.route.startswith('/public/liveEvent'):
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to live event {eventId}')
-            self.page.views.append(LiveEventView(self.page, eventId, self.db, self.redis ))
+            self.page.views.append(LiveEventView(self.page, self.db, self.redis, eventId))
             self.page.update()
             return
         elif self.page.route.startswith('/public/ranking'):
             eventId = int(self.page.route.split('/')[-1])
             print(f'switch to public ranking {eventId}')
-            self.page.views.append(RankingView(self.page, eventId, self.db, self.redis))
+            self.page.views.append(RankingView(self.page, self.db, self.redis, eventId))
             self.page.update()
             return
         elif self.page.route.startswith("/categories"):
             eventId = int(self.page.route.split("/")[-1])
-            self.page.views.append(CategoriesView(self.page, eventId, self.db, self.redis))
+            self.page.views.append(CategoriesView(self.page, self.db, self.redis, eventId))
             self.page.update()
             return
         elif self.page.route == '/login':
