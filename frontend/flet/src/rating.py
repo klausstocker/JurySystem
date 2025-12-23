@@ -9,8 +9,11 @@ from shared.database import JuryDatabase, Athlete, AthleteRatings, Gender
 
 numFilter = ft.InputFilter(regex_string=r'^(\d+(\.\d*)?|\.\d+)$')
 
-def emptyIfNone(o):
-    return '-----' if o is None else o
+def formatPoints(value):
+    if value is None:
+        return '-----'
+    return '{:.1f}'.format(value)
+
 class RatingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
@@ -46,9 +49,9 @@ class RatingView(View):
         cells = [
             ft.DataCell(ft.Text(athlete.name())),
             ft.DataCell(ft.Text(ratings.eventCategoryName)),
-            ft.DataCell(ft.Text(ratings.sum())),
-            ft.DataCell(ft.Text(emptyIfNone(difficultyText))),
-            ft.DataCell(ft.Text(emptyIfNone(executionText))),
+            ft.DataCell(ft.Text('{:.1f}'.format(ratings.sum()))),
+            ft.DataCell(ft.Text(formatPoints(difficultyText))),
+            ft.DataCell(ft.Text(formatPoints(executionText))),
             ft.DataCell(ft.Row(spacing=0, controls=[
                 ft.IconButton(
                     icon=ft.Icons.EDIT,
@@ -68,8 +71,58 @@ class RatingView(View):
         def editRating(e, ratings: AthleteRatings, discipline: str):
             print(f'edit athlete="{ratings.athlete.name()}"')
             difficultyContent, executionContent, ratingId = ratings.ratingOrNone(discipline)
-            difficultyEdt = ft.TextField(label="difficulty", value=difficultyContent, width=200, input_filter=numFilter)
-            executionEdt = ft.TextField(label="execution", value=executionContent, width=200, input_filter=numFilter)
+            
+            d_val = "{:.2f}".format(difficultyContent) if difficultyContent is not None else ""
+            e_val = "{:.2f}".format(executionContent) if executionContent is not None else ""
+
+            difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT, border_color=ft.Colors.BLUE, border_width=2)
+            executionEdt = ft.TextField(label="execution", value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
+
+            self.active_field = difficultyEdt
+
+            def highlight_field(front, back):
+                self.active_field = front
+                front.border_width = 2
+                front.border_color = None
+                back.border_width = 1
+                front.update()
+                back.update()
+
+            def set_difficulty(e):
+                highlight_field(difficultyEdt, executionEdt)
+
+            def set_execution(e):
+                highlight_field(executionEdt, difficultyContent)
+
+            difficultyEdt.on_focus = set_difficulty
+            executionEdt.on_focus = set_execution
+
+            def add_char(char):
+                if self.active_field.value is None:
+                    self.active_field.value = ""
+                
+                if self.active_field.value == "0" and char == "0":
+                    return
+                if self.active_field.value == "0" and char != ".":
+                    self.active_field.value = char
+                else:
+                    self.active_field.value += char
+                self.active_field.update()
+
+            def backspace(e):
+                if self.active_field.value and len(self.active_field.value) > 0:
+                    self.active_field.value = self.active_field.value[:-1]
+                    self.active_field.update()
+
+            def digit_btn(digit):
+                return ft.ElevatedButton(text=str(digit), on_click=lambda _: add_char(str(digit)), expand=1)
+
+            keypad = ft.Column([
+                ft.Row([digit_btn(7), digit_btn(8), digit_btn(9)], spacing=2),
+                ft.Row([digit_btn(4), digit_btn(5), digit_btn(6)], spacing=2),
+                ft.Row([digit_btn(1), digit_btn(2), digit_btn(3)], spacing=2),
+                ft.Row([ft.ElevatedButton(".", on_click=lambda _: add_char("."), expand=1), digit_btn(0), ft.ElevatedButton(content=ft.Icon(ft.Icons.BACKSPACE_OUTLINED), on_click=backspace, expand=1)], spacing=2)
+            ], spacing=2, width=200)
 
             def update(e):
                 print(f'update athlete="{ratings.athlete.name()}"')
@@ -80,14 +133,15 @@ class RatingView(View):
                 else:
                     self.db.updateRating(ratingId, self.user.id, difficultyEdt.value,
                                          executionEdt.value)
-                self.page.close(self.bs)
+                self.page.close(self.dlg)
                 self.updateControls()
             def cancel(e):
                 print(f'cancel athlete="{ratings.athlete.name()}"')
-                self.page.close(self.bs)
+                self.page.close(self.dlg)
 
-            self.bs = ft.BottomSheet(
-                ft.Container(
+            self.dlg = ft.AlertDialog(
+                modal=True,
+                content=ft.Container(
                     ft.Column(
                         [
                             ft.Text(discipline),
@@ -95,6 +149,7 @@ class RatingView(View):
                             ft.Text(f'{ratings.eventCategoryName} {ratings.athlete.birthFormated()}'),
                             difficultyEdt,
                             executionEdt,
+                            keypad,
                             ft.Row(spacing=0, controls=
                                 [
                                     ft.IconButton(
@@ -107,30 +162,32 @@ class RatingView(View):
                                         icon_color=ft.Colors.RED_300,
                                         tooltip="Cancel",
                                         on_click=cancel)
-                                ], scroll=ft.ScrollMode.AUTO)
+                                ], alignment=ft.MainAxisAlignment.CENTER)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        tight=True,
+                        tight=True, scroll=ft.ScrollMode.AUTO
                     ),
-                    padding=50,
+                    padding=10,
                 )
             )
-            self.page.overlay.append(self.bs)
+            self.page.overlay.append(self.dlg)
             self.page.update()
-            self.page.open(self.bs)
+            self.page.open(self.dlg)
 
         
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '', '']],
-                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes]
+                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes],
+                column_spacing=10,
+                vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
             )
 
         self.controls = [
             ft.AppBar(title=ft.Text(f'Rating'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
-            self.disciplineEdit,
-            self.groupEdit,
-            self.table,
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))]
+            ft.Column(controls=[
+                ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
+                ft.Row([self.disciplineEdit, self.groupEdit], wrap=True),
+                ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
+                ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+            ], scroll=ft.ScrollMode.AUTO, expand=True)
+        ]
         self.page.update()
-
-

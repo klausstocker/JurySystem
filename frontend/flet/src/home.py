@@ -9,7 +9,7 @@ from shared.database import JuryDatabase, Athlete, Gender, Event, Progress
 from shared.rights import Route, allowedRoutes
 
 class TextButton(ft.TextButton):
-    def __init__(self, text = None, icon = None, icon_color = None, content = None, style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)), autofocus = None, url = None, url_target = None, clip_behavior = None, on_click = None, on_long_press = None, on_hover = None, on_focus = None, on_blur = None, ref = None, key = None, width= 120, height = 40, left = None, top = None, right = None, bottom = None, expand = None, expand_loose = None, col = None, opacity = None, rotate = None, scale = None, offset = None, aspect_ratio = None, animate_opacity = None, animate_size = None, animate_position = None, animate_rotation = None, animate_scale = None, animate_offset = None, on_animation_end = None, tooltip = None, badge = None, visible = None, disabled = None, data = None, adaptive = None):
+    def __init__(self, text = None, icon = None, icon_color = None, content = None, style=ft.ButtonStyle(text_style=ft.TextStyle(size=16), side=ft.BorderSide(1, ft.Colors.OUTLINE)), autofocus = None, url = None, url_target = None, clip_behavior = None, on_click = None, on_long_press = None, on_hover = None, on_focus = None, on_blur = None, ref = None, key = None, width= 144, height = 48, left = None, top = None, right = None, bottom = None, expand = None, expand_loose = None, col = None, opacity = None, rotate = None, scale = None, offset = None, aspect_ratio = None, animate_opacity = None, animate_size = None, animate_position = None, animate_rotation = None, animate_scale = None, animate_offset = None, on_animation_end = None, tooltip = None, badge = None, visible = None, disabled = None, data = None, adaptive = None):
         super().__init__(text, icon, icon_color, content, style, autofocus, url, url_target, clip_behavior, on_click, on_long_press, on_hover, on_focus, on_blur, ref, key, width, height, left, top, right, bottom, expand, expand_loose, col, opacity, rotate, scale, offset, aspect_ratio, animate_opacity, animate_size, animate_position, animate_rotation, animate_scale, animate_offset, on_animation_end, tooltip, badge, visible, disabled, data, adaptive)
 
 class HomeView(View):
@@ -22,10 +22,11 @@ class HomeView(View):
         for allowed in allowedRoutes(user):
             controls.append(TextButton(allowed.name, on_click=lambda _,r=allowed.route: self.page.go(r)))
 
-        menu = ft.Row(
+        menu = ft.Column(
             controls=controls,
             alignment=ft.MainAxisAlignment.CENTER,
-            spacing=40
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=5
         )
         logout_button = ft.Row(
             controls=[
@@ -52,8 +53,6 @@ class HomeView(View):
                     [
                         ft.Text("Jury System", size=18, weight="bold"),
                         ft.Container(expand=True),
-                        menu,
-                        ft.Container(expand=True),
                         ft.Text(f"user: {username}", size=14, italic=True),
                         logout_button,
                     ],
@@ -62,6 +61,11 @@ class HomeView(View):
                 ),
                 bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
             ),
+            ft.Container(
+                content=menu,
+                expand=True,
+                alignment=ft.alignment.center
+            )
         ]
 
     def logout(self, e):

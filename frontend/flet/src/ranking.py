@@ -6,11 +6,14 @@ from view import View
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, AthleteRatings, AthleteRanking, Gender
 
+def pretty(val):
+    return '{:.1f}'.format(val)
+
 def ratingCell(ratings: AthleteRatings, discipline: str):
     if discipline not in ratings.ratings.keys():
         return ft.DataCell(ft.Text('---'))
-    difficulty, execution = ratings.ratings[discipline].prettyTuple()
-    return ft.DataCell(ft.Row(spacing=5, controls=[ft.Text(difficulty), ft.Text(execution)]))
+    rating = ratings.ratings[discipline]
+    return ft.DataCell(ft.Row(spacing=5, controls=[ft.Text(pretty(rating.difficulty)), ft.Text(pretty(rating.execution))]))
     
 class RankingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
@@ -51,7 +54,7 @@ class RankingView(View):
             )
 
         def printPdf(e):
-            self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
+            self.page.launch_url(f'{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
 
         self.controls = [
             ft.AppBar(title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
@@ -64,5 +67,3 @@ class RankingView(View):
                           on_click=printPdf),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))]
         self.page.update()
-
-
