@@ -20,7 +20,10 @@ class HomeView(View):
         username = '' if user is None else user.username
         controls = []
         for allowed in allowedRoutes(user):
-            controls.append(TextButton(allowed.name, on_click=lambda _,r=allowed.route: self.page.go(r)))
+            route = allowed.route
+            if route.startswith('/rating'):
+                route = '/rating'
+            controls.append(TextButton(allowed.name, on_click=lambda _,r=route: self.page.go(r)))
 
         menu = ft.Column(
             controls=controls,

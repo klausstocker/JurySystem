@@ -8,7 +8,7 @@ from users import UserView, UserEditView
 from athletes import AthleteView, AthleteEditView
 from attendance import AttendanceView
 from events import EventView, EventEditView
-from rating import RatingView
+from rating import RatingView, RatingSelectEventView
 from ranking import RankingView
 from live_event import LiveEventView
 from categories import CategoriesView
@@ -95,7 +95,9 @@ class Navigator:
         elif self.page.route.startswith('/eventEdit'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(EventEditView(self.page, self.db, self.redis, eventId))
-        elif self.page.route.startswith('/rating'):
+        elif self.page.route == '/rating':
+            self.page.views.append(RatingSelectEventView(self.page, self.db, self.redis))
+        elif self.page.route.startswith('/rating/'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(RatingView(self.page, self.db, self.redis, eventId))
         else:

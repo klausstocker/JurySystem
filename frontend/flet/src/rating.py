@@ -14,6 +14,32 @@ def formatPoints(value):
         return '-----'
     return '{:.1f}'.format(value)
 
+class RatingSelectEventView(View):
+    def __init__(self, page: ft.Page, db, redis):
+        super().__init__(page, db, redis)
+        self.route = '/rating'
+
+        self.controls = [
+            ft.AppBar(title=ft.Text('Select Event'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.Container(
+                content=ft.Column(
+                    controls=[
+                        ft.ElevatedButton(
+                            f"{e.descr()}",
+                            on_click=lambda _, id=e.id: self.page.go(f'/rating/{id}'),
+                            width=300
+                        ) for e in self.db.getAllEvents()
+                    ],
+                    scroll=ft.ScrollMode.AUTO,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    spacing=10
+                ),
+                expand=True,
+                alignment=ft.alignment.center
+            ),
+            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+        ]
+
 class RatingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
