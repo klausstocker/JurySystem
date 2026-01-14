@@ -57,7 +57,7 @@ class RankingView(View):
             self.page.launch_url(f'{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
 
         self.controls = [
-            ft.AppBar(title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
             self.categoryEdit,
             self.table,

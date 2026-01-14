@@ -40,6 +40,8 @@ class Navigator:
 
     def route_change(self, route):
         print(f'{route=}')
+        if self.page.route != '/help':
+            self.page.session.set('last_route', self.page.route)
         self.page.views.clear()
         if self.page.route.startswith('/public/liveEvent'):
             eventId = int(self.page.route.split('/')[-1])
@@ -75,7 +77,7 @@ class Navigator:
             print(f'store target={self.page.route}')
             self.page.session.set('target', self.page.route)
             self.page.views.append(LoginView(self.page, self.db, self.redis))
-        elif self.page.route == '/settings':
+        elif self.page.route == '/help':
             self.page.views.append(SiteView(self.page, self.db, self.redis))
         elif self.page.route == '/users':
             self.page.views.append(UserView(self.page, self.db, self.redis))

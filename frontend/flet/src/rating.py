@@ -20,7 +20,7 @@ class RatingSelectEventView(View):
         self.route = '/rating'
 
         self.controls = [
-            ft.AppBar(title=ft.Text('Select Event'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Select Event'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Container(
                 content=ft.Column(
                     controls=[
@@ -211,7 +211,7 @@ class RatingView(View):
             )
 
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Rating'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Rating'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Column(controls=[
                 ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
                 ft.Row([self.disciplineEdit, self.groupEdit], wrap=True),

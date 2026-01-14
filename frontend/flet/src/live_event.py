@@ -32,7 +32,7 @@ class LiveEventView(View):
             t = time.strftime('%H:%M:%S', time.localtime())
             self.updateTableIfNewer()
             self.controls = [
-                ft.AppBar(title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+                ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
                 self.table
             ]
             self.page.update()
@@ -45,7 +45,7 @@ class LiveEventView(View):
         self.updateTableIfNewer()
 
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table
         ]
         self.scheduler.start()

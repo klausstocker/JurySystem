@@ -80,7 +80,7 @@ class EventView(View):
         )
 
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
             ft.Row(
                 spacing=0,
@@ -154,7 +154,7 @@ class EventEditView(View):
             self.page.go("/events")
 
         self.controls = [
-            ft.AppBar(title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
                       bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             name_input,
             self.event_date,

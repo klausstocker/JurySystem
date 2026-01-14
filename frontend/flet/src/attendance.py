@@ -63,7 +63,7 @@ class AttendanceView(View):
             )
         title = f'Attendances of {self.user().username if self.user().isHost() else self.user().team}'
         self.controls = [
-            ft.AppBar(title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.eventCtrl,
             self.table,
             ft.Row(spacing=0, controls=[
@@ -132,4 +132,3 @@ class AttendanceView(View):
             groupCell
             ]
         return ft.DataRow(cells=cells)
-

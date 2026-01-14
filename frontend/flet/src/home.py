@@ -5,7 +5,7 @@ import secrets
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
-from shared.database import JuryDatabase, Athlete, Gender, Event, Progress
+from shared.database import JuryDatabase, Athlete, Gender, Event, Progress, Restrictions
 from shared.rights import Route, allowedRoutes
 
 class TextButton(ft.TextButton):
@@ -19,11 +19,18 @@ class HomeView(View):
         user = page.session.get('user')
         username = '' if user is None else user.username
         controls = []
+        help_button = ft.Container(width=0)
         for allowed in allowedRoutes(user):
             route = allowed.route
+            name = allowed.name
+            if route == '/settings':
+                help_button = ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help'))
+                continue
+            if user and user.restrictions == Restrictions.TRAINER and route == '/events':
+                continue
             if route.startswith('/rating'):
                 route = '/rating'
-            controls.append(TextButton(allowed.name, on_click=lambda _,r=route: self.page.go(r)))
+            controls.append(TextButton(name, on_click=lambda _,r=route: self.page.go(r)))
 
         menu = ft.Column(
             controls=controls,
@@ -54,6 +61,7 @@ class HomeView(View):
             ft.AppBar(
                 title=ft.Row(
                     [
+                        help_button,
                         ft.Text("Jury System", size=18, weight="bold"),
                         ft.Container(expand=True),
                         ft.Text(f"user: {username}", size=14, italic=True),

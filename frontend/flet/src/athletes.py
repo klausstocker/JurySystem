@@ -64,7 +64,7 @@ class AthleteView(View):
                 rows=createRows()
             )
         self.controls = [
-            ft.AppBar(title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.table,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
@@ -165,7 +165,7 @@ class AthleteEditView(View):
             options=[ft.dropdownm2.Option(e.name) for e in Gender],
             value=Gender.FEMALE.name if createAthlete else athlete.gender.name)
         self.controls = [
-            ft.AppBar(title=ft.Text(f'{'Create ' if createAthlete else 'Edit '} Athlete'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'{'Create ' if createAthlete else 'Edit '} Athlete'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             givenNameEdit,
             surnameEdit,
             teamEdit,
