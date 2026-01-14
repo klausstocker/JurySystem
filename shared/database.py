@@ -627,6 +627,28 @@ class JuryDatabase:
                 print(f"Error inserting event category: {e}")
                 return False
 
+    def updateEventCategory(self, category: EventCategory, oldName: str) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = "UPDATE `event_categories` SET `name` = %s, `gender` = %s, `birthFrom` = %s, `birthTo` = %s, `rankingType` = %s, `rankingAlgo` = %s WHERE `eventId` = %s AND `name` = %s"
+            try:
+                cursor.execute(sql, (category.name, category.gender.value, category.birthFrom, category.birthTo, category.rankingType.value, category.rankingAlgo, category.eventId, oldName))
+                self.conn.commit()
+                return True
+            except Exception as e:
+                print(f"Error updating event category: {e}")
+                return False
+
+    def removeEventCategory(self, eventId: int, name: str) -> bool:
+        with self.conn.cursor() as cursor:
+            sql = "DELETE FROM `event_categories` WHERE `eventId` = %s AND `name` = %s"
+            try:
+                cursor.execute(sql, (eventId, name))
+                self.conn.commit()
+                return True
+            except Exception as e:
+                print(f"Error deleting event category: {e}")
+                return False
+
     def updateRating(self, ratingId: int, userId: int, difficulty: float, execution: float):
         with self.conn.cursor() as cursor:
             sql = f"UPDATE `ratings` SET`ts`='{datetime.now()}', `userId`='{userId}', `difficulty`='{difficulty}', `execution`='{execution}' WHERE `id`='{ratingId}'"

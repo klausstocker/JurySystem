@@ -19,6 +19,8 @@ class CategoriesView(View):
         # ======== INTERN gespeicherte Werte ========
         self.birth_from = None
         self.birth_to = None
+        self.editing_old_name = None
+        self.editing_algo = None
 
         # ======== Eingabefelder ========
 
@@ -83,6 +85,7 @@ class CategoriesView(View):
         # ========= SAVE BUTTON =========
         def save_clicked(e):
             try:
+                algo = self.editing_algo if self.editing_algo else EventCategory.defaultRankingAlgo()
                 cat = EventCategory(
                     name_field.value,
                     self.eventId,
@@ -90,11 +93,24 @@ class CategoriesView(View):
                     self.birth_from,
                     self.birth_to,
                     RankingType[ranking_type_field.value],
-                    EventCategory.defaultRankingAlgo()
+                    algo
                 )
 
-                if self.db.insertEventCategory(cat):
-                    page.open(ft.SnackBar(ft.Text("Category saved", size=18), bgcolor="green"))
+                success = False
+                if self.editing_old_name:
+                    if self.db.updateEventCategory(cat, self.editing_old_name):
+                        page.open(ft.SnackBar(ft.Text("Category updated", size=18), bgcolor="green"))
+                        success = True
+                    else:
+                        page.open(ft.SnackBar(ft.Text("Error updating category", size=18), bgcolor="red"))
+                else:
+                    if self.db.insertEventCategory(cat):
+                        page.open(ft.SnackBar(ft.Text("Category saved", size=18), bgcolor="green"))
+                        success = True
+                    else:
+                        page.open(ft.SnackBar(ft.Text("Error saving category", size=18), bgcolor="red"))
+
+                if success:
                     # Clear input fields
                     name_field.value = ""
                     gender_field.value = None
@@ -103,11 +119,13 @@ class CategoriesView(View):
                     self.birth_from = None
                     self.birth_to = None
                     ranking_type_field.value = None
+                    self.editing_old_name = None
+                    self.editing_algo = None
 
                     # Refresh the view to show the new category
-                    self.page.go(f"/categories/{self.eventId}")
-                else:
-                    page.open(ft.SnackBar(ft.Text("Error saving category", size=18), bgcolor="red"))
+                    self.table.rows = create_rows()
+                    self.table.update()
+                    self.page.update()
 
             except Exception as ex:
                 page.open(ft.SnackBar(ft.Text(f"Error: {ex}", size=18), bgcolor="red"))
@@ -133,22 +151,61 @@ class CategoriesView(View):
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
         )
 
-        # ========= Load existing categories and create rows for them =========
-        self.existing_categories = self.db.getEventCategories(self.eventId)
+        def edit_clicked(e, category: EventCategory):
+            name_field.value = category.name
+            gender_field.value = category.gender.name
+            self.birth_from = category.birthFrom
+            self.birth_to = category.birthTo
+            birth_from_text.value = str(category.birthFrom) if category.birthFrom else ""
+            birth_to_text.value = str(category.birthTo) if category.birthTo else ""
+            ranking_type_field.value = category.rankingType.name
+            
+            self.editing_old_name = category.name
+            self.editing_algo = category.rankingAlgo
+            page.update()
 
-        existing_rows = []
-        for cat in self.existing_categories:
-            existing_rows.append(
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(cat.name)),
-                        ft.DataCell(ft.Text(cat.gender.name)),
-                        ft.DataCell(ft.Text(cat.birthFrom.strftime('%Y-%m-%d') if cat.birthFrom else "")),
-                        ft.DataCell(ft.Text(cat.birthTo.strftime('%Y-%m-%d') if cat.birthTo else "")),
-                        ft.DataCell(ft.Text(cat.rankingType.name)),
-                    ]
-                )
+        def delete_clicked(e, category_name):
+            def confirm_delete(e):
+                if self.db.removeEventCategory(self.eventId, category_name):
+                    page.open(ft.SnackBar(ft.Text("Category deleted", size=18), bgcolor="green"))
+                    self.table.rows = create_rows()
+                    self.table.update()
+                else:
+                    page.open(ft.SnackBar(ft.Text("Error deleting category", size=18), bgcolor="red"))
+                page.close(dlg)
+
+            dlg = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Confirm Deletion"),
+                content=ft.Text(f"Do you want to delete the category '{category_name}'?"),
+                actions=[
+                    ft.TextButton("Yes", on_click=confirm_delete),
+                    ft.TextButton("No", on_click=lambda e: page.close(dlg)),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
             )
+            page.open(dlg)
+
+        # ========= Load existing categories and create rows for them =========
+        def create_rows():
+            rows = []
+            for cat in self.db.getEventCategories(self.eventId):
+                rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(cat.name)),
+                            ft.DataCell(ft.Text(cat.gender.name)),
+                            ft.DataCell(ft.Text(cat.birthFrom.strftime('%Y-%m-%d') if cat.birthFrom else "")),
+                            ft.DataCell(ft.Text(cat.birthTo.strftime('%Y-%m-%d') if cat.birthTo else "")),
+                            ft.DataCell(ft.Text(cat.rankingType.name)),
+                            ft.DataCell(ft.Row([
+                                ft.IconButton(icon=ft.Icons.EDIT, icon_color=ft.Colors.BLUE, on_click=lambda e, c=cat: edit_clicked(e, c)),
+                                ft.IconButton(icon=ft.Icons.DELETE, icon_color=ft.Colors.RED, on_click=lambda e, n=cat.name: delete_clicked(e, n))
+                            ]))
+                        ]
+                    )
+                )
+            return rows
 
         # ========== Tabelle (GUI Layout) ==========
 
@@ -159,8 +216,9 @@ class CategoriesView(View):
                 ft.DataColumn(ft.Text("Birth From")),
                 ft.DataColumn(ft.Text("Birth To")),
                 ft.DataColumn(ft.Text("Ranking Type")),
+                ft.DataColumn(ft.Text("Actions")),
             ],
-            rows=existing_rows
+            rows=create_rows()
         )
 
         self.controls = [
