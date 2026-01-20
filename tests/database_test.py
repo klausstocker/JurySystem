@@ -5,14 +5,14 @@ import pymysql.cursors
 from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, RankingType, allowedCategories
+from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, EventDiscipline, RankingType, allowedCategories
 from shared.rights import Route, allowedRoutes
 class TestDatabase(unittest.TestCase):
 
     def __init__(self, methodName = "runTest"):
         super().__init__(methodName)
         self.db = JuryDatabase('localhost')
-        
+
     def test_restrictions(self):
         a = Restrictions['TRAINER']
         self.assertEqual(a, Restrictions.TRAINER)
@@ -31,7 +31,7 @@ class TestDatabase(unittest.TestCase):
         user = self.db.getUser(1)
         self.assertEqual(user.restrictions, Restrictions.ADMIN)
         self.assertTrue(user.valid())
-        
+
         insertedId = self.db.insertUser('judenau', 'pass', 'judenau@sportunion.at', '', Restrictions.TRAINER)
         insertedUser = self.db.getUser(insertedId)
         self.assertEqual(insertedUser.username, 'judenau')
@@ -39,10 +39,10 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(insertedUser.restrictions, Restrictions.TRAINER)
         self.assertTrue(self.db.updateUser(insertedId, 'judenau1', 'pass', '', '', datetime.now(), Restrictions.TRAINER, False))
         self.assertEqual(self.db.getUser(insertedId).username, 'judenau1')
-        
+
         self.assertTrue(self.db.removeUser(insertedId))
         self.assertFalse(self.db.removeUser(insertedId))
-        
+
     def test_athlete(self):
         athletes = self.db.getAthletes(3)
         self.assertEqual(len(athletes), 3)
@@ -54,7 +54,7 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(self.db.updateAthlete(insertedId, 'Daniel', 'Stocker1', 3, '2015-03-31', Gender.MALE))
         self.assertEqual(self.db.getAthlete(insertedId).surname, 'Stocker1')
         self.assertTrue(self.db.removeAthlete(insertedId))
-        
+
         self.db.removeAthlete(3)
         self.assertTrue(self.db.getAthlete(3).hidden)
         self.db.hideAthlete(3, False)
@@ -97,7 +97,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(judges), 2)
         self.assertTrue(self.db.removeEventJudge(2, 3))
         self.assertTrue(self.db.removeEventJudge(2, 4))
-    
+
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
         self.assertEqual(len(self.db.getEventRatings(1, 2)), 2)
@@ -124,6 +124,16 @@ class TestDatabase(unittest.TestCase):
         athlete = self.db.getAthlete(6)
         filtered = allowedCategories(allCats, athlete)
         self.assertEqual(len(filtered), 1)
+
+    def test_disciplines(self):
+        self.assertFalse(self.db.canRemoveEventDiscipline(EventDiscipline('Boden', 1)))
+        self.assertTrue(self.db.canRemoveEventDiscipline(EventDiscipline('Boden', 2)))
+        self.db.insertEventDiscipline(EventDiscipline('Reck', 2))
+        self.assertEqual(len(self.db.getEventDisciplines(2)), 1)
+        discipline, enable = self.db.getEventDisciplinesEnableRemove(2)[0]
+        self.assertEqual(discipline, EventDiscipline('Reck', 2))
+        self.assertTrue(enable)
+        self.assertTrue(self.db.removeEventDiscipline(EventDiscipline('Reck', 2)))
 
     def test_rights(self):
         host = self.db.getUser(2)

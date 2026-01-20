@@ -517,6 +517,39 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 disciplines.append(EventDiscipline.fromRow(row))
         return disciplines
+    
+    def getEventDisciplinesEnableRemove(self, eventId: int) -> list[(EventDiscipline, bool)]:
+        disciplines = []
+        for discipline in self.getEventDisciplines(eventId):
+            disciplines.append((discipline, self.canRemoveEventDiscipline(discipline)))
+        return disciplines
+
+    def insertEventDiscipline(self, discipline: EventDiscipline):
+        with self.conn.cursor() as cursor:
+            cnt = cursor.execute(f'INSERT INTO `event_disciplines` (`name`, `eventId`) VALUES ("{discipline.name}", "{discipline.eventId}");')
+            if cnt != 1:
+                return
+            self.conn.commit()
+
+    def canRemoveEventDiscipline(self, discipline: EventDiscipline) -> bool:
+        with self.conn.cursor() as cursor:
+            res = cursor.execute(f'SELECT COUNT(*) FROM `ratings` WHERE `eventId`="{discipline.eventId}" AND `eventDisciplineName`="{discipline.name}";')
+            if res != 1:
+                return False
+            cnt = cursor.fetchone()['COUNT(*)']
+            if cnt == 0:
+                return True
+        return False
+
+    def removeEventDiscipline(self, discipline: EventDiscipline) -> bool:
+        if not self.canRemoveEventDiscipline(discipline):
+            return False
+        with self.conn.cursor() as cursor:
+            sql = f'DELETE FROM event_disciplines WHERE `event_disciplines`.`eventId` = "{discipline.eventId}" AND `event_disciplines`.`name` = "{discipline.name}";'
+            cnt = cursor.execute(sql)
+            self.conn.commit()
+            return cnt != 0
+        return False
 
     def getEventCategories(self, eventId: int) -> list[EventCategory]:
         categories = []
