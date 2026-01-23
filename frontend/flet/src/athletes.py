@@ -100,8 +100,8 @@ class AthleteView(View):
 
 
 class AthleteEditView(View):
-    def __init__(self, page: ft.Page, athleteId: int):
-        super().__init__(page)
+    def __init__(self, page: ft.Page, db, redis, athleteId: int):
+        super().__init__(page, db, redis)
         self.route = f'/athleteEdit/{athleteId}'
         createAthlete = athleteId == 0
         user = self.page.session.get('user')
