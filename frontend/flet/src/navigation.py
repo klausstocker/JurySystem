@@ -95,7 +95,7 @@ class Navigator:
             self.page.views.append(AthleteView(self.page, self.db, self.redis))
         elif self.page.route.startswith('/athleteEdit'):
             athleteId = int(self.page.route.split('/')[-1])
-            self.page.views.insert(0, HomeView(self.page))
+            self.page.views.insert(0, HomeView(self.page, self.db, self.redis))
             self.page.views.append(AthleteEditView(self.page, self.db, self.redis, athleteId))
         elif self.page.route.startswith('/attendances'):
             self.page.views.append(AttendanceView(self.page, self.db, self.redis))
