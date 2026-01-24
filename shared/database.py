@@ -598,14 +598,26 @@ class JuryDatabase:
                 return
             self.conn.commit()
 
+    def canRemoveEventJudge(self, eventId: int, judgeId: int) -> bool:
+        with self.conn.cursor() as cursor:
+            res = cursor.execute(f'SELECT COUNT(*) FROM `ratings` WHERE `eventId`="{eventId}" AND `userId`="{judgeId}";')
+            if res != 1:
+                return False
+            cnt = cursor.fetchone()['COUNT(*)']
+            if cnt == 0:
+                return True
+        return False
+
     def removeEventJudge(self, eventId: int, judgeId: int) -> bool:
+        if not self.canRemoveEventJudge(eventId, judgeId):
+            return False
         with self.conn.cursor() as cursor:
             sql = f'DELETE FROM event_judges WHERE `event_judges`.`eventId` = {eventId} AND `event_judges`.`userId` = {judgeId};'
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0
         return False
-    
+
     def getAthleteRatings(self, athleteId: int, eventId: int) -> list[Rating]:
         ratings = {}
         with self.conn.cursor() as cursor:

@@ -91,6 +91,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(events[0].name, 'Bezirksmeisterschaften 2025')
         judges = self.db.getEventJudges(1)
         self.assertEqual(judges[0].id, 5)
+        self.assertFalse(self.db.canRemoveEventJudge(1, 5))
         self.db.addEventJudge(2, 3)
         self.db.addEventJudge(2, 4)
         judges = self.db.getEventJudges(2)
