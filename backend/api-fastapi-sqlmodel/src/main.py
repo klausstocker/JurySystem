@@ -115,8 +115,8 @@ def get_bytes(image):
     image.save(img_byte_arr, format='png')
     return img_byte_arr.getvalue()
 
-@api.get('/qrcodes/login/{token}/{userId}', response_class=HTMLResponse)
-async def qrCodesLogin(userId: int, token: str, request: Request) ->Response:
+@api.get('/qrcodes/login/{token}/{userId}/{target}', response_class=HTMLResponse)
+async def qrCodesLogin(userId: int, token: str, target: str, request: Request) ->Response:
     if r.get(token) is None:
         raise HTTPException(
             status_code=401,
@@ -129,7 +129,7 @@ async def qrCodesLogin(userId: int, token: str, request: Request) ->Response:
             status_code=404,
             detail="user not found"
         )
-    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_FLET'] + os.environ['DOMAIN']}/autoLogin/{user.username}/{user.token}')
+    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_FLET'] + os.environ['DOMAIN']}/autoLogin/{user.username}/{user.token}/{target}')
     filename = f'login_{alphaNum(user.username)}.png'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')

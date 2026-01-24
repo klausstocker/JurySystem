@@ -12,7 +12,6 @@ def header():
 class EventJudgesView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
-        self.eventId = eventId
         self.route = f"/eventJudges/{eventId}"
 
         self.event = self.db.getEvent(eventId)
@@ -25,7 +24,7 @@ class EventJudgesView(View):
             self.page.update()
 
         def deleteJudge(e, judgeId):
-            self.db.removeEventJudge(self.eventId, judgeId)
+            self.db.removeEventJudge(self.event.id, judgeId)
             updateTable()
             self.page.update()
 
@@ -39,7 +38,7 @@ class EventJudgesView(View):
 
         def updateTable():
             rows = []
-            for judgeId, judgeName, can_remove in self.db.getEventJudgesEnableRemove(self.eventId):
+            for judgeId, judgeName, can_remove in self.db.getEventJudgesEnableRemove(self.event.id):
                 rows.append(self.asRow(judgeId, judgeName, can_remove, deleteJudge))
             self.table.rows = rows
 
@@ -59,7 +58,7 @@ class EventJudgesView(View):
 
     def asRow(self, judgeId, judgeName, can_remove, deleteFunc):
         def downlodQR(e):
-            e.page.launch_url(f'https://{View.api()}/qrcodes/login/{self.token()}/{judgeId}')
+            e.page.launch_url(f'https://{View.api()}/qrcodes/login/{self.token()}/{judgeId}/rating_{self.event.id}')
 
         def recreateQr(e):
             self.db.recreateUserToken(judgeId)

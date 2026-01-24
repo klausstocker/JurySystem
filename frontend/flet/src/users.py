@@ -65,12 +65,6 @@ class UserView(View):
         ]
         
     def userAsRow(self, user: User, editFunc: callable, deleteFunc: callable):
-        def downlodQR(e):
-            e.page.launch_url(f'https://{View.api()}/qrcodes/login/{self.token()}/{user.id}')
-
-        def recreateQr(e):
-            self.db.recreateUserToken(user.id)
-
         cells = [
             ft.DataCell(ft.IconButton(
                         icon=ft.Icons.EDIT,

@@ -78,12 +78,15 @@ class Navigator:
         elif self.page.route.startswith('/autoLogin'):
             user = self.page.route.split('/')[2]
             token = self.page.route.split('/')[3]
+            target_id = self.page.route.split('/')[4]
+            target = target_id.split('_')[0]
+            id = target_id.split('_')[1]
             userId = self.db.validateUserByToken(user, token)
             if userId is not None:
                 print(f"Redirecting user '{user}' logged in with url")
                 self.page.session.set('user', self.db.getUser(userId))
                 self.setToken(secrets.token_urlsafe())
-                self.page.go('/')
+                self.page.go(f'/{target}/{id}')
             else:
                 self.page.go('/login')
         elif self.page.session.get('user') is None:
