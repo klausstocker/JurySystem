@@ -13,6 +13,7 @@ from ranking import RankingView
 from live_event import LiveEventView
 from categories import CategoriesView
 from disciplines import DisciplinesView
+from event_judges import EventJudgesView
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -65,6 +66,11 @@ class Navigator:
         elif self.page.route.startswith("/disciplines"):
             eventId = int(self.page.route.split("/")[-1])
             self.page.views.append(DisciplinesView(self.page, self.db, self.redis, eventId))
+            self.page.update()
+            return
+        elif self.page.route.startswith("/eventJudges"):
+            eventId = int(self.page.route.split("/")[-1])
+            self.page.views.append(EventJudgesView(self.page, self.db, self.redis, eventId))
             self.page.update()
             return
         elif self.page.route == '/login':

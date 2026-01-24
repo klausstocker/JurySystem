@@ -2,20 +2,20 @@ import pymysql.cursors
 import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
-from enum import Enum
+from enum import IntEnum
 from typing import List
 
-class Restrictions(Enum):
+class Restrictions(IntEnum):
     TRAINER = 0
     HOST = 1
     JUDGE = 2
     ADMIN = 3
 
-class Gender(Enum):
+class Gender(IntEnum):
     MALE = 0
     FEMALE = 1
     
-class RankingType(Enum):
+class RankingType(IntEnum):
     NO_RANKING = 1
     RANKING = 0
 
@@ -68,7 +68,7 @@ class Athlete:
     def birthFromString(birth: str) -> datetime:
         return datetime.strptime(birth, '%d.%m.%Y')
 
-class Progress(Enum):
+class Progress(IntEnum):
     PLANNED = 0
     ACTIVE = 1
     FINISHED = 2
@@ -297,6 +297,15 @@ class JuryDatabase:
         users = []
         with self.conn.cursor() as cursor:
             cursor.execute('SELECT * FROM users WHERE hidden = 0;')
+            for row in cursor.fetchall():
+                users.append(User.fromRow(row))
+        return users
+    
+    def getAllJudges(self) -> List[User]:
+        users = []
+        with self.conn.cursor() as cursor:
+            sql = f'SELECT * FROM users WHERE hidden = 0 AND restrictions = {int(Restrictions.JUDGE)};'
+            cursor.execute(sql)
             for row in cursor.fetchall():
                 users.append(User.fromRow(row))
         return users
@@ -607,6 +616,13 @@ class JuryDatabase:
             if cnt == 0:
                 return True
         return False
+
+    def getEventJudgesEnableRemove(self, eventId: int) -> list[(int, str, bool)]:
+        judges = []
+        for judge in self.getEventJudges(eventId):
+            user = self.getUser(judge.id)
+            judges.append((user.id, user.username, self.canRemoveEventJudge(eventId, user.id)))
+        return judges
 
     def removeEventJudge(self, eventId: int, judgeId: int) -> bool:
         if not self.canRemoveEventJudge(eventId, judgeId):

@@ -42,6 +42,7 @@ class TestDatabase(unittest.TestCase):
 
         self.assertTrue(self.db.removeUser(insertedId))
         self.assertFalse(self.db.removeUser(insertedId))
+        self.assertEqual(len(self.db.getAllJudges()), 1)
 
     def test_athlete(self):
         athletes = self.db.getAthletes(3)
@@ -96,6 +97,7 @@ class TestDatabase(unittest.TestCase):
         self.db.addEventJudge(2, 4)
         judges = self.db.getEventJudges(2)
         self.assertEqual(len(judges), 2)
+        id, name, can_remove = self.db.getEventJudgesEnableRemove(2)[0]
         self.assertTrue(self.db.removeEventJudge(2, 3))
         self.assertTrue(self.db.removeEventJudge(2, 4))
 

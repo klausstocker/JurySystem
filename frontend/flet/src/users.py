@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Restrictions
 
 def header():
-    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt', 'qr', '']
+    return ['', '', 'Username', 'E-Mail', 'Team', 'registriert', 'läuft ab', 'Berechtigung', 'gesperrt']
 
 class UserView(View):
     def __init__(self, page: ft.Page, db, redis):
@@ -88,15 +88,7 @@ class UserView(View):
             ft.DataCell(ft.Text(user.registered)),
             ft.DataCell(ft.Text(user.expires)),
             ft.DataCell(ft.Text(user.restrictions.name)),
-            ft.DataCell(ft.Checkbox(value=user.locked, disabled=True)),
-            ft.DataCell(ft.IconButton(
-                icon=ft.Icons.QR_CODE_2_ROUNDED,
-                tooltip="qr-code for token login",
-                on_click=downlodQR)),
-            ft.DataCell(ft.IconButton(
-                icon=ft.Icons.AUTORENEW_ROUNDED,
-                tooltip="renew token for qr-code login",
-                on_click=recreateQr))
+            ft.DataCell(ft.Checkbox(value=user.locked, disabled=True))
             ]
         return ft.DataRow(cells=cells)
 

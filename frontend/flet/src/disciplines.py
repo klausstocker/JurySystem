@@ -27,7 +27,7 @@ class DisciplinesView(View):
             updateTable()
             self.page.update()
 
-        self.name_input = ft.TextField(label="Discipline Name", width=300, on_submit=addDiscipline)
+        self.name_input = ft.TextField(label="Add Discipline", width=300, on_submit=addDiscipline)
         
         def updateTable():
             rows = []
@@ -46,8 +46,8 @@ class DisciplinesView(View):
 
         self.table = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("Name")),
-                ft.DataColumn(ft.Text("Actions")),
+                ft.DataColumn(ft.Text("Discipline")),
+                ft.DataColumn(ft.Text("")),
             ],
             rows=[]
         )

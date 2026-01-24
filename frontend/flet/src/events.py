@@ -9,7 +9,7 @@ from shared.database import JuryDatabase, Event, Progress
 
 
 def header():
-    return ['edit', 'delete', 'name', 'date', 'progress', 'categories', 'disciplines']
+    return ['', '', 'Event name', 'date', 'progress', '', '', '']
 
 def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
     cells = [
@@ -25,7 +25,7 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
                     on_click=lambda e: deleteFunc(e, event.id))),
         ft.DataCell(ft.Text(event.name)),
         ft.DataCell(ft.Text(event.dateFormated())),
-        ft.DataCell(ft.Text(event.progress())),
+        ft.DataCell(ft.Text(event.progress().name)),
         ft.DataCell(ft.IconButton(icon=ft.Icons.CATEGORY,
                                 icon_color=ft.Colors.BLUE_300,
                                 tooltip="Categories",
@@ -34,6 +34,10 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
                                 icon_color=ft.Colors.ORANGE_300,
                                 tooltip="Disciplines",
                                 on_click=lambda e: e.control.page.go(f"/disciplines/{event.id}"))),
+        ft.DataCell(ft.IconButton(icon=ft.Icons.BALANCE_ROUNDED,
+                                icon_color=ft.Colors.GREEN_300,
+                                tooltip="Judges",
+                                on_click=lambda e: e.control.page.go(f"/eventJudges/{event.id}"))),
         ]
     return ft.DataRow(cells=cells)
 
