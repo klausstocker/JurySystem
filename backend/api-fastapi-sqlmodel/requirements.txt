@@ -7,3 +7,4 @@ jinja2
 weasyprint
 qrcode[pil]
 redis[hiredis]
+bcrypt
