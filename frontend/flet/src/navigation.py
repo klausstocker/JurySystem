@@ -14,7 +14,7 @@ from live_event import LiveEventView
 from categories import CategoriesView
 from disciplines import DisciplinesView
 from event_judges import EventJudgesView
-
+from ranking_home import RankingHomeView
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Event, Progress
@@ -71,6 +71,8 @@ class Navigator:
         elif self.page.route.startswith("/eventJudges"):
             eventId = int(self.page.route.split("/")[-1])
             self.page.views.append(EventJudgesView(self.page, self.db, self.redis, eventId))
+        elif self.page.route == '/ranking_home':
+            self.page.views.append(RankingHomeView(self.page, self.db, self.redis))
             self.page.update()
             return
         elif self.page.route == '/login':

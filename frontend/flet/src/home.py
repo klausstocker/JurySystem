@@ -30,7 +30,9 @@ class HomeView(View):
                 continue
             if route.startswith('/rating'):
                 route = '/rating'
-            controls.append(TextButton(name, on_click=lambda _,r=route: self.page.go(r)))
+            if allowed.name == 'Ranking':
+                route = '/ranking_home'
+            controls.append(TextButton(allowed.name, on_click=lambda _,r=route: self.page.go(r)))
 
         menu = ft.Column(
             controls=controls,
