@@ -111,7 +111,7 @@ class UserEditView(View):
             user = self.db.getUser(userId)
             print(f'{user.username=}')
         nameEdit = ft.TextField(label="Username", value=None if createUser else user.username)
-        passwordEdit = ft.TextField(label="Passworde", value=None if createUser else user.password)
+        passwordEdit = ft.TextField(label="Password", password=True, value=None if createUser else 'password')
         emailEdit = ft.TextField(label="Email", value=None if createUser else user.email)
         teamEdit = ft.TextField(label="Team", value=None if createUser else user.team)
         resitrictionsEdit = ft.Dropdown(
