@@ -10,7 +10,7 @@ services:
     environment:
       - DOMAIN=${DOMAIN}
       - SUBDOMAIN_API=${SUBDOMAIN_API}
-      - SUBDOMAIN_FLET=${SUBDOMAIN_FLET}
+      - SUBDOMAIN_JURY=${SUBDOMAIN_JURY}
     # ports:
     #  - "${PORT_API}:${PORT_API}"
     volumes:

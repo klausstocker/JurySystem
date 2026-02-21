@@ -9,21 +9,21 @@ services:
     restart: always
     environment:
       - FLET_FORCE_WEB_SERVER=true
-      - FLET_SERVER_PORT=${PORT_FLET}
+      - FLET_SERVER_PORT=${PORT_JURY}
       - FLET_APP_LIFETIME_MINUTES=10
       - DOMAIN=${DOMAIN}
       - SUBDOMAIN_API=${SUBDOMAIN_API}
-      - SUBDOMAIN_FLET=${SUBDOMAIN_FLET}
+      - SUBDOMAIN_JURY=${SUBDOMAIN_JURY}
     # ports:
-    #  - "${PORT_FLET}:${PORT_FLET}"
+    #  - "${PORT_JURY}:${PORT_JURY}"
     volumes:
       - ./frontend/flet/log:/usr/src/app/log
       - ./frontend/flet/src:/usr/src/app/src:volume-nocopy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flet-app.rule=Host(`${SUBDOMAIN_FLET}${DOMAIN}`)"
+      - "traefik.http.routers.flet-app.rule=Host(`${SUBDOMAIN_JURY}${DOMAIN}`)"
       - "traefik.http.routers.flet-app.entrypoints=websecure"
-      - "traefik.http.services.flet-app.loadbalancer.server.port=${PORT_FLET}"
+      - "traefik.http.services.flet-app.loadbalancer.server.port=${PORT_JURY}"
       - "traefik.http.routers.flet-app.tls.certresolver=letsencrypt"
     depends_on:
       - db

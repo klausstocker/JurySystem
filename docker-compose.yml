@@ -7,7 +7,7 @@ include:
 
   # uncomment needed services
   - docker-compose-python-app.yml  # service app declared | depends on: db
-  - docker-compose-flet-app.yml  # service flet declared | depends on: db
+  - docker-compose-jury-app.yml  # service jury declared | depends on: db
   - docker-compose-fastapi-sqlmodel.yml  # service api-fastapi-sqlmodel declared | depends on: db
 
 
