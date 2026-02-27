@@ -19,10 +19,9 @@ routes = [
     Route("Users", "/users", [Restrictions.ADMIN]),
     Route("Athletes", "/athletes", [Restrictions.TRAINER]),
     Route("Attendances", "/attendances", [Restrictions.HOST, Restrictions.TRAINER]),
-    Route("Events", "/events", [Restrictions.HOST, Restrictions.TRAINER]),
-    Route("Rating", "/rating/1", [Restrictions.HOST, Restrictions.JUDGE]),
-    Route("Ranking", "/ranking/1", [Restrictions.HOST]),
-    Route("Settings", "/settings", Restrictions)
+    Route("Events", "/events", [Restrictions.HOST]),
+    Route("Rating", "/rating", [Restrictions.HOST, Restrictions.JUDGE]),
+    Route("Ranking", "/ranking", [Restrictions.HOST, Restrictions.TRAINER])
 ]
 
 def allowedRoutes(user: User) -> list[Route]:

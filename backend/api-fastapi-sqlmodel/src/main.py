@@ -57,7 +57,6 @@ async def attendances(userId: int, eventId: int):
         athleteAttendances.append((attendance, db.getAthlete(attendance.athleteId)))
 
     data = [[a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, a in athleteAttendances]
-    print(data)
     user = db.getUser(userId)
 
     context = {

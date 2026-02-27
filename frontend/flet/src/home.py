@@ -19,19 +19,8 @@ class HomeView(View):
         user = page.session.get('user')
         username = '' if user is None else user.username
         controls = []
-        help_button = ft.Container(width=0)
         for allowed in allowedRoutes(user):
             route = allowed.route
-            name = allowed.name
-            if route == '/settings':
-                help_button = ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help'))
-                continue
-            if user and user.restrictions == Restrictions.TRAINER and route == '/events':
-                continue
-            if route.startswith('/rating'):
-                route = '/rating'
-            if allowed.name == 'Ranking':
-                route = '/ranking_home'
             controls.append(TextButton(allowed.name, on_click=lambda _,r=route: self.page.go(r)))
 
         menu = ft.Column(
@@ -58,6 +47,8 @@ class HomeView(View):
                 ),
             ],
         )
+
+        help_button = ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help'))
 
         self.controls = [
             ft.AppBar(
@@ -134,7 +125,6 @@ class LoginView(View):
             userEdit, passEdit,login_button
         ]
 
-        print(len(self.db.getAllEvents()))
         for e in self.db.getAllEvents():
             if e.progress() == Progress.FINISHED:
                 controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}")))

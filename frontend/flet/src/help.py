@@ -2,7 +2,7 @@ import flet as ft
 from view import View
 
 
-class SiteView(View):
+class HelpView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/help'

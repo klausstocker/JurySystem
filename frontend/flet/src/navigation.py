@@ -3,7 +3,7 @@ import secrets
 import sys
 import os
 from home import HomeView, LoginView
-from settings import SiteView
+from help import HelpView
 from users import UserView, UserEditView
 from athletes import AthleteView, AthleteEditView
 from attendance import AttendanceView
@@ -96,7 +96,7 @@ class Navigator:
             self.page.session.set('target', self.page.route)
             self.page.views.append(LoginView(self.page, self.db, self.redis))
         elif self.page.route == '/help':
-            self.page.views.append(SiteView(self.page, self.db, self.redis))
+            self.page.views.append(HelpView(self.page, self.db, self.redis))
         elif self.page.route == '/users':
             self.page.views.append(UserView(self.page, self.db, self.redis))
         elif self.page.route.startswith('/userEdit'):
@@ -115,11 +115,13 @@ class Navigator:
         elif self.page.route.startswith('/eventEdit'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(EventEditView(self.page, self.db, self.redis, eventId))
-        elif self.page.route == '/rating':
-            self.page.views.append(RatingSelectEventView(self.page, self.db, self.redis))
         elif self.page.route.startswith('/rating/'):
             eventId = int(self.page.route.split('/')[-1])
             self.page.views.append(RatingView(self.page, self.db, self.redis, eventId))
+        elif self.page.route == '/rating':
+            self.page.views.append(RatingSelectEventView(self.page, self.db, self.redis))
+        elif self.page.route.startswith('/ranking'):
+            self.page.views.append(RankingHomeView(self.page, self.db, self.redis))
         else:
             self.page.views.append(HomeView(self.page, self.db, self.redis))
         self.page.update()

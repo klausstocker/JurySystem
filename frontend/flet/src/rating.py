@@ -151,7 +151,7 @@ class RatingView(View):
                 ft.Row([digit_btn(4), digit_btn(5), digit_btn(6)], spacing=2),
                 ft.Row([digit_btn(1), digit_btn(2), digit_btn(3)], spacing=2),
                 ft.Row([ft.ElevatedButton(".", on_click=lambda _: add_char("."), expand=1), digit_btn(0), ft.ElevatedButton(content=ft.Icon(ft.Icons.BACKSPACE_OUTLINED), on_click=backspace, expand=1)], spacing=2)
-            ], spacing=2, width=200)
+            ], spacing=2, width=300)
 
             def update(e):
                 print(f'update athlete="{ratings.athlete.name()}"')

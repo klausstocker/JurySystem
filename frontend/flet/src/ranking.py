@@ -18,7 +18,7 @@ def ratingCell(ratings: AthleteRatings, discipline: str):
 class RankingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
-        self.route = f'public/ranking/{eventId}'
+        self.route = f'ranking/{eventId}'
 
         self.event = self.db.getEvent(eventId)
         self.disciplines = self.db.getEventDisciplines(eventId)
