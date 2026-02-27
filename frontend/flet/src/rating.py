@@ -104,7 +104,7 @@ class RatingView(View):
             d_val = "{:.2f}".format(difficultyContent) if difficultyContent is not None else ""
             e_val = "{:.2f}".format(executionContent) if executionContent is not None else ""
 
-            difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT, border_color=ft.Colors.BLUE, border_width=2)
+            difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
             executionEdt = ft.TextField(label="execution", value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
 
             self.active_field = difficultyEdt
@@ -121,7 +121,7 @@ class RatingView(View):
                 highlight_field(difficultyEdt, executionEdt)
 
             def set_execution(e):
-                highlight_field(executionEdt, difficultyContent)
+                highlight_field(executionEdt, difficultyEdt)
 
             difficultyEdt.on_focus = set_difficulty
             executionEdt.on_focus = set_execution
@@ -143,65 +143,119 @@ class RatingView(View):
                     self.active_field.value = self.active_field.value[:-1]
                     self.active_field.update()
 
-            def digit_btn(digit):
-                return ft.ElevatedButton(text=str(digit), on_click=lambda _: add_char(str(digit)), expand=1)
-
-            keypad = ft.Column([
-                ft.Row([digit_btn(7), digit_btn(8), digit_btn(9)], spacing=2),
-                ft.Row([digit_btn(4), digit_btn(5), digit_btn(6)], spacing=2),
-                ft.Row([digit_btn(1), digit_btn(2), digit_btn(3)], spacing=2),
-                ft.Row([ft.ElevatedButton(".", on_click=lambda _: add_char("."), expand=1), digit_btn(0), ft.ElevatedButton(content=ft.Icon(ft.Icons.BACKSPACE_OUTLINED), on_click=backspace, expand=1)], spacing=2)
-            ], spacing=2, width=300)
-
-            def update(e):
-                print(f'update athlete="{ratings.athlete.name()}"')
-                if ratingId is None:
-                    self.db.insertRating(ratings.athlete.id, ratings.eventId,
-                                         self.user.id, self.disciplineEdit.value,
-                                         difficultyEdt.value, executionEdt.value)
-                else:
-                    self.db.updateRating(ratingId, self.user.id, difficultyEdt.value,
-                                         executionEdt.value)
-                self.page.close(self.dlg)
-                self.updateControls()
-            def cancel(e):
-                print(f'cancel athlete="{ratings.athlete.name()}"')
-                self.page.close(self.dlg)
-
-            self.dlg = ft.AlertDialog(
-                modal=True,
-                content=ft.Container(
-                    ft.Column(
-                        [
-                            ft.Text(discipline),
-                            ft.Text(ratings.athlete.name()),
-                            ft.Text(f'{ratings.eventCategoryName} {ratings.athlete.birthFormated()}'),
-                            difficultyEdt,
-                            executionEdt,
-                            keypad,
-                            ft.Row(spacing=0, controls=
-                                [
-                                    ft.IconButton(
-                                        icon=ft.Icons.CHECK_CIRCLE,
-                                        icon_color=ft.Colors.GREEN_300,
-                                        tooltip="Save",
-                                        on_click=update),
-                                    ft.IconButton(
-                                        icon=ft.Icons.CANCEL,
-                                        icon_color=ft.Colors.RED_300,
-                                        tooltip="Cancel",
-                                        on_click=cancel)
-                                ], alignment=ft.MainAxisAlignment.CENTER)
-                        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        tight=True, scroll=ft.ScrollMode.AUTO
+            def digit_btn(text, handler):
+                return ft.OutlinedButton(
+                    text=text,
+                    on_click=handler,
+                    expand=1,
+                    height=72,
+                    style=ft.ButtonStyle(
+                        text_style=ft.TextStyle(size=26),
                     ),
-                    padding=10,
                 )
-            )
-            self.page.overlay.append(self.dlg)
-            self.page.update()
-            self.page.open(self.dlg)
 
+            sheet_height = self.page.height * 0.85
+
+            keypad = ft.Column(
+                [
+                    ft.Row([
+                        digit_btn("7", lambda _: add_char("7")),
+                        digit_btn("8", lambda _: add_char("8")),
+                        digit_btn("9", lambda _: add_char("9")),
+                    ], spacing=8),
+
+                    ft.Row([
+                        digit_btn("4", lambda _: add_char("4")),
+                        digit_btn("5", lambda _: add_char("5")),
+                        digit_btn("6", lambda _: add_char("6")),
+                    ], spacing=8),
+
+                    ft.Row([
+                        digit_btn("1", lambda _: add_char("1")),
+                        digit_btn("2", lambda _: add_char("2")),
+                        digit_btn("3", lambda _: add_char("3")),
+                    ], spacing=8),
+
+                    ft.Row(
+                        [
+                            digit_btn(".", lambda _: add_char(".")),
+                            digit_btn("0", lambda _: add_char("0")),
+                            ft.ElevatedButton(
+                                content=ft.Icon(ft.Icons.BACKSPACE_OUTLINED, size=28),
+                                on_click=backspace,
+                                expand=1,
+                                height=72,
+                            ),
+                        ],
+                        spacing=8,
+                    ),
+                ],
+                spacing=8,
+            )
+
+            def close_sheet(save):
+                sheet.bottom = -sheet_height
+                self.page.update()
+                self.page.overlay.remove(sheet)
+                if save:
+                    print(f'update athlete="{ratings.athlete.name()}"')
+                    if ratingId is None:
+                        self.db.insertRating(ratings.athlete.id, ratings.eventId,
+                                            self.user.id, self.disciplineEdit.value,
+                                            difficultyEdt.value, executionEdt.value)
+                    else:
+                        self.db.updateRating(ratingId, self.user.id, difficultyEdt.value,
+                                            executionEdt.value)
+                else:
+                    print(f'cancel athlete="{ratings.athlete.name()}"')
+                self.page.update()
+                self.updateControls()
+
+            sheet = ft.Container(
+                width=self.page.width,
+                height=sheet_height,
+                bgcolor=ft.Colors.SURFACE,
+                border_radius=ft.border_radius.only(top_left=20, top_right=20),
+                padding=16,
+                bottom=-sheet_height,
+                animate_position=ft.Animation(300, ft.AnimationCurve.EASE_OUT),
+                content=ft.Column(
+                    [
+                        ft.Text(f'{discipline} / {ratings.eventCategoryName}', size=20, weight=ft.FontWeight.BOLD),
+                        ft.Text(f'{ratings.athlete.name()} / {ratings.athlete.birthFormated()}', size=16),
+                        ft.Row(controls=[difficultyEdt, executionEdt]),
+                        ft.Divider(),
+                        keypad,
+                        ft.Row([
+                                ft.OutlinedButton(
+                                    icon_color=ft.Colors.GREEN_300,
+                                    icon=ft.Icons.CHECK_ROUNDED,
+                                    expand=1,
+                                    height=56,
+                                    on_click=lambda e: close_sheet(True),
+                                ),
+                                ft.OutlinedButton(
+                                    icon_color=ft.Colors.RED_300,
+                                    icon=ft.Icons.CANCEL_ROUNDED,
+                                    expand=1,
+                                    height=56,
+                                    on_click=lambda e: close_sheet(False),
+                                ),
+                            ],
+                            spacing=12,
+                        ),
+                    ],
+                    spacing=12,
+                    expand=True,
+                ),
+            )
+
+            self.page.overlay.append(sheet)
+            self.page.update()
+
+            # slide up
+            sheet.bottom = 0
+            self.page.update()
         
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '']],
