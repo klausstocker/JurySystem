@@ -278,7 +278,7 @@ class JuryDatabase:
         with self.conn.cursor() as cursor:
             idText, idValue = ("id, ", f"'{id}', ") if id else ('', '')
             token = secrets.token_urlsafe() if restrictions == Restrictions.JUDGE else ''
-            sql = f"INSERT INTO users ({idText}username, hash, email, team, registered, expires, restrictions, locked, token) VALUES ({idValue}'{username}', '{bcrypt.hashpw(password.encode(), salt).decode()}', '{email}','{team}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked}, {token});"
+            sql = f"INSERT INTO users ({idText}username, hash, email, team, registered, expires, restrictions, locked, token) VALUES ({idValue}'{username}', '{bcrypt.hashpw(password.encode(), salt).decode()}', '{email}','{team}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked}, '{token}');"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
