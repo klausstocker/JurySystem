@@ -45,6 +45,7 @@ class EventView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = "/events"
+        self.scroll = ft.ScrollMode.AUTO
 
         user = self.page.session.get('user')
 
@@ -89,7 +90,7 @@ class EventView(View):
 
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(
                 spacing=0,
                 controls=[
@@ -108,6 +109,7 @@ class EventEditView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
         self.route = f"/eventEdit/{eventId}"
+        self.scroll = ft.ScrollMode.AUTO
         createEvent = eventId == 0
 
         user = self.page.session.get('user')

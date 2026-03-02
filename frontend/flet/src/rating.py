@@ -18,32 +18,37 @@ class RatingSelectEventView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/rating'
+        self.scroll = False
+
+        buttons = [
+            ft.ElevatedButton(
+                f"{e.descr()}",
+                on_click=lambda _, id=e.id: self.page.go(f'/rating/{id}'),
+                width=300
+            ) for e in self.db.getAllEvents()
+        ]
+        buttons.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Select Event'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Container(
                 content=ft.Column(
-                    controls=[
-                        ft.ElevatedButton(
-                            f"{e.descr()}",
-                            on_click=lambda _, id=e.id: self.page.go(f'/rating/{id}'),
-                            width=300
-                        ) for e in self.db.getAllEvents()
-                    ],
+                    controls=buttons,
                     scroll=ft.ScrollMode.AUTO,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=10
+                    spacing=10,
+                    alignment=ft.MainAxisAlignment.CENTER
                 ),
                 expand=True,
                 alignment=ft.alignment.center
-            ),
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+            )
         ]
 
 class RatingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
         self.route = f'/rating/{eventId}'
+        self.scroll = ft.ScrollMode.AUTO
 
         self.user = self.page.session.get('user')
         self.event = self.db.getEvent(eventId)
@@ -69,7 +74,7 @@ class RatingView(View):
         )
         self.updateControls()
 
-    def AthleteRatingAsRow(self, athlete: Athlete, discipline: str, editFunc: callable):
+    def AthleteRatingAsRow(self, athlete: Athlete, discipline: str, editFunc: callable, index: int):
         ratings = self.db.getAthleteAndRatings(athlete.id, self.event.id)
         _, _, ratingId = ratings.ratingOrNone(discipline)
         def remove(e):
@@ -93,7 +98,7 @@ class RatingView(View):
                     tooltip="Delete",
                     on_click=remove)]))
         ]
-        return ft.DataRow(cells=cells)
+        return ft.DataRow(cells=cells, color=ft.Colors.GREY_900 if index % 2 == 1 else None)
         
     def updateControls(self):
         
@@ -259,7 +264,7 @@ class RatingView(View):
         
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '']],
-                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating) for athlete in self.athletes],
+                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating, i) for i, athlete in enumerate(self.athletes)],
                 column_spacing=10,
                 vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
             )

@@ -13,6 +13,7 @@ class CategoriesView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
         self.route = f"/categories/{eventId}"
+        self.scroll = ft.ScrollMode.AUTO
         self.eventId = eventId
         self.existing_categories: List[EventCategory] = []
 
@@ -149,6 +150,7 @@ class CategoriesView(View):
             ],
             alignment=ft.MainAxisAlignment.SPACE_AROUND,
             vertical_alignment=ft.CrossAxisAlignment.CENTER,
+            scroll=ft.ScrollMode.AUTO
         )
 
         def edit_clicked(e, category: EventCategory):
@@ -228,7 +230,7 @@ class CategoriesView(View):
             ),
             ft.Text("Add new Category", size=20),
             input_controls,
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/events"))
         ]
 

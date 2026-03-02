@@ -17,6 +17,7 @@ class AttendanceView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/attendances'
+        self.scroll = ft.ScrollMode.AUTO
 
         def printPdf(e):
             if self.eventCtrl.value is None:
@@ -65,7 +66,7 @@ class AttendanceView(View):
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.eventCtrl,
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.SAVE,
                           icon_color=ft.Colors.BLUE_300,

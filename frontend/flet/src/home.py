@@ -81,6 +81,7 @@ class LoginView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/login'
+        self.scroll = False
 
         def loginbtn(e):
             userId = self.db.validateUser(userEdit.value, passEdit.value)
@@ -137,7 +138,8 @@ class LoginView(View):
                     controls=controls,
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=15
+                    spacing=15,
+                    scroll=ft.ScrollMode.AUTO
                 ),
                 expand=True,
                 alignment=ft.alignment.center

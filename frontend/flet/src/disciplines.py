@@ -11,6 +11,7 @@ class DisciplinesView(View):
         super().__init__(page, db, redis)
         self.eventId = eventId
         self.route = f"/disciplines/{eventId}"
+        self.scroll = ft.ScrollMode.AUTO
         
         self.event = self.db.getEvent(eventId)
 
@@ -57,6 +58,6 @@ class DisciplinesView(View):
         self.controls = [
             ft.AppBar(title=ft.Text(f"Disciplines for {self.event.name}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.name_input, ft.IconButton(icon=ft.Icons.ADD_CIRCLE, icon_color=ft.Colors.BLUE_300, on_click=addDiscipline)]),
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/events"))
         ]

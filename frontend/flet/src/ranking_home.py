@@ -10,6 +10,7 @@ class RankingHomeView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/ranking_home'
+        self.scroll = False
 
         controls = [
             ft.Text("Events", size=40, weight="bold"),
@@ -17,9 +18,9 @@ class RankingHomeView(View):
 
         for e in self.db.getAllEvents():
             if e.progress() == Progress.FINISHED:
-                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}")))
+                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}"), width=300))
             if e.progress() == Progress.ACTIVE:
-                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/liveEvent/{id}")))
+                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/liveEvent/{id}"), width=300))
 
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
@@ -29,7 +30,8 @@ class RankingHomeView(View):
                     controls=controls,
                     alignment=ft.MainAxisAlignment.CENTER,
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=15
+                    spacing=15,
+                    scroll=ft.ScrollMode.AUTO
                 ),
                 expand=True,
                 alignment=ft.alignment.center

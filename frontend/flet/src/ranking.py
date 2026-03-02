@@ -19,6 +19,7 @@ class RankingView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
         self.route = f'ranking/{eventId}'
+        self.scroll = ft.ScrollMode.AUTO
 
         self.event = self.db.getEvent(eventId)
         self.disciplines = self.db.getEventDisciplines(eventId)
@@ -38,19 +39,19 @@ class RankingView(View):
 
         self.updateControls()
 
-    def AthleteRankingAsRow(self, ranking: AthleteRanking):
+    def AthleteRankingAsRow(self, ranking: AthleteRanking, index: int):
         cells = [
             ft.DataCell(ft.Text(ranking.ranking)),
             ft.DataCell(ft.Text(ranking.ratings.athlete.name()))
             ]
         cells += [ratingCell(ranking.ratings, d.name) for d in self.disciplines]
         cells.append(ft.DataCell(ft.Text('{:.2f}'.format(ranking.ratings.sum()))))
-        return ft.DataRow(cells=cells)
+        return ft.DataRow(cells=cells, color=ft.Colors.GREY_900 if index % 2 == 1 else None)
         
     def updateControls(self):
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in ['rank', 'name'] + [d.name for d in self.disciplines] + ['sum']],
-                rows= [self.AthleteRankingAsRow(ranking) for ranking in self.rankings]
+                rows= [self.AthleteRankingAsRow(ranking, i) for i, ranking in enumerate(self.rankings)]
             )
 
         def printPdf(e):
@@ -61,10 +62,12 @@ class RankingView(View):
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
             self.categoryEdit,
-            self.table,
-            ft.IconButton(ft.Icons.SAVE,
-                          icon_color=ft.Colors.BLUE_300,
-                          tooltip="pdf",
-                          on_click=printPdf),
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))]
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
+            ft.Row(controls=[
+                ft.IconButton(ft.Icons.SAVE,
+                              icon_color=ft.Colors.BLUE_300,
+                              tooltip="pdf",
+                              on_click=printPdf),
+                ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
+            ])]
         self.page.update()

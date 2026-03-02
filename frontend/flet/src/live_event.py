@@ -27,13 +27,14 @@ class LiveEventView(View):
         super().__init__(page, db, redis)
         self.page = page
         self.route =f'/public/liveEvent/{eventId}'
+        self.scroll = ft.ScrollMode.AUTO
 
         def onServerTime():
             t = time.strftime('%H:%M:%S', time.localtime())
             self.updateTableIfNewer()
             self.controls = [
                 ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-                self.table
+                ft.Row([self.table], scroll=ft.ScrollMode.AUTO)
             ]
             self.page.update()
 
@@ -46,7 +47,7 @@ class LiveEventView(View):
 
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            self.table
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO)
         ]
         self.scheduler.start()
     

@@ -50,13 +50,14 @@ class UserView(View):
             
         self.page = page
         self.route = '/users'
+        self.scroll = ft.ScrollMode.AUTO
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(h)) for h in header()],
                 rows=createRows()
             )
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.IconButton(ft.Icons.ADD_CIRCLE,
                     icon_color=ft.Colors.BLUE_300,
                     tooltip="Add",
@@ -90,6 +91,7 @@ class UserEditView(View):
     def __init__(self, page: ft.Page, db, redis, userId: int):
         super().__init__(page, db, redis)
         self.route = f'/userEdit/{userId}'
+        self.scroll = ft.ScrollMode.AUTO
 
         createUser = userId == 0
 

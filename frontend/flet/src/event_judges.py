@@ -13,6 +13,7 @@ class EventJudgesView(View):
     def __init__(self, page: ft.Page, db, redis, eventId: int):
         super().__init__(page, db, redis)
         self.route = f"/eventJudges/{eventId}"
+        self.scroll = ft.ScrollMode.AUTO
 
         self.event = self.db.getEvent(eventId)
 
@@ -52,7 +53,7 @@ class EventJudgesView(View):
         self.controls = [
             ft.AppBar(title=ft.Text(f"Judges for {self.event.name}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.judgeInput, ft.IconButton(icon=ft.Icons.ADD_CIRCLE, icon_color=ft.Colors.BLUE_300, on_click=addJudge)]),
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/events"))
         ]
 

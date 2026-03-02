@@ -15,6 +15,7 @@ class AthleteView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/athletes'
+        self.scroll = ft.ScrollMode.AUTO
 
         user = self.page.session.get('user')
 
@@ -65,7 +66,7 @@ class AthleteView(View):
             )
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
-            self.table,
+            ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
                     icon_color=ft.Colors.BLUE_300,
@@ -103,6 +104,7 @@ class AthleteEditView(View):
     def __init__(self, page: ft.Page, db, redis, athleteId: int):
         super().__init__(page, db, redis)
         self.route = f'/athleteEdit/{athleteId}'
+        self.scroll = ft.ScrollMode.AUTO
         createAthlete = athleteId == 0
         user = self.page.session.get('user')
         

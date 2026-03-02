@@ -6,6 +6,7 @@ class HelpView(View):
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
         self.route = '/help'
+        self.scroll = ft.ScrollMode.AUTO
         
         last_route = self.page.session.get('last_route') or '/'
         help_text = "Allgemeine Hilfe zum Jury System."
