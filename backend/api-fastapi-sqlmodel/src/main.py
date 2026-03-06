@@ -42,6 +42,7 @@ async def athletes(userId: int):
     user = db.getUser(userId)
 
     context = {
+            "orientation": 'A4 portrait',
             "title": f'Athletes of {user.team}',
             "headers": ['name', 'birth', 'gender'],
             "data": data
@@ -60,14 +61,15 @@ async def attendances(userId: int, eventId: int):
     user = db.getUser(userId)
 
     context = {
+            "orientation": 'A4 portrait',
             "title": f'Attendances for {event.descr()} of {user.team}',
             "headers": ['name', 'birth', 'gender', 'category', 'group'],
             "data": data
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
-@api.get('/ranking/{eventId}/{category}', response_class=HTMLResponse)
-async def ranking(eventId: int, category: str):
+@api.get('/ranking/{eventId}/{category}/{detail}', response_class=HTMLResponse)
+async def ranking(eventId: int, category: str, detail: int):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
     disciplines = db.getEventDisciplines(eventId)
@@ -75,14 +77,16 @@ async def ranking(eventId: int, category: str):
     for rank in db.getEventCategoryRankings(eventId, category):
         athlete = rank.ratings.athlete
         ratingData = []
-        for discipline in disciplines:
-            ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
+        if detail == 1:
+            for discipline in disciplines:
+                ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
         user = db.getUser(athlete.userId)
         data.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
 
     context = {
+            "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
             "title": f'Rankings for {event.descr()} / {category}',
-            "headers": ['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'],
+            "headers": ['rank', 'name', 'team'] + ([d.name for d in disciplines] if detail == 1 else []) + ['rating'],
             "data": data
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')

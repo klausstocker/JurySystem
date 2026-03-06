@@ -54,9 +54,9 @@ class RankingView(View):
                 rows= [self.AthleteRankingAsRow(ranking, i) for i, ranking in enumerate(self.rankings)]
             )
 
-        def printList(e):
+        def printList(e, d):
             if self.categoryEdit.value:
-                self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
+                self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}/{d}')
 
         def printCert(e):
             if self.categoryEdit.value:
@@ -68,7 +68,12 @@ class RankingView(View):
                 ft.IconButton(ft.Icons.FORMAT_LIST_NUMBERED,
                               icon_color=ft.Colors.BLUE_300,
                               tooltip="results",
-                              on_click=printList))
+                              on_click=lambda e, d=0: printList(e, d)))
+            controls.append(
+                ft.IconButton(ft.Icons.LIST_ALT,
+                              icon_color=ft.Colors.BLUE_300,
+                              tooltip="details",
+                              on_click=lambda e, d=1: printList(e, d)))
             controls.append(
                 ft.IconButton(ft.Icons.PICTURE_AS_PDF,
                               icon_color=ft.Colors.BLUE_300,
