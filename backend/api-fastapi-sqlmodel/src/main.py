@@ -88,12 +88,12 @@ async def ranking(eventId: int, category: str):
     return createResponse('table.html', context, f'ranking_{category}.pdf')
 
 
-@api.get('/certificate/{eventId}', response_class=HTMLResponse)
-async def certificate(eventId: int):
+@api.get('/certificate/{eventId}/{category}', response_class=HTMLResponse)
+async def certificate(eventId: int, category: str):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
     athleteAttendances = []
-    for attendance in db.getEventAttendances(eventId):
+    for attendance in db.getEventAttendances(eventId, category):
         athleteAttendances.append((attendance, db.getAthlete(attendance.athleteId)))
 
     template = env.get_template('certificate.html')

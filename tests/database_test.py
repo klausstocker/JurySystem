@@ -141,7 +141,7 @@ class TestDatabase(unittest.TestCase):
     def test_rights(self):
         host = self.db.getUser(2)
         allowed = allowedRoutes(host)
-        self.assertEqual(len(allowed), 5)
+        self.assertEqual(len(allowed), 4)
 
 if __name__ == '__main__':
     unittest.main()

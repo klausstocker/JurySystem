@@ -507,10 +507,11 @@ class JuryDatabase:
                 return Attendance.fromRow(cursor.fetchone())
         return None
  
-    def getEventAttendances(self, eventId: int) -> list[Attendance]:
+    def getEventAttendances(self, eventId: int, eventCategoryName: str='') -> list[Attendance]:
         attendances = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT * FROM attendances WHERE eventId = {eventId} AND hidden = 0;')
+            category = f' AND `eventCategoryName` = "{eventCategoryName}"' if len(eventCategoryName) > 0 else ''
+            cursor.execute(f'SELECT * FROM attendances WHERE eventId = {eventId}{category} AND hidden = 0;')
             for row in cursor.fetchall():
                 attendances.append(Attendance.fromRow(row))
         return attendances

@@ -54,20 +54,33 @@ class RankingView(View):
                 rows= [self.AthleteRankingAsRow(ranking, i) for i, ranking in enumerate(self.rankings)]
             )
 
-        def printPdf(e):
+        def printList(e):
             if self.categoryEdit.value:
                 self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}')
+
+        def printCert(e):
+            if self.categoryEdit.value:
+                self.page.launch_url(f'https://{View.api()}/certificate/{self.event.id}/{self.categoryEdit.value}')
+
+        controls = []
+        if len(self.table.rows) > 0:
+            controls.append(
+                ft.IconButton(ft.Icons.FORMAT_LIST_NUMBERED,
+                              icon_color=ft.Colors.BLUE_300,
+                              tooltip="results",
+                              on_click=printList))
+            controls.append(
+                ft.IconButton(ft.Icons.PICTURE_AS_PDF,
+                              icon_color=ft.Colors.BLUE_300,
+                              tooltip="certificates",
+                              on_click=printCert))
+
+        controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
             self.categoryEdit,
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
-            ft.Row(controls=[
-                ft.IconButton(ft.Icons.SAVE,
-                              icon_color=ft.Colors.BLUE_300,
-                              tooltip="pdf",
-                              on_click=printPdf),
-                ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
-            ])]
+            ft.Row(controls=controls)]
         self.page.update()
