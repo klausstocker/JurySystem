@@ -7,7 +7,13 @@
     <title>{{title}}</title>
     <style>
         @page {
-            size: {{ orientation }};
+            size: {
+                    {
+                    orientation
+                }
+            }
+
+            ;
             margin: 10mm;
         }
 
@@ -60,7 +66,9 @@
 
 <body>
     <h1>{{ title }}</h1>
+    {% for c, t in tables %}
     <div class="table-container">
+        <h3>{{ c }}</h3>
         <table style='font-size:60%'>
             <thead>
                 <tr>
@@ -70,7 +78,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for row in data %}
+                {% for row in t %}
                 <tr>
                     {% for val in row %}
                     <td>{{ val }}</td>
@@ -80,6 +88,7 @@
             </tbody>
         </table>
     </div>
+    {% endfor %}
 </body>
 
 </html>

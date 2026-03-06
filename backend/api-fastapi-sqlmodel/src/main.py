@@ -45,7 +45,7 @@ async def athletes(userId: int):
             "orientation": 'A4 portrait',
             "title": f'Athletes of {user.team}',
             "headers": ['name', 'birth', 'gender'],
-            "data": data
+            "tables": [('', data)]
         }
     return createResponse('table.html', context, f'athletes_{alphaNum(user.team)}.pdf')
 
@@ -68,6 +68,29 @@ async def attendances(userId: int, eventId: int):
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
+@api.get('/results/{eventId}', response_class=HTMLResponse)
+async def results(eventId: int):
+    db = JuryDatabase('db')
+    event = db.getEvent(eventId)
+    disciplines = db.getEventDisciplines(eventId)
+    tables = []
+    detail = 0
+    for category in db.getEventCategories(eventId):
+        data = []
+        for rank in db.getEventCategoryRankings(eventId, category.name):
+            athlete = rank.ratings.athlete
+            user = db.getUser(athlete.userId)
+            data.append([rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
+        tables.append((category.name, data))
+
+    context = {
+            "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
+            "title": f'Rankings for {event.descr()}',
+            "headers": ['rank', 'name', 'team', 'rating'],
+            "tables": tables
+        }
+    return createResponse('table.html', context, f'{event.name}.pdf')
+
 @api.get('/ranking/{eventId}/{category}/{detail}', response_class=HTMLResponse)
 async def ranking(eventId: int, category: str, detail: int):
     db = JuryDatabase('db')
@@ -87,7 +110,7 @@ async def ranking(eventId: int, category: str, detail: int):
             "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
             "title": f'Rankings for {event.descr()} / {category}',
             "headers": ['rank', 'name', 'team'] + ([d.name for d in disciplines] if detail == 1 else []) + ['rating'],
-            "data": data
+            "tables": [('', data)]
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')
 
