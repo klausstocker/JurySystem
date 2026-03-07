@@ -50,11 +50,17 @@ class EventJudgesView(View):
         
         updateTable()
 
+        def printJudgeLogins(e):
+            self.page.launch_url(f'https://{View.api()}/judgelogins/{self.token()}/{eventId}/rating_{eventId}')
+
         self.controls = [
             ft.AppBar(title=ft.Text(f"Judges for {self.event.name}"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.judgeInput, ft.IconButton(icon=ft.Icons.ADD_CIRCLE, icon_color=ft.Colors.BLUE_300, on_click=addJudge)]),
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
-            ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/events"))
+            ft.Row([
+                ft.IconButton(icon=ft.Icons.CONTACT_PAGE, tooltip="Logins for judges", on_click=printJudgeLogins),
+                ft.ElevatedButton("Back", on_click=lambda _: self.page.go("/events"))
+            ])
         ]
 
     def asRow(self, judgeId, judgeName, can_remove, deleteFunc):

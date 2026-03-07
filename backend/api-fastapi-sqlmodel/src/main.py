@@ -1,6 +1,7 @@
 import io
 import os
 import sys
+import base64
 from fastapi import FastAPI, Response, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -160,3 +161,33 @@ async def qrCodesLogin(userId: int, token: str, target: str, request: Request) -
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')
 
+@api.get('/judgelogins/{token}/{eventId}/{target}', response_class=HTMLResponse)
+async def qrCodesLoginAllJudges(eventId: int, token: str, target: str) ->Response:
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
+    db = JuryDatabase('db')
+    event = db.getEvent(eventId)
+    judges = db.getEventJudges(eventId)
+    if not judges:
+        raise HTTPException(
+            status_code=404,
+            detail="no judges for this event"
+        )
+    targets = []
+    for judge in judges:
+        img = qrcode.make(f'https://{os.environ['SUBDOMAIN_API'] + os.environ['DOMAIN']}/qrcodes/login/{token}/{judge.id}/{target}')
+        targets.append((judge.username, base64.b64encode(get_bytes(img)).decode("utf-8")))
+
+    template = env.get_template('qr_login.html')
+    context = {
+        "event": event,
+        "targets": targets
+    }
+    rendered_html = template.render(context)
+    pdf_file = HTML(string=rendered_html, base_url=".").write_pdf()
+    filename = f'{alphaNum(event.name)}.pdf'
+    headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
+    return Response(pdf_file, headers=headers, media_type='application/pdf')

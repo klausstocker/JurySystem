@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Judge Logins</title>
+</head>
+
+<body>
+  <style>
+    body {
+      text-align: center;
+      font-family: Georgia, serif;
+      margin: 20px;
+    }
+
+    .qr-img {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 200px;
+    }
+  </style>
+  {% for name, img in targets %}
+  <h1 style="break-before: page;">{{ event.name }}</h1>
+  <h2>{{ event.dateFormated() }}</h2>
+  <h3>{{ name }}</h3>
+  <img class="qr-img" alt="QR-Code" src="data:image/png;base64,{{ img }}">
+  <p>Log Dich mit Deinem Browser ein.</p>
+  {% endfor %}
+</body>
+
+</html>
