@@ -51,14 +51,15 @@ CREATE TABLE IF NOT EXISTS `events` (
   `name` varchar(50) NOT NULL,
   `userId` int(10) unsigned NOT NULL,
   `date` datetime NOT NULL,
+  `finished`tinyint(4) DEFAULT 0,
   `deleted` tinyint(4) DEFAULT 0,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `events` (`id`, `name`, `userId`, `date`, `deleted`) VALUES
-  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 0),
-  (2, 'Bezirksmeisterschaften 2026', 2, '2026-05-28', 0);
+INSERT INTO `events` (`id`, `name`, `userId`, `date`, `finished`, `deleted`) VALUES
+  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 1, 0),
+  (2, 'Bezirksmeisterschaften 2026', 2, '2026-05-28', 0, 0);
 
 CREATE TABLE IF NOT EXISTS `event_judges` (
   `eventId` int(10) unsigned NOT NULL,

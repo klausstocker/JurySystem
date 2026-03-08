@@ -80,15 +80,15 @@ class Event:
     name: str
     userId: int
     date: datetime
+    __finished: bool
 
     @staticmethod
     def fromRow(row):
-        return Event(row['id'], row['name'], row['userId'], row['date'])
+        return Event(row['id'], row['name'], row['userId'], row['date'], row['finished'] == 1)
     
     @staticmethod
     def dateFromString(date: str) -> datetime:
         return datetime.strptime(date, '%d.%m.%Y')
-
 
     def dateFormated(self) -> str:
         return self.date.strftime('%d.%m.%Y')
@@ -96,11 +96,10 @@ class Event:
     def descr(self) -> str:
         return f'{self.name} / {self.dateFormated()}'
     
-    def progress(self) -> Progress:
-        today = date.today()
-        if today < self.date.date():
+    def progress(self, day:date=date.today()) -> Progress:
+        if day < self.date.date():
             return Progress.PLANNED
-        if today > self.date.date():
+        if day >= self.date.date() and self.__finished:
             return Progress.FINISHED
         return Progress.ACTIVE
 
@@ -473,6 +472,12 @@ class JuryDatabase:
             self.conn.commit()
             return cnt != 0
         return False
+    
+    def finishEvent(self, eventId:int, finished: bool):
+        with self.conn.cursor() as cursor:
+            sql = f"UPDATE `events` SET `finished` = {1 if finished else 0} WHERE `events`.`id` = {eventId};"
+            cnt = cursor.execute(sql)
+            self.conn.commit()
 
     def removeEvent(self, eventId: int) -> bool:
         with self.conn.cursor() as cursor:

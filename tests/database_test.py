@@ -5,7 +5,7 @@ import pymysql.cursors
 from datetime import datetime
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, EventDiscipline, RankingType, allowedCategories
+from shared.database import JuryDatabase, Restrictions, User, Gender, EventCategory, EventDiscipline, RankingType, allowedCategories, Progress
 from shared.rights import Route, allowedRoutes
 class TestDatabase(unittest.TestCase):
 
@@ -100,6 +100,12 @@ class TestDatabase(unittest.TestCase):
         id, name, can_remove = self.db.getEventJudgesEnableRemove(2)[0]
         self.assertTrue(self.db.removeEventJudge(2, 3))
         self.assertTrue(self.db.removeEventJudge(2, 4))
+        self.assertEqual(self.db.getEvent(2).progress(datetime.strptime('2025-01-01', '%Y-%m-%d').date()), Progress.PLANNED)
+        eventDate = self.db.getEvent(2).date.date()
+        self.assertEqual(self.db.getEvent(2).progress(eventDate), Progress.ACTIVE)
+        self.db.finishEvent(2, True)
+        self.assertEqual(self.db.getEvent(2).progress(eventDate), Progress.FINISHED)
+        self.db.finishEvent(2, False)
 
     def test_rating(self):
         self.assertEqual(len(self.db.getEventRatings(1, 1)), 1)
