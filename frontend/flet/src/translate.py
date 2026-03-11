@@ -24,7 +24,9 @@ class tr:
             'Attendances': 'Teilnahmen',
             'Rating': 'Bewertung',
             'Ranking': 'Ergebnisse',
-            'Attendances of': 'Teilnahmen von'
+            'Attendances of': 'Teilnahmen von',
+            'category': 'Klasse',
+            'group': 'Riege'
         }
     }
 
