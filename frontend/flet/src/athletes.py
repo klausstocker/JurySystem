@@ -3,6 +3,7 @@ import sys
 import datetime
 import flet as ft
 from view import View
+from translate import tr
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, Gender, Event, Progress
@@ -18,6 +19,7 @@ class AthleteView(View):
         self.scroll = ft.ScrollMode.AUTO
 
         user = self.page.session.get('user')
+        self.tr = tr(user.language)
 
         def createRows():
             return [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
@@ -40,10 +42,10 @@ class AthleteView(View):
 
             dlg = ft.AlertDialog(
                 modal=True,
-                content=ft.Text(f"Delete athlete '{athlete.name()}'?"),
+                content=ft.Text(f"{self.tr.tr('Delete athlete')} '{athlete.name()}'?"),
                 actions=[
-                    ft.TextButton("Yes", on_click=yes),
-                    ft.TextButton("No", on_click=no),
+                    ft.TextButton(self.tr.tr("Yes"), on_click=yes),
+                    ft.TextButton(self.tr.tr("No"), on_click=no),
                 ],
                 actions_alignment=ft.MainAxisAlignment.END)
             e.control.page.overlay.append(dlg)
@@ -61,16 +63,16 @@ class AthleteView(View):
             page.launch_url(f'https://{View.api()}/athletes/{user.id}')
 
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in header()],
+                columns=[ft.DataColumn(ft.Text(self.tr.tr(h))) for h in header()],
                 rows=createRows()
             )
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr("Help"), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Athletes of {user.team}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(spacing=0, controls=[
                 ft.IconButton(ft.Icons.ADD_CIRCLE,
                     icon_color=ft.Colors.BLUE_300,
-                    tooltip="Add",
+                    tooltip=self.tr.tr("Add"),
                     on_click=addFunc),
                 ft.IconButton(ft.Icons.SAVE,
                           icon_color=ft.Colors.BLUE_300,
@@ -84,12 +86,12 @@ class AthleteView(View):
             ft.DataCell(ft.IconButton(
                         icon=ft.Icons.EDIT,
                         icon_color=ft.Colors.GREEN_300,
-                        tooltip="Edit",
+                        tooltip=self.tr.tr('Edit'),
                         on_click=lambda e: editFunc(e, athlete.id))),
             ft.DataCell(ft.IconButton(
                         icon=ft.Icons.DELETE,
                         icon_color=ft.Colors.RED_300,
-                        tooltip="Delete",
+                        tooltip=self.tr.tr('Delete'),
                         on_click=lambda e: deleteFunc(e, athlete.id))),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
@@ -107,6 +109,7 @@ class AthleteEditView(View):
         self.scroll = ft.ScrollMode.AUTO
         createAthlete = athleteId == 0
         user = self.page.session.get('user')
+        self.tr = tr(user.language)
         
         def update(e):
             if createAthlete:
@@ -131,17 +134,17 @@ class AthleteEditView(View):
             birth_value = athlete.birthFormated()
         else:
             birth_value = ""
-        givenNameEdit = ft.TextField(label="Given name", value=None if createAthlete else athlete.givenname)
-        surnameEdit = ft.TextField(label="Surname", value=None if createAthlete else athlete.surname)
-        teamEdit = ft.TextField(label="Team", value=user.team, disabled=True)
+        givenNameEdit = ft.TextField(label=self.tr.tr("given name"), value=None if createAthlete else athlete.givenname)
+        surnameEdit = ft.TextField(label=self.tr.tr("surname"), value=None if createAthlete else athlete.surname)
+        teamEdit = ft.TextField(label=self.tr.tr("team"), value=user.team, disabled=True)
         self.birthEdit = ft.TextField(
-            label="Birth",
+            label=self.tr.tr("birth"),
             value=birth_value,
             disabled=True,
             width=115
         )
         birthPicker = ft.ElevatedButton(
-            "Pick date",
+            self.tr.tr("pick date"),
             icon=ft.Icons.CALENDAR_MONTH,
             on_click=lambda e: page.open(
                 ft.DatePicker(
@@ -162,12 +165,12 @@ class AthleteEditView(View):
         
     
         genderEdit = ft.Dropdown(
-            label="gender",
+            label=self.tr.tr("gender"),
             width = 300,
             options=[ft.dropdownm2.Option(e.name) for e in Gender],
             value=Gender.FEMALE.name if createAthlete else athlete.gender.name)
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'{'Create ' if createAthlete else 'Edit '} Athlete'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr("Help"), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'{self.tr.tr('Create ') if createAthlete else self.tr.tr('Edit ')} {self.tr.tr('Athlete')}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             givenNameEdit,
             surnameEdit,
             teamEdit,
@@ -177,12 +180,12 @@ class AthleteEditView(View):
                     ft.IconButton(
                         icon=ft.Icons.CHECK_CIRCLE,
                         icon_color=ft.Colors.GREEN_300,
-                        tooltip="Save",
+                        tooltip=self.tr.tr("Save"),
                         on_click=update),
                     ft.IconButton(
                         icon=ft.Icons.CANCEL,
                         icon_color=ft.Colors.RED_300,
-                        tooltip="Cancel",
+                        tooltip=self.tr.tr("Cancel"),
                         on_click=cancel)], scroll=ft.ScrollMode.AUTO),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/"))
             ]

@@ -33,6 +33,7 @@ class User:
     locked: bool
     hidden: bool
     token: str
+    language: str
     
     def valid(self) -> bool:
         return datetime.now() < self.expires and not self.locked
@@ -42,7 +43,7 @@ class User:
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['hash'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0, row['token'])
+        return User(row['id'], row['username'], row['hash'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0, row['token'], 'ge')
 
 
 @dataclass

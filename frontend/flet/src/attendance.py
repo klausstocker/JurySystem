@@ -2,13 +2,14 @@ import os
 import sys
 import flet as ft
 from view import View
+from translate import tr
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Athlete, Attendance, Gender, Event, Progress, Restrictions, allowedCategories
 
 
 def header():
-    return ['', 'given name', 'surname', 'birth', 'gender', 'category', 'group']
+    return ['', 'given name', 'surname','birth','gender', 'category', 'group']
 
 class AttendanceView(View):
     def user(self) -> User:
@@ -18,6 +19,8 @@ class AttendanceView(View):
         super().__init__(page, db, redis)
         self.route = '/attendances'
         self.scroll = ft.ScrollMode.AUTO
+        
+        self.tr = tr(self.user().language)
 
         def printPdf(e):
             if self.eventCtrl.value is None:
@@ -53,18 +56,18 @@ class AttendanceView(View):
 
         self.eventCtrl = ft.Dropdown(
             editable=False,
-            label="select event",
+            label=self.tr.tr("select event"),
             options=options,
             width=400,
             on_change=updateRows
         )
 
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in header()],
+                columns=[ft.DataColumn(ft.Text(self.tr.tr(h))) for h in header()],
             )
-        title = f'Attendances of {self.user().username if self.user().isHost() else self.user().team}'
+        title = f'{self.tr.tr("Attendances of")} {self.user().username if self.user().isHost() else self.user().team}'
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr("Help"), on_click=lambda _: self.page.go('/help')), title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             self.eventCtrl,
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(spacing=0, controls=[

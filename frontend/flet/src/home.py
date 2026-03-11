@@ -3,6 +3,7 @@ import sys
 import flet as ft
 import secrets
 from view import View
+from translate import tr
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, Gender, Event, Progress, Restrictions
@@ -17,11 +18,12 @@ class HomeView(View):
         super().__init__(page, db, redis)
         self.route = '/'
         user = page.session.get('user')
+        self.tr = tr(user.language)
         username = '' if user is None else user.username
         controls = []
         for allowed in allowedRoutes(user):
             route = allowed.route
-            controls.append(TextButton(allowed.name, on_click=lambda _,r=route: self.page.go(r)))
+            controls.append(TextButton(self.tr.tr(allowed.name), on_click=lambda _,r=route: self.page.go(r)))
 
         menu = ft.Column(
             controls=controls,
