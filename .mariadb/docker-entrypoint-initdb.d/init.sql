@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `locked` tinyint(4) DEFAULT NULL,
   `hidden` tinyint(4) DEFAULT 0,
   `token` varchar(50) DEFAULT '',
+  `language`varchar(2) DEFAULT 'ge',
   PRIMARY KEY (`id`),
   UNIQUE (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

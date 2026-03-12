@@ -98,10 +98,10 @@ class UserEditView(View):
         def update(e):
             if createUser:
                 print(f'creating user')
-                self.db.insertUser(nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, Restrictions[resitrictionsEdit.value])
+                self.db.insertUser(nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, Restrictions[resitrictionsEdit.value], langEdt.value)
             else:
                 print(f'saving {userId=}')
-                self.db.updateUser(userId, nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value)
+                self.db.updateUser(userId, nameEdit.value, passwordEdit.value, emailEdit.value, teamEdit.value, expiresEdit.value, Restrictions[resitrictionsEdit.value], lockedEdit.value, langEdt.value)
             self.page.go("/users")
 
         def cancel(e):
@@ -121,6 +121,7 @@ class UserEditView(View):
             width = 300,
             options=[ft.dropdownm2.Option(e.name) for e in Restrictions],
             value=Restrictions.TRAINER.name if createUser else user.restrictions.name)
+        langEdt = ft.Dropdown(label="Language", width=300, options=[ft.dropdownm2.Option(l) for l in ['en', 'ge']], value=user.language)
         expiresEdit = ft.TextField(label="expires", value=None if createUser else user.expires)
         lockedEdit = ft.Checkbox(label="locked", value=False if createUser else user.locked)
         self.controls = [
@@ -129,7 +130,8 @@ class UserEditView(View):
             passwordEdit,
             emailEdit,
             teamEdit,
-            resitrictionsEdit]
+            resitrictionsEdit,
+            langEdt]
         if not createUser:
             self.controls += [
                 expiresEdit,

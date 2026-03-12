@@ -26,7 +26,13 @@ class tr:
             'Ranking': 'Ergebnisse',
             'Attendances of': 'Teilnahmen von',
             'category': 'Klasse',
-            'group': 'Riege'
+            'group': 'Riege',
+            'Group': 'Riege',
+            'discipline': 'Gerät',
+            'Discipline': 'Gerät',
+            'Edit Rating': 'Bewertung bearbeiten',
+            'difficulty': 'Schwierigkeit',
+            'execution': 'Ausführung'
         }
     }
 

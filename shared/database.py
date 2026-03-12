@@ -43,7 +43,7 @@ class User:
     
     @staticmethod
     def fromRow(row):
-        return User(row['id'], row['username'], row['hash'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0, row['token'], 'ge')
+        return User(row['id'], row['username'], row['hash'], row['email'], row['team'], row['registered'], row['expires'], Restrictions(row['restrictions']), row['locked'] != 0, row['hidden'] != 0, row['token'], row['language'])
 
 
 @dataclass
@@ -229,11 +229,11 @@ class JuryDatabase:
             if cnt > 0:
                 return
 
-        self.insertUser('admin', 'pass', 'john.doe@example.com', '', Restrictions.ADMIN, 1)
-        self.insertUser('host', 'pass', 'john.doe@example.com', '', Restrictions.HOST, 2)
-        self.insertUser('michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', Restrictions.TRAINER, 3)
-        self.insertUser('tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', Restrictions.TRAINER, 4)
-        judgeId = self.insertUser('judge', 'pass', 'john.doe@example.com', '', Restrictions.JUDGE, 5)
+        self.insertUser('admin', 'pass', 'john.doe@example.com', '', Restrictions.ADMIN, 'ge', 1)
+        self.insertUser('host', 'pass', 'john.doe@example.com', '', Restrictions.HOST, 'ge', 2)
+        self.insertUser('michelhausen', 'pass', 'john.doe@example.com', 'Sportunion Michelhausen', Restrictions.TRAINER, 'en', 3)
+        self.insertUser('tulln', 'pass', 'john.doe@example.com', 'Sportunion Tulln', Restrictions.TRAINER, 'ge', 4)
+        judgeId = self.insertUser('judge', 'pass', 'john.doe@example.com', '', Restrictions.JUDGE, 'ge', 5)
         self.setUserToken(judgeId, 'asdfasdf')
 
     def validateUser(self, username: str, password: str):
@@ -272,13 +272,13 @@ class JuryDatabase:
             return User.fromRow(cursor.fetchone())
         return None
 
-    def insertUser(self, username: str, password: str, email:str, team:str, restrictions: Restrictions, id=None) -> int:
+    def insertUser(self, username: str, password: str, email:str, team:str, restrictions: Restrictions, language: str, id=None) -> int:
         locked = 0
         salt = bcrypt.gensalt()
         with self.conn.cursor() as cursor:
             idText, idValue = ("id, ", f"'{id}', ") if id else ('', '')
             token = secrets.token_urlsafe() if restrictions == Restrictions.JUDGE else ''
-            sql = f"INSERT INTO users ({idText}username, hash, email, team, registered, expires, restrictions, locked, token) VALUES ({idValue}'{username}', '{bcrypt.hashpw(password.encode(), salt).decode()}', '{email}','{team}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked}, '{token}');"
+            sql = f"INSERT INTO users ({idText}username, hash, email, team, registered, expires, restrictions, locked, token, language) VALUES ({idValue}'{username}', '{bcrypt.hashpw(password.encode(), salt).decode()}', '{email}','{team}', '{datetime.now()}', '{datetime.now() + timedelta(weeks=300)}', {restrictions.value}, {locked}, '{token}', '{language}');"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
@@ -294,9 +294,9 @@ class JuryDatabase:
             return cnt != 0
         return False
     
-    def updateUser(self, userId: int, username: str, password: str, email: str, team: str, expires: datetime, restrictions: Restrictions, locked: bool):
+    def updateUser(self, userId: int, username: str, password: str, email: str, team: str, expires: datetime, restrictions: Restrictions, locked: bool, language:str):
         with self.conn.cursor() as cursor:
-            sql = f"UPDATE `users` SET `username` = '{username}',`hash` = '{bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()}', `email` = '{email}', `team` = '{team}', `expires` = '{expires}',`restrictions` = '{restrictions.value}', `locked` = '{1 if locked else 0}' WHERE `users`.`id` = {userId};"
+            sql = f"UPDATE `users` SET `username` = '{username}',`hash` = '{bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()}', `email` = '{email}', `team` = '{team}', `expires` = '{expires}',`restrictions` = '{restrictions.value}', `locked` = '{1 if locked else 0}', `language` = '{language}' WHERE `users`.`id` = {userId};"
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0

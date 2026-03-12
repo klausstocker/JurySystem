@@ -32,12 +32,12 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(user.restrictions, Restrictions.ADMIN)
         self.assertTrue(user.valid())
 
-        insertedId = self.db.insertUser('judenau', 'pass', 'judenau@sportunion.at', '', Restrictions.TRAINER)
+        insertedId = self.db.insertUser('judenau', 'pass', 'judenau@sportunion.at', '', Restrictions.TRAINER, 'en')
         insertedUser = self.db.getUser(insertedId)
         self.assertEqual(insertedUser.username, 'judenau')
         self.assertEqual(insertedUser.locked, 0)
         self.assertEqual(insertedUser.restrictions, Restrictions.TRAINER)
-        self.assertTrue(self.db.updateUser(insertedId, 'judenau1', 'pass', '', '', datetime.now(), Restrictions.TRAINER, False))
+        self.assertTrue(self.db.updateUser(insertedId, 'judenau1', 'pass', '', '', datetime.now(), Restrictions.TRAINER, False, 'ge'))
         self.assertEqual(self.db.getUser(insertedId).username, 'judenau1')
 
         self.assertTrue(self.db.removeUser(insertedId))

@@ -3,6 +3,7 @@ import sys
 import flet as ft
 from view import View
 from datetime import datetime
+from translate import tr
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, AthleteRatings, Gender
@@ -51,6 +52,7 @@ class RatingView(View):
         self.scroll = ft.ScrollMode.AUTO
 
         self.user = self.page.session.get('user')
+        self.tr = tr(self.user.language)
         self.event = self.db.getEvent(eventId)
         self.disciplines = self.db.getEventDisciplines(eventId)
         self.groups = self.db.getEventGroups(eventId)
@@ -61,13 +63,13 @@ class RatingView(View):
             self.updateControls()
 
         self.disciplineEdit = ft.Dropdown(
-            label="Discipline",
+            label=self.tr.tr("Discipline"),
             width = 300,
             options=[ft.dropdownm2.Option(d.name) for d in self.disciplines],
             on_change=updateAthletes
         )
         self.groupEdit = ft.Dropdown(
-            label="Group",
+            label=self.tr.tr("Group"),
             width = 300,
             options=[ft.dropdownm2.Option(g) for g in self.groups],
             on_change=updateAthletes
@@ -90,12 +92,12 @@ class RatingView(View):
                 ft.IconButton(
                     icon=ft.Icons.EDIT,
                     icon_color=ft.Colors.GREEN_300,
-                    tooltip="Edit Rating",
+                    tooltip=self.tr.tr("Edit Rating"),
                     on_click=lambda e: editFunc(e, ratings, discipline)),
                 ft.IconButton(
                     icon=ft.Icons.DELETE,
                     icon_color=ft.Colors.RED_300,
-                    tooltip="Delete",
+                    tooltip=self.tr.tr("Delete"),
                     on_click=remove)]))
         ]
         return ft.DataRow(cells=cells, color=ft.Colors.GREY_900 if index % 2 == 1 else None)
@@ -109,8 +111,8 @@ class RatingView(View):
             d_val = "{:.2f}".format(difficultyContent) if difficultyContent is not None else ""
             e_val = "{:.2f}".format(executionContent) if executionContent is not None else ""
 
-            difficultyEdt = ft.TextField(label="difficulty", value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
-            executionEdt = ft.TextField(label="execution", value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
+            difficultyEdt = ft.TextField(label=self.tr.tr("difficulty"), value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
+            executionEdt = ft.TextField(label=self.tr.tr("execution"), value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
 
             self.active_field = difficultyEdt
 
