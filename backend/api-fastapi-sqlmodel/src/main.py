@@ -120,15 +120,14 @@ async def ranking(eventId: int, category: str, detail: int):
 async def certificate(eventId: int, category: str):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
-    athleteAttendances = []
-    for attendance in db.getEventAttendances(eventId, category):
-        athleteAttendances.append((attendance, db.getAthlete(attendance.athleteId)))
 
     template = env.get_template('certificate.html')
     context = {
         "title": f'{event.name}',
         "event": event,
-        "athleteAttendances": athleteAttendances
+        "category": category,
+        "rankingType": db.getEventCategory(eventId, category).rankingType,
+        "rankings": db.getEventCategoryRankings(eventId, category)
     }
     rendered_html = template.render(context)
     pdf_file = HTML(string=rendered_html, base_url=".").write_pdf()
