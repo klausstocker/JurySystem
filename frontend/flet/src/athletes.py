@@ -17,9 +17,7 @@ class AthleteView(View):
         super().__init__(page, db, redis)
         self.route = '/athletes'
         self.scroll = ft.ScrollMode.AUTO
-
         user = self.page.session.get('user')
-        self.tr = tr(user.language)
 
         def createRows():
             return [self.athleteAsRow(athlete, editFunc, deleteFunc) for athlete in self.db.getAthletes(user.id)]
@@ -109,8 +107,7 @@ class AthleteEditView(View):
         self.scroll = ft.ScrollMode.AUTO
         createAthlete = athleteId == 0
         user = self.page.session.get('user')
-        self.tr = tr(user.language)
-        
+
         def update(e):
             if createAthlete:
                 print(f'creating athlete')

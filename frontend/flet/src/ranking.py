@@ -83,7 +83,7 @@ class RankingView(View):
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
             self.categoryEdit,
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),

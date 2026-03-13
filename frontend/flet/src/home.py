@@ -18,7 +18,7 @@ class HomeView(View):
         super().__init__(page, db, redis)
         self.route = '/'
         user = page.session.get('user')
-        self.tr = tr(user.language)
+
         username = '' if user is None else user.username
         controls = []
         for allowed in allowedRoutes(user):
@@ -50,7 +50,7 @@ class HomeView(View):
             ],
         )
 
-        help_button = ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help'))
+        help_button = ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help'))
 
         self.controls = [
             ft.AppBar(
