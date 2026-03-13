@@ -1,3 +1,4 @@
+import ast
 import pymysql.cursors
 import secrets
 import bcrypt
@@ -5,6 +6,24 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from enum import IntEnum
 from typing import List
+
+
+def multiline_eval(expr: str, context={}):
+    "Evaluate several lines of input, returning the result of the last line"
+    tree = ast.parse(expr)
+    eval_exprs = []
+    exec_exprs = []
+    for module in tree.body:
+        if isinstance(module, ast.Expr):
+            eval_exprs.append(module.value)
+        else:
+            exec_exprs.append(module)
+    exec_expr = ast.Module(exec_exprs, type_ignores=[])
+    exec(compile(exec_expr, 'file', 'exec'), context)
+    results = []
+    for eval_expr in eval_exprs:
+        results.append(eval(compile(ast.Expression((eval_expr)), 'file', 'eval'), context))
+    return '\n'.join([str(r) for r in results])
 
 class Restrictions(IntEnum):
     TRAINER = 0
@@ -82,10 +101,11 @@ class Event:
     userId: int
     date: datetime
     __finished: bool
+    customRanking: str
 
     @staticmethod
     def fromRow(row):
-        return Event(row['id'], row['name'], row['userId'], row['date'], row['finished'] == 1)
+        return Event(row['id'], row['name'], row['userId'], row['date'], row['finished'] == 1, row['customRanking'])
     
     @staticmethod
     def dateFromString(date: str) -> datetime:
@@ -456,9 +476,9 @@ class JuryDatabase:
                 return Event.fromRow(cursor.fetchone())
         return None
     
-    def insertEvent(self, name: str, userId: int, date: datetime):
+    def insertEvent(self, name: str, userId: int, date: datetime, customRanking: str):
         with self.conn.cursor() as cursor:
-            sql = f"INSERT INTO events (name, userId, date) VALUES ('{name}', '{userId}', '{date}');"
+            sql = f"INSERT INTO events (name, userId, date, customRanking) VALUES ('{name}', '{userId}', '{date}', '{customRanking}');"
             cnt = cursor.execute(sql)
             if cnt != 1:
                 return None
@@ -466,9 +486,9 @@ class JuryDatabase:
             return cursor.lastrowid
         return None
 
-    def updateEvent(self, eventId: int,  name: str, userId: int, date: datetime):
+    def updateEvent(self, eventId: int,  name: str, userId: int, date: datetime, customRanking: str):
         with self.conn.cursor() as cursor:
-            sql = f"UPDATE `events` SET `name` = '{name}', `userId` = '{userId}', `date` = '{date}' WHERE `events`.`id` = {eventId};"
+            sql = f"UPDATE `events` SET `name` = '{name}', `userId` = '{userId}', `date` = '{date}', `customRanking` = '{customRanking}' WHERE `events`.`id` = {eventId};"
             cnt = cursor.execute(sql)
             self.conn.commit()
             return cnt != 0
@@ -674,6 +694,7 @@ class JuryDatabase:
         return AthleteRatings(athlete, eventId, attendance.eventCategoryName, self.getAthleteRatings(athleteId, eventId))
 
     def _getEventCategoryRankings(self, eventId, category: EventCategory) -> list[AthleteRanking]:
+        customRanking = self.getEvent(eventId).customRanking
         rankings = []
         ratings = [self.getAthleteAndRatings(athleteId, eventId) for athleteId in self.getEventCategoryAthleteIds(eventId, category.name)]
         ratings.sort(key=lambda rating: rating.sum(), reverse=True)
@@ -695,7 +716,7 @@ class JuryDatabase:
                 if ratingSum == 0.0:
                     rankings.append(AthleteRanking('DNF', rating))
                 else:
-                    rankings.append(AthleteRanking(eval(category.rankingAlgo, {}, {'sum':ratingSum}), rating))
+                    rankings.append(AthleteRanking(multiline_eval(f'{customRanking}\n{category.rankingAlgo}', {'sum':ratingSum}), rating))
         return rankings
 
     def getEventCategoryRankings(self, eventId: int, eventCategoryName: str) -> list[AthleteRanking]:

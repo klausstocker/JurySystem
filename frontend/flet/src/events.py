@@ -185,7 +185,13 @@ class EventEditView(View):
                 )
             ),
         )
-
+        
+        rating_input = ft.TextField(
+            label="custom ranking",
+            value=event.customRanking,
+            multiline=True,
+            width=300
+        )
 
         def saveEvent(e):
             name = name_input.value.strip()
@@ -196,9 +202,9 @@ class EventEditView(View):
                 return
 
             if createEvent:
-                self.db.insertEvent(name, user.id, Event.dateFromString(date))
+                self.db.insertEvent(name, user.id, Event.dateFromString(date), rating_input.value)
             else:
-                self.db.updateEvent(event.id, name, user.id, Event.dateFromString(date))
+                self.db.updateEvent(event.id, name, user.id, Event.dateFromString(date), rating_input.value)
 
             self.page.go("/events")
 
@@ -211,6 +217,7 @@ class EventEditView(View):
             name_input,
             self.event_date,
             date_input,
+            rating_input,
             ft.Row(spacing=0, controls=[
                 ft.IconButton(icon=ft.Icons.CHECK_CIRCLE, icon_color=ft.Colors.GREEN_300, tooltip="Speichern", on_click=saveEvent),
                 ft.IconButton(icon=ft.Icons.CANCEL, icon_color=ft.Colors.RED_300, tooltip="Abbrechen", on_click=cancel),

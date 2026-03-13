@@ -77,8 +77,8 @@ class TestDatabase(unittest.TestCase):
     def test_events(self):
         events = self.db.getEvents(2)
         self.assertEqual(events[0].name, 'Bezirksmeisterschaften 2025')
-        insertedId = self.db.insertEvent('LM', 2, '2026-01-01')
-        self.assertTrue(self.db.updateEvent(insertedId, 'LM1', 2, '2026-01-02'))
+        insertedId = self.db.insertEvent('LM', 2, '2026-01-01', 'goldThres = 30')
+        self.assertTrue(self.db.updateEvent(insertedId, 'LM1', 2, '2026-01-02', 'goldThres = 30'))
         self.assertEqual(self.db.getEvent(insertedId).name, 'LM1')
         self.db.deleteEvent(insertedId)
         self.assertEqual(len(self.db.getEventDisciplines(1)), 4)

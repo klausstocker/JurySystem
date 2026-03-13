@@ -54,13 +54,14 @@ CREATE TABLE IF NOT EXISTS `events` (
   `date` datetime NOT NULL,
   `finished`tinyint(4) DEFAULT 0,
   `deleted` tinyint(4) DEFAULT 0,
+  `customRanking` VARCHAR(500) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`userId`) REFERENCES users(`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `events` (`id`, `name`, `userId`, `date`, `finished`, `deleted`) VALUES
-  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 1, 0),
-  (2, 'Bezirksmeisterschaften 2026', 2, '2026-05-28', 0, 0);
+INSERT INTO `events` (`id`, `name`, `userId`, `date`, `finished`, `deleted`, `customRanking`) VALUES
+  (1, 'Bezirksmeisterschaften 2025', 2, '2025-05-28', 1, 0, 'goldThres, silberThres, bronzeThres = 30, 20, 10'),
+  (2, 'Bezirksmeisterschaften 2026', 2, '2026-05-28', 0, 0, 'goldThres, silberThres, bronzeThres = 30, 20, 10');
 
 CREATE TABLE IF NOT EXISTS `event_judges` (
   `eventId` int(10) unsigned NOT NULL,
@@ -88,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `event_categories` (
 INSERT INTO `event_categories` (`name`, `eventId`, `gender`, `birthFrom`, `birthTo`, `rankingType`, `rankingAlgo`) VALUES
   ('Kn01', 1, 0, '1900-01-01', '2000-12-31', 0, ''),
   ('Kn02', 1, 0, '2000-01-01', '2099-12-31', 0, ''),
-  ('Md01', 1, 1, '1900-01-01', '2099-12-31', 1, '"gold" if sum > 30 else "silber" if sum > 20 else "bronze" if sum > 10 else ""');
+  ('Md01', 1, 1, '1900-01-01', '2099-12-31', 1, '"gold" if sum > goldThres else "silber" if sum > silberThres else "bronze" if sum > bronzeThres else ""');
 
 CREATE TABLE IF NOT EXISTS `event_disciplines` (
   `name` varchar(50) NOT NULL,
