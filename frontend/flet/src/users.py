@@ -56,7 +56,7 @@ class UserView(View):
                 rows=createRows()
             )
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text("Users"), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.IconButton(ft.Icons.ADD_CIRCLE,
                     icon_color=ft.Colors.BLUE_300,
@@ -125,7 +125,7 @@ class UserEditView(View):
         expiresEdit = ft.TextField(label="expires", value=None if createUser else user.expires)
         lockedEdit = ft.Checkbox(label="locked", value=False if createUser else user.locked)
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'{'Create ' if createUser else 'Edit '} User'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'{'Create ' if createUser else 'Edit '} User'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             nameEdit,
             passwordEdit,
             emailEdit,

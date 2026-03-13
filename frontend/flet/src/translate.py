@@ -32,7 +32,11 @@ class tr:
             'Discipline': 'Gerät',
             'Edit Rating': 'Bewertung bearbeiten',
             'difficulty': 'Schwierigkeit',
-            'execution': 'Ausführung'
+            'execution': 'Ausführung',
+            'date': 'Datum',
+            'Progress': 'Status',
+            'Finish Event': 'Event beenden',
+            'Open Event': 'Event wieder öffnen'
         }
     }
 

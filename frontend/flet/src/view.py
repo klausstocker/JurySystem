@@ -2,6 +2,7 @@ import os
 import sys
 import flet as ft
 from redis import StrictRedis
+from translate import tr
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase
@@ -12,6 +13,8 @@ class View(ft.View):
         self.page = page
         self.db = db
         self.redis = redis
+        user = self.page.session.get('user')
+        self.tr = tr(user.language if user else 'en')
 
     def did_mount(self):
         print(f'{type(self).__name__} did_mount')

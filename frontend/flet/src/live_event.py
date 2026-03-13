@@ -33,7 +33,7 @@ class LiveEventView(View):
             t = time.strftime('%H:%M:%S', time.localtime())
             self.updateTableIfNewer()
             self.controls = [
-                ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+                ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
                 ft.Row([self.table], scroll=ft.ScrollMode.AUTO)
             ]
             self.page.update()
@@ -46,7 +46,7 @@ class LiveEventView(View):
         self.updateTableIfNewer()
 
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO)
         ]
         self.scheduler.start()

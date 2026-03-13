@@ -9,9 +9,23 @@ from shared.database import JuryDatabase, Event, Progress
 
 
 def header():
-    return ['', '', 'Event name', 'date', 'progress', '', '', '']
+    return ['', '', 'Event name', 'date', 'progress', '', '', '', '']
 
-def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
+def eventAsRow(tr, event: Event, editFunc: callable, deleteFunc: callable, finishFunc: callable):
+    if event.progress() == Progress.ACTIVE:
+        finishButon = ft.IconButton(icon=ft.Icons.STOP,
+                                  icon_color=ft.Colors.RED_300,
+                                  tooltip=tr.tr("Finish Event"),
+                                  on_click=lambda e: finishFunc(e, event.id, True))
+    elif event.progress() == Progress.FINISHED:
+        finishButon = ft.IconButton(icon=ft.Icons.START,
+                                  icon_color=ft.Colors.GREEN_300,
+                                  tooltip=tr.tr("Open Event"),
+                                  on_click=lambda e: finishFunc(e, event.id, False))
+    else:
+        finishButon = ft.IconButton(icon=ft.Icons.STOP,
+                                  icon_color=ft.Colors.GREY_300, disabled=True)
+
     cells = [
         ft.DataCell(ft.IconButton(
                     icon=ft.Icons.EDIT,
@@ -38,6 +52,7 @@ def eventAsRow(event: Event, editFunc: callable, deleteFunc: callable):
                                 icon_color=ft.Colors.GREEN_300,
                                 tooltip="Judges",
                                 on_click=lambda e: e.control.page.go(f"/eventJudges/{event.id}"))),
+        ft.DataCell(finishButon)
         ]
     return ft.DataRow(cells=cells)
 
@@ -80,16 +95,43 @@ class EventView(View):
             dlg.open = True
             e.control.page.update()
 
+        def finishEvent(e, eventId: int, finish: bool):
+            event = self.db.getEvent(eventId)
+            def yes(e):
+                self.db.finishEvent(eventId, finish)
+                dlg.open = False
+                self.table.rows = createRows()
+                e.control.page.update()
+
+            def no(e):
+                print('cancel')
+                dlg.open = False
+                e.control.page.update()
+
+            msg = self.tr.tr('Finish Event' if finish else 'Open Event')
+
+            dlg = ft.AlertDialog(
+                modal=True,
+                content=ft.Text(f'{msg} {event.descr()} ?'),
+                actions=[
+                    ft.TextButton(self.tr.tr("Yes"), on_click=yes),
+                    ft.TextButton(self.tr.tr("No"), on_click=no),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END)
+            e.control.page.overlay.append(dlg)
+            dlg.open = True
+            e.control.page.update()
+        
         def createRows():
-            return [eventAsRow(event, editFunc, deleteFunc) for event in self.db.getEvents(user.id)]
+            return [eventAsRow(self.tr, event, editFunc, deleteFunc, finishEvent) for event in self.db.getEvents(user.id)]
 
         self.table = ft.DataTable(
-            columns=[ft.DataColumn(ft.Text(h)) for h in header()],
+            columns=[ft.DataColumn(ft.Text(self.tr.tr(h))) for h in header()],
             rows=createRows()
         )
 
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Events of {user.username}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(
                 spacing=0,
@@ -164,7 +206,7 @@ class EventEditView(View):
             self.page.go("/events")
 
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip="Help", on_click=lambda _: self.page.go('/help')), title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
+            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text("Event erstellen" if createEvent else "Event bearbeiten"),
                       bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
             name_input,
             self.event_date,
