@@ -30,8 +30,8 @@
   <p>
     im Geräteturnen<br>
     in der Klasse {{ category }}<br>
-    {{ ("den " + ranking.ranking + ". Rang") if rankingType == 0 else ("das Abzeichen in " +
-    ranking.ranking)}}
+  <h3>{{ ("den " + ranking.ranking + ". Rang") if rankingType == 0 else ("das Abzeichen in " +
+    ranking.ranking)}}</h3>
   </p>
   <p>{{ event.dateFormated() }}</p>
   <img class="signature-img" alt="Unterschrift" src="static/signature.png">
