@@ -65,16 +65,24 @@ async def attendances(userId: int, eventId: int, token: str):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
     athleteAttendances = []
-    for attendance in db.getAttendances(eventId, userId):
-        athleteAttendances.append((attendance, db.getAthlete(attendance.athleteId)))
+    
+    user = db.getUser(userId)
+    if user.isHost():
+        for attendance in db.getEventAttendances(event.id):
+            athlete = db.getAthlete(attendance.athleteId)
+            team = db.getUser(athlete.userId).team
+            athleteAttendances.append((attendance, team, athlete))
+    else:
+        for attendance in db.getAttendances(eventId, userId):
+            athleteAttendances.append((attendance, user.team, db.getAthlete(attendance.athleteId)))
 
-    data = [[a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, a in athleteAttendances]
+    data = [[t, a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, t, a in athleteAttendances]
     user = db.getUser(userId)
 
     context = {
             "orientation": 'A4 portrait',
             "title": f'Attendances for {event.descr()} of {user.team}',
-            "headers": ['name', 'birth', 'gender', 'category', 'group'],
+            "headers": ['team', 'name', 'birth', 'gender', 'category', 'group'],
             "tables": [('', data)]
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')

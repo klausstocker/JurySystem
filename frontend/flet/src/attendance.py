@@ -9,7 +9,7 @@ from shared.database import JuryDatabase, User, Athlete, Attendance, Gender, Eve
 
 
 def header():
-    return ['', 'given name', 'surname','birth','gender', 'category', 'group']
+    return ['', 'team', 'given name', 'surname','birth','gender', 'category', 'group']
 
 class AttendanceView(View):
     def user(self) -> User:
@@ -111,6 +111,7 @@ class AttendanceView(View):
             self.db.setAttendanceGroup(event.id, athlete.id, e.control.value)
 
         attendance = self.db.getAttendance(athlete.id, event.id)
+        team = self.db.getUser(athlete.userId).team
         checkBoxEnabled = event.progress() == Progress.PLANNED
         checkBoxValue = attendance is not None
         allowed = allowedCategories(categories, athlete)
@@ -128,6 +129,7 @@ class AttendanceView(View):
                     ))
         cells = [
             ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
+            ft.DataCell(ft.Text(team)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),
