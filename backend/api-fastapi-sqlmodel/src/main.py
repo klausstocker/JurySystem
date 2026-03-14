@@ -36,8 +36,13 @@ def alphaNum(text: str) -> str:
 async def test():
     return {"message": f"API running {datetime.now()}"}
 
-@api.get('/athletes/{userId}', response_class=HTMLResponse)
-async def athletes(userId: int):
+@api.get('/athletes/{token}/{userId}', response_class=HTMLResponse)
+async def athletes(userId: int, token: str):
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
     db = JuryDatabase('db')
     data = [[athlete.name(), athlete.birthFormated(), athlete.gender.name] for athlete in db.getAthletes(userId)]
     user = db.getUser(userId)
@@ -50,8 +55,13 @@ async def athletes(userId: int):
         }
     return createResponse('table.html', context, f'athletes_{alphaNum(user.team)}.pdf')
 
-@api.get('/attendances/{userId}/{eventId}', response_class=HTMLResponse)
-async def attendances(userId: int, eventId: int):
+@api.get('/attendances/{token}/{userId}/{eventId}', response_class=HTMLResponse)
+async def attendances(userId: int, eventId: int, token: str):
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
     athleteAttendances = []
@@ -65,7 +75,7 @@ async def attendances(userId: int, eventId: int):
             "orientation": 'A4 portrait',
             "title": f'Attendances for {event.descr()} of {user.team}',
             "headers": ['name', 'birth', 'gender', 'category', 'group'],
-            "data": data
+            "tables": [('', data)]
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
@@ -92,8 +102,13 @@ async def results(eventId: int):
         }
     return createResponse('table.html', context, f'{event.name}.pdf')
 
-@api.get('/ranking/{eventId}/{category}/{detail}', response_class=HTMLResponse)
-async def ranking(eventId: int, category: str, detail: int):
+@api.get('/ranking/{token}/{eventId}/{category}/{detail}', response_class=HTMLResponse)
+async def ranking(eventId: int, token: str, category: str, detail: int):
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
     disciplines = db.getEventDisciplines(eventId)
@@ -116,8 +131,14 @@ async def ranking(eventId: int, category: str, detail: int):
     return createResponse('table.html', context, f'ranking_{category}.pdf')
 
 
-@api.get('/certificate/{eventId}/{category}', response_class=HTMLResponse)
-async def certificate(eventId: int, category: str):
+@api.get('/certificate/{token}/{eventId}/{category}', response_class=HTMLResponse)
+async def certificate(token: str, eventId: int, category: str):
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
+
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
 

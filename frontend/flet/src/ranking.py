@@ -56,11 +56,11 @@ class RankingView(View):
 
         def printList(e, d):
             if self.categoryEdit.value:
-                self.page.launch_url(f'https://{View.api()}/ranking/{self.event.id}/{self.categoryEdit.value}/{d}')
+                self.page.launch_url(f'https://{View.api()}/ranking/{self.token()}/{self.event.id}/{self.categoryEdit.value}/{d}')
 
         def printCert(e):
             if self.categoryEdit.value:
-                self.page.launch_url(f'https://{View.api()}/certificate/{self.event.id}/{self.categoryEdit.value}')
+                self.page.launch_url(f'https://{View.api()}/certificate/{self.token()}/{self.event.id}/{self.categoryEdit.value}')
 
         controls = []
         if len(self.table.rows) > 0:
