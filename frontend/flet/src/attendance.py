@@ -17,14 +17,14 @@ class AttendanceView(View):
         self.route = '/attendances'
         self.scroll = ft.ScrollMode.AUTO
 
-        self.sort_column_index = 2  # surname
+        self.sort_column_index = 1  # team 
         self.sort_ascending = True
 
         def printPdf(e):
             if self.eventCtrl.value is None:
                 return
             eventId = self.eventCtrl.value
-            page.launch_url(f'https://{View.api()}/attendances/{self.user().id}/{eventId}')
+            page.launch_url(f'https://{View.api()}/attendances/{self.token()}/{self.user().id}/{eventId}')
 
         def createRows():
             if self.eventCtrl.value is None:
@@ -55,14 +55,16 @@ class AttendanceView(View):
 
             if self.sort_column_index is not None:
                 sort_key = None
-                if self.sort_column_index == 2:  # surname
-                    sort_key = lambda item: item["athlete"].surname.lower()
-                elif self.sort_column_index == 3:  # birth
-                    sort_key = lambda item: item["athlete"].birth
-                elif self.sort_column_index == 4:  # gender
-                    sort_key = lambda item: item["athlete"].gender.name.lower()
-                elif self.sort_column_index == 5:  # team
+                if self.sort_column_index == 1:  # team
                     sort_key = lambda item: item["team"].lower()
+                elif self.sort_column_index == 2:  # given name
+                    sort_key = lambda item: item["athlete"].givenname.lower()
+                elif self.sort_column_index == 3:  # surname
+                    sort_key = lambda item: item["athlete"].surname.lower()
+                elif self.sort_column_index == 4:  # birth
+                    sort_key = lambda item: item["athlete"].birth
+                elif self.sort_column_index == 5:  # gender
+                    sort_key = lambda item: item["athlete"].gender.name.lower()
                 elif self.sort_column_index == 6:  # category
                     sort_key = lambda item: item["category"].lower()
                 elif self.sort_column_index == 7:  # group
@@ -97,13 +99,13 @@ class AttendanceView(View):
 
         column_names = [
             '',
-            self.tr.tr('given name'),
-            self.tr.tr('surname'),
-            self.tr.tr('birth'),
-            self.tr.tr('gender'),
-            self.tr.tr('team'),
-            self.tr.tr('category'),
-            self.tr.tr('group')
+            'team',
+            'given name',
+            'surname',
+            'birth',
+            'gender',
+            'category',
+            'group'
         ]
 
         def on_sort(e: ft.DataColumnSortEvent):
@@ -114,7 +116,7 @@ class AttendanceView(View):
                 self.sort_ascending = True
 
             for i, col in enumerate(self.table.columns):
-                col.label.value = column_names[i]
+                col.label.value = self.tr.tr(column_names[i])
                 if i == self.sort_column_index:
                     col.sort_ascending = self.sort_ascending
                     arrow = " ▲" if self.sort_ascending else " ▼"
@@ -126,14 +128,14 @@ class AttendanceView(View):
 
         self.table = ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text(column_names[0])),
-                ft.DataColumn(ft.Text(column_names[1])),
-                ft.DataColumn(ft.Text(column_names[2]), on_sort=on_sort),
-                ft.DataColumn(ft.Text(column_names[3]), on_sort=on_sort),
-                ft.DataColumn(ft.Text(column_names[4]), on_sort=on_sort),
-                ft.DataColumn(ft.Text(column_names[5]), on_sort=on_sort),
-                ft.DataColumn(ft.Text(column_names[6]), on_sort=on_sort),
-                ft.DataColumn(ft.Text(column_names[7]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[0]))),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[1])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[2])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[3])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[4])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[5])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[6])), on_sort=on_sort),
+                ft.DataColumn(ft.Text(self.tr.tr(column_names[7])), on_sort=on_sort),
             ])
         initial_sort_col_index = self.sort_column_index
         arrow = " ▲" if self.sort_ascending else " ▼"
@@ -202,11 +204,11 @@ class AttendanceView(View):
                     ))
         cells = [
             ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
+            ft.DataCell(ft.Text(team_name)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),
             ft.DataCell(ft.Text(athlete.gender.name)),
-            ft.DataCell(ft.Text(team_name)),
             categoryCell,
             groupCell
             ]
