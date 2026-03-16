@@ -39,22 +39,22 @@ class CategoriesView(View):
             options=[ft.dropdown.Option(r.name) for r in RankingType]
         )
 
-        # ========= Geburtsdatum Textfelder (jetzt 240px breit!) =========
-        birth_from_text = ft.TextField(label="Birth From", read_only=True, width=240)
-        birth_to_text = ft.TextField(label="Birth To", read_only=True, width=240)
+        # ========= Geburtsdatum Textfelder (jetzt 115px breit!) =========
+        birth_from_text = ft.TextField(label="Birth From", disabled=True, width=115)
+        birth_to_text = ft.TextField(label="Birth To", disabled=True, width=115)
 
         # ========= DatePicker Functions =========
 
         def set_birth_from(e):
             if e.data:
                 self.birth_from = datetime.datetime.fromisoformat(e.data)
-                birth_from_text.value = e.data
+                birth_from_text.value = self.birth_from.strftime('%d.%m.%Y')
                 page.update()
 
         def set_birth_to(e):
             if e.data:
                 self.birth_to = datetime.datetime.fromisoformat(e.data)
-                birth_to_text.value = e.data
+                birth_to_text.value = self.birth_to.strftime('%d.%m.%Y')
                 page.update()
 
         picker_from = ft.DatePicker(
@@ -158,8 +158,8 @@ class CategoriesView(View):
             gender_field.value = category.gender.name
             self.birth_from = category.birthFrom
             self.birth_to = category.birthTo
-            birth_from_text.value = str(category.birthFrom) if category.birthFrom else ""
-            birth_to_text.value = str(category.birthTo) if category.birthTo else ""
+            birth_from_text.value = category.birthFrom.strftime('%d.%m.%Y') if category.birthFrom else ""
+            birth_to_text.value = category.birthTo.strftime('%d.%m.%Y') if category.birthTo else ""
             ranking_type_field.value = category.rankingType.name
             
             self.editing_old_name = category.name
@@ -197,8 +197,8 @@ class CategoriesView(View):
                         cells=[
                             ft.DataCell(ft.Text(cat.name)),
                             ft.DataCell(ft.Text(cat.gender.name)),
-                            ft.DataCell(ft.Text(cat.birthFrom.strftime('%Y-%m-%d') if cat.birthFrom else "")),
-                            ft.DataCell(ft.Text(cat.birthTo.strftime('%Y-%m-%d') if cat.birthTo else "")),
+                            ft.DataCell(ft.Text(cat.birthFrom.strftime('%d.%m.%Y') if cat.birthFrom else "")),
+                            ft.DataCell(ft.Text(cat.birthTo.strftime('%d.%m.%Y') if cat.birthTo else "")),
                             ft.DataCell(ft.Text(cat.rankingType.name)),
                             ft.DataCell(ft.Row([
                                 ft.IconButton(icon=ft.Icons.EDIT, icon_color=ft.Colors.BLUE, on_click=lambda e, c=cat: edit_clicked(e, c)),

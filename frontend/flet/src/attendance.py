@@ -7,48 +7,81 @@ from translate import tr
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Athlete, Attendance, Gender, Event, Progress, Restrictions, allowedCategories
 
-
-def header():
-    return ['', 'team', 'given name', 'surname','birth','gender', 'category', 'group']
-
 class AttendanceView(View):
     def user(self) -> User:
         return self.page.session.get('user')
     
     def __init__(self, page: ft.Page, db, redis):
         super().__init__(page, db, redis)
+        self.tr = tr(self.user().language)
         self.route = '/attendances'
         self.scroll = ft.ScrollMode.AUTO
-        
-        self.tr = tr(self.user().language)
+
+        self.sort_column_index = 2  # surname
+        self.sort_ascending = True
 
         def printPdf(e):
             if self.eventCtrl.value is None:
                 return
             eventId = self.eventCtrl.value
-            page.launch_url(f'https://{View.api()}/attendances/{self.token()}/{self.user().id}/{eventId}')
+            page.launch_url(f'https://{View.api()}/attendances/{self.user().id}/{eventId}')
 
         def createRows():
             if self.eventCtrl.value is None:
                 return []
             event = self.db.getEvent(self.eventCtrl.value)
             categories = self.db.getEventCategories(event.id)
+
             athletes = []
             if self.user().isHost():
                 for attendance in self.db.getEventAttendances(event.id):
-                    athletes.append(self.db.getAthlete(attendance.athleteId))
+                    athlete = self.db.getAthlete(attendance.athleteId)
+                    if athlete:
+                        athletes.append(athlete)
             else:
                 athletes = self.db.getAthletes(self.user().id)
-            return [self.attendanceAsRow(athlete, event, categories) for athlete in athletes]
+
+            data_for_rows = []
+            for athlete in athletes:
+                attendance = self.db.getAttendance(athlete.id, event.id)
+                user = self.db.getUser(athlete.userId)
+                team = user.team if user else ""
+                data_for_rows.append({
+                    "athlete": athlete,
+                    "team": team,
+                    "category": attendance.eventCategoryName if attendance else "",
+                    "group": attendance.group if attendance else ""
+                })
+
+            if self.sort_column_index is not None:
+                sort_key = None
+                if self.sort_column_index == 2:  # surname
+                    sort_key = lambda item: item["athlete"].surname.lower()
+                elif self.sort_column_index == 3:  # birth
+                    sort_key = lambda item: item["athlete"].birth
+                elif self.sort_column_index == 4:  # gender
+                    sort_key = lambda item: item["athlete"].gender.name.lower()
+                elif self.sort_column_index == 5:  # team
+                    sort_key = lambda item: item["team"].lower()
+                elif self.sort_column_index == 6:  # category
+                    sort_key = lambda item: item["category"].lower()
+                elif self.sort_column_index == 7:  # group
+                    sort_key = lambda item: item["group"].lower()
+
+                if sort_key:
+                    data_for_rows.sort(key=sort_key, reverse=not self.sort_ascending)
+
+            return [self.attendanceAsRow(item["athlete"], event, categories, item["team"]) for item in data_for_rows]
             
         def updateRows(e):
             self.table.rows = createRows()
             e.control.page.update()
 
+
         options = []
         for event in self.db.getAllEvents():
             options.append(
-                ft.dropdownm2.Option(
+                ft.dropdown.Option(
                     key=event.id,
                     text=event.descr()
                 )
@@ -62,9 +95,50 @@ class AttendanceView(View):
             on_change=updateRows
         )
 
+        column_names = [
+            '',
+            self.tr.tr('given name'),
+            self.tr.tr('surname'),
+            self.tr.tr('birth'),
+            self.tr.tr('gender'),
+            self.tr.tr('team'),
+            self.tr.tr('category'),
+            self.tr.tr('group')
+        ]
+
+        def on_sort(e: ft.DataColumnSortEvent):
+            if self.sort_column_index == e.column_index:
+                self.sort_ascending = not self.sort_ascending
+            else:
+                self.sort_column_index = e.column_index
+                self.sort_ascending = True
+
+            for i, col in enumerate(self.table.columns):
+                col.label.value = column_names[i]
+                if i == self.sort_column_index:
+                    col.sort_ascending = self.sort_ascending
+                    arrow = " ▲" if self.sort_ascending else " ▼"
+                    col.label.value += arrow
+                else:
+                    col.sort_ascending = None
+            self.table.rows = createRows()
+            self.table.update()
+
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(self.tr.tr(h))) for h in header()],
-            )
+            columns=[
+                ft.DataColumn(ft.Text(column_names[0])),
+                ft.DataColumn(ft.Text(column_names[1])),
+                ft.DataColumn(ft.Text(column_names[2]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(column_names[3]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(column_names[4]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(column_names[5]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(column_names[6]), on_sort=on_sort),
+                ft.DataColumn(ft.Text(column_names[7]), on_sort=on_sort),
+            ])
+        initial_sort_col_index = self.sort_column_index
+        arrow = " ▲" if self.sort_ascending else " ▼"
+        self.table.columns[initial_sort_col_index].label.value += arrow
+        self.table.columns[self.sort_column_index].sort_ascending = self.sort_ascending
         title = f'{self.tr.tr("Attendances of")} {self.user().username if self.user().isHost() else self.user().team}'
         self.controls = [
             ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr("Help"), on_click=lambda _: self.page.go('/help')), title=ft.Text(title), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
@@ -75,10 +149,10 @@ class AttendanceView(View):
                           icon_color=ft.Colors.BLUE_300,
                           tooltip="pdf",
                           on_click=printPdf)]),
-            ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
+            ft.ElevatedButton(self.tr.tr("Home"), on_click=lambda _: self.page.go("/")),
         ]
 
-    def attendanceAsRow(self, athlete: Athlete, event:Event, categories: list):
+    def attendanceAsRow(self, athlete: Athlete, event: Event, categories: list, team_name: str):
         def onChange(e):
             attendance = self.db.getAttendance(athlete.id, event.id)
             if e.control.value:
@@ -91,7 +165,7 @@ class AttendanceView(View):
                     groupCell.content.disabled = True
                 categoryCell.content.disabled = False
                 allowed = allowedCategories(categories, athlete)
-                categoryCell.content.options = [ft.dropdownm2.Option(d.name) for d in allowed]
+                categoryCell.content.options = [ft.dropdown.Option(d.name) for d in allowed]
             else:
                 print(f'denominate {athlete.name()} for {event.descr()}')
                 self.db.hideAttendance(event.id, athlete.id, True)
@@ -111,13 +185,12 @@ class AttendanceView(View):
             self.db.setAttendanceGroup(event.id, athlete.id, e.control.value)
 
         attendance = self.db.getAttendance(athlete.id, event.id)
-        team = self.db.getUser(athlete.userId).team
         checkBoxEnabled = event.progress() == Progress.PLANNED
         checkBoxValue = attendance is not None
         allowed = allowedCategories(categories, athlete)
         categoryCell = ft.DataCell(ft.Dropdown(
                     disabled=not attendance,
-                    options=list() if attendance is None else [ft.dropdownm2.Option(d.name) for d in allowed],
+                    options=list() if attendance is None else [ft.dropdown.Option(d.name) for d in allowed],
                     value=attendance.eventCategoryName if attendance else None,
                     on_change=onUpdateCategory
                     ))
@@ -129,11 +202,11 @@ class AttendanceView(View):
                     ))
         cells = [
             ft.DataCell(ft.Checkbox(value=checkBoxValue, disabled=not checkBoxEnabled, on_change=onChange)),
-            ft.DataCell(ft.Text(team)),
             ft.DataCell(ft.Text(athlete.givenname)),
             ft.DataCell(ft.Text(athlete.surname)),
             ft.DataCell(ft.Text(athlete.birthFormated())),
             ft.DataCell(ft.Text(athlete.gender.name)),
+            ft.DataCell(ft.Text(team_name)),
             categoryCell,
             groupCell
             ]
