@@ -61,27 +61,6 @@ services:
       networks:
         - backnet
 
-    # Max Scale - it is running but has some issues
-    # username is admin and the password is mariadb
-    maxscale:
-      image: mariadb/maxscale:latest
-      container_name: maxscale
-      # volumes:
-      #  - ./.mariadb/maxscale/maxscale.cnf:/etc/maxscale.cnf.d/maxscale.cnf
-      ports:
-        - 0.0.0.0:4006:4006 # readwrite port
-        - 0.0.0.0:4008:4008 # readonly port
-        - 0.0.0.0:8989:8989 # REST API port
-      links:
-        # to fix - here could be a potential bug
-        - db:database
-      depends_on:
-        - db
-        #db:
-        #  condition: service_healthy
-      networks:
-        - backnet
-
 # volumes:
 #  db_data:
 #      name: ${DB_VOLUME_NAME}
