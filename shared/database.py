@@ -699,17 +699,15 @@ class JuryDatabase:
         ratings = [self.getAthleteAndRatings(athleteId, eventId) for athleteId in self.getEventCategoryAthleteIds(eventId, category.name)]
         ratings.sort(key=lambda rating: rating.sum(), reverse=True)
         if category.rankingType == RankingType.RANKING:
-            rank = 0
-            sum = -1.
-            for rating in ratings:
+            prev = (None, None)
+            for i, rating in enumerate(ratings, 1):
                 ratingSum = round(rating.sum(), 6)
                 if ratingSum == 0.0:
                     rankings.append(AthleteRanking('DNF', rating))
                 else:
-                    if ratingSum != sum:
-                        rank += 1
-                    sum = ratingSum
+                    rank = i if ratingSum != prev[0] else prev[1]
                     rankings.append(AthleteRanking(str(rank), rating))
+                    prev = ratingSum, rank
         elif category.rankingType == RankingType.NO_RANKING:
             for rating in ratings:
                 ratingSum = round(rating.sum(), 6)
