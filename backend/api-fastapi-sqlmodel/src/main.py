@@ -93,10 +93,16 @@ async def attendances(userId: int, eventId: int, token: str):
     else:
         tables = [('', data)]
     
+    title = f'Attendances for {event.descr()}'
+    if not user.isHost():
+        title += f' of {user.team}'
+    
+    headers = ['team', 'name', 'birth', 'gender', 'category', 'group']
+    
     context = {
             "orientation": 'A4 portrait',
-            "title": f'Attendances for {event.descr()} of {user.team}',
-            "headers": ['team', 'name', 'birth', 'gender', 'category', 'group'],
+            "title": title,
+            "headers": headers,
             "tables": tables
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
