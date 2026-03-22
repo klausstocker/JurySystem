@@ -27,13 +27,19 @@ class RankingView(View):
         self.rankings = []
         
         def updateRankings(e):
-            self.rankings = self.db.getEventCategoryRankings(self.event.id, self.categoryEdit.value)
+            if self.categoryEdit.value == 'All':
+                print(f'Selected All: {len(self.categories)}')
+                self.rankings = []
+                for category in self.categories:
+                    self.rankings += self.db.getEventCategoryRankings(self.event.id, category.name)
+            else:
+                self.rankings = self.db.getEventCategoryRankings(self.event.id, self.categoryEdit.value)
             self.updateControls()
 
         self.categoryEdit = ft.Dropdown(
             label="Category",
             width = 300,
-            options=[ft.dropdownm2.Option(d.name) for d in self.categories],
+            options=[ft.dropdownm2.Option('All')] + [ft.dropdownm2.Option(d.name) for d in self.categories],
             on_change=updateRankings
         )
 
@@ -41,6 +47,8 @@ class RankingView(View):
 
     def AthleteRankingAsRow(self, ranking: AthleteRanking, index: int):
         cells = [
+            ft.DataCell(ft.Text(index + 1)),
+            ft.DataCell(ft.Text(ranking.ratings.eventCategoryName)),
             ft.DataCell(ft.Text(ranking.ranking)),
             ft.DataCell(ft.Text(ranking.ratings.athlete.name()))
             ]
@@ -50,7 +58,7 @@ class RankingView(View):
         
     def updateControls(self):
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in ['rank', 'name'] + [d.name for d in self.disciplines] + ['sum']],
+                columns=[ft.DataColumn(ft.Text(h)) for h in ['', 'category', 'rank', 'name'] + [d.name for d in self.disciplines] + ['sum']],
                 rows= [self.AthleteRankingAsRow(ranking, i) for i, ranking in enumerate(self.rankings)]
             )
 
