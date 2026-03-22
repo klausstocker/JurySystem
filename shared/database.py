@@ -120,9 +120,7 @@ class Event:
     def progress(self, day:date=date.today()) -> Progress:
         if day < self.date.date():
             return Progress.PLANNED
-        if day >= self.date.date() and self.__finished:
-            return Progress.FINISHED
-        return Progress.ACTIVE
+        return Progress.FINISHED if self.__finished else Progress.ACTIVE
 
 @dataclass
 class EventCategory:
