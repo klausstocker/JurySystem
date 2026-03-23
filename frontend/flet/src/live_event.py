@@ -29,6 +29,10 @@ class LiveEventView(View):
         self.route =f'/public/liveEvent/{eventId}'
         self.scroll = ft.ScrollMode.AUTO
 
+        async def handle_disconnect(e):
+            self.scheduler.remove_job(self.job.id)
+            print('removed job')
+
         def onServerTime():
             t = time.strftime('%H:%M:%S', time.localtime())
             self.updateTableIfNewer()
@@ -36,10 +40,12 @@ class LiveEventView(View):
                 ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text(f'Live ratings of {self.event.name}, {t}'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
                 ft.Row([self.table], scroll=ft.ScrollMode.AUTO)
             ]
-            self.page.update()
+            if self.page is not None:
+                self.page.update()
 
         self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(onServerTime, 'interval', seconds=1)
+        self.job = self.scheduler.add_job(onServerTime, 'interval', seconds=1)
+        self.page.on_disconnect = handle_disconnect
 
         self.event = self.db.getEvent(eventId)
         self.recentRatingTs = None

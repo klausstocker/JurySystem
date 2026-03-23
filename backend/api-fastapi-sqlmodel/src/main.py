@@ -76,14 +76,34 @@ async def attendances(userId: int, eventId: int, token: str):
         for attendance in db.getAttendances(eventId, userId):
             athleteAttendances.append((attendance, user.team, db.getAthlete(attendance.athleteId)))
 
-    data = [[t, a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, t, a in athleteAttendances]
-    user = db.getUser(userId)
+    # sort by group, team, givenname
+    athleteAttendances.sort(key=lambda t: (t[0].group, t[1], t[2].givenname))
 
+    data = [[t, a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, t, a in athleteAttendances]
+    
+    # group by group
+    tables = []
+    if user.isHost():
+        prevGroup = None
+        for row in data:
+            if prevGroup != row[5]:
+                tables.append((row[5], []))
+                prevGroup = row[5]
+            tables[-1][1].append(row)
+    else:
+        tables = [('', data)]
+    
+    title = f'Attendances for {event.descr()}'
+    if not user.isHost():
+        title += f' of {user.team}'
+    
+    headers = ['team', 'name', 'birth', 'gender', 'category', 'group']
+    
     context = {
             "orientation": 'A4 portrait',
-            "title": f'Attendances for {event.descr()} of {user.team}',
-            "headers": ['team', 'name', 'birth', 'gender', 'category', 'group'],
-            "tables": [('', data)]
+            "title": title,
+            "headers": headers,
+            "tables": tables
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
 
