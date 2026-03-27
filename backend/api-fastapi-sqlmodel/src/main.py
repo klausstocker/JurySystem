@@ -3,13 +3,15 @@ import os
 import sys
 import base64
 from fastapi import FastAPI, Response, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 from weasyprint import HTML
 from datetime import datetime
 import qrcode
+from openpyxl import Workbook
+from io import BytesIO
 from redis import StrictRedis
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
@@ -157,6 +159,46 @@ async def ranking(eventId: int, token: str, category: str, detail: int):
             "tables": [('', data)]
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')
+
+@api.get('/ranking_xlsx/{token}/{eventId}/{category}', response_class=HTMLResponse)
+async def ranking_xlsx(eventId: int, token: str, category: str):
+    if r.get(token) is None:
+        raise HTTPException(
+            status_code=401,
+            detail="unautohrized"
+        )
+
+    db = JuryDatabase('db')
+    event = db.getEvent(eventId)
+    disciplines = db.getEventDisciplines(eventId)
+
+    output = BytesIO()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = event.name
+
+    ws.append(['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'])
+
+    categories = [c.name for c in db.getEventCategories(eventId)] if category == 'All' else [db.getEventCategory(eventId, category).name]
+    for cat in categories:
+        for rank in db.getEventCategoryRankings(eventId, cat):
+            athlete = rank.ratings.athlete
+            ratingData = []
+            for discipline in disciplines:
+                ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
+            user = db.getUser(athlete.userId)
+            ws.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
+
+    wb.save(output)
+    output.seek(0)
+
+    return StreamingResponse(
+        output,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename={event.name}_{category}.xlsx"
+        },
+    )
 
 
 @api.get('/certificate/{token}/{eventId}/{category}', response_class=HTMLResponse)

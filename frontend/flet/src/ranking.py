@@ -70,23 +70,37 @@ class RankingView(View):
             if self.categoryEdit.value:
                 self.page.launch_url(f'https://{View.api()}/certificate/{self.token()}/{self.event.id}/{self.categoryEdit.value}')
 
+        def exportCsv(e):
+            if self.categoryEdit.value:
+                self.page.launch_url(f'https://{View.api()}/ranking_xlsx/{self.token()}/{self.event.id}/{self.categoryEdit.value}')
+
         controls = []
+        disablePdf = self.categoryEdit.value == 'All'
+        iconColor = ft.Colors.GREY_300 if disablePdf else ft.Colors.BLUE_300
         if len(self.table.rows) > 0:
             controls.append(
                 ft.IconButton(ft.Icons.FORMAT_LIST_NUMBERED,
-                              icon_color=ft.Colors.BLUE_300,
+                              icon_color=iconColor,
                               tooltip="results",
+                              disabled=disablePdf,
                               on_click=lambda e: printList(e, 0)))
             controls.append(
                 ft.IconButton(ft.Icons.LIST_ALT,
-                              icon_color=ft.Colors.BLUE_300,
+                              icon_color=iconColor,
                               tooltip="details",
+                              disabled=disablePdf,
                               on_click=lambda e: printList(e, 1)))
             controls.append(
                 ft.IconButton(ft.Icons.PICTURE_AS_PDF,
-                              icon_color=ft.Colors.BLUE_300,
+                              icon_color=iconColor,
                               tooltip="certificates",
+                              disabled=disablePdf,
                               on_click=printCert))
+            controls.append(
+                ft.IconButton(ft.Icons.SAVE,
+                              icon_color=ft.Colors.BLUE_300,
+                              tooltip="csv",
+                              on_click=exportCsv))
 
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
