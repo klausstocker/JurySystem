@@ -177,7 +177,7 @@ async def ranking_xlsx(eventId: int, token: str, category: str):
     ws = wb.active
     ws.title = event.name
 
-    ws.append(['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'])
+    ws.append(['category', 'rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'])
 
     categories = [c.name for c in db.getEventCategories(eventId)] if category == 'All' else [db.getEventCategory(eventId, category).name]
     for cat in categories:
@@ -187,7 +187,7 @@ async def ranking_xlsx(eventId: int, token: str, category: str):
             for discipline in disciplines:
                 ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
             user = db.getUser(athlete.userId)
-            ws.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
+            ws.append([cat, rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
 
     wb.save(output)
     output.seek(0)
