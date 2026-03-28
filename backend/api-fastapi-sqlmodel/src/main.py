@@ -122,7 +122,8 @@ async def results(eventId: int):
             athlete = rank.ratings.athlete
             user = db.getUser(athlete.userId)
             data.append([rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
-        tables.append((category.name, data))
+        if len(data):
+            tables.append((category.name, data))
 
     context = {
             "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
