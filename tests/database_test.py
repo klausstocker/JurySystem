@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+import math
 import pymysql.cursors
 from datetime import datetime
 
@@ -148,6 +149,24 @@ class TestDatabase(unittest.TestCase):
         host = self.db.getUser(2)
         allowed = allowedRoutes(host)
         self.assertEqual(len(allowed), 4)
+        
+    def test_rank(self):
+        ratingSums = [20.0000000001, 25.0, 20.0, 20.0, 30.0, 15.0, 10.0, 15.0]
+        rankings = []
+        ratingSums.sort(reverse=True)
+        prev = (None, None)
+        for i, rating in enumerate(ratingSums, 1):
+            ratingSum = rating
+            if ratingSum == 0.0:
+                rankings.append('DNF', rating)
+            else:
+                if prev[0] is None:
+                    rank = i
+                else:
+                    rank = prev[1] if math.isclose(ratingSum, prev[0], abs_tol=1e-3) else i
+                rankings.append((rank, rating))
+                prev = ratingSum, rank
+        self.assertEqual(rankings, [(1,30.0),(2,25.0),(3,20.0000000001),(3,20.0),(3,20.0),(6,15.0),(6,15.0),(8,10.0)])
 
 if __name__ == '__main__':
     unittest.main()

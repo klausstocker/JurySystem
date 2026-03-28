@@ -2,6 +2,7 @@ import ast
 import pymysql.cursors
 import secrets
 import bcrypt
+import math
 from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from enum import IntEnum
@@ -699,11 +700,14 @@ class JuryDatabase:
         if category.rankingType == RankingType.RANKING:
             prev = (None, None)
             for i, rating in enumerate(ratings, 1):
-                ratingSum = round(rating.sum(), 6)
+                ratingSum = rating.sum()
                 if ratingSum == 0.0:
                     rankings.append(AthleteRanking('DNF', rating))
                 else:
-                    rank = i if ratingSum != prev[0] else prev[1]
+                    if prev[0] is None:
+                        rank = i
+                    else:
+                        rank = prev[1] if math.isclose(ratingSum, prev[0], abs_tol=1e-3) else i
                     rankings.append(AthleteRanking(str(rank), rating))
                     prev = ratingSum, rank
         elif category.rankingType == RankingType.NO_RANKING:
