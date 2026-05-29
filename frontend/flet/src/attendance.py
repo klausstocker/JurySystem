@@ -26,6 +26,12 @@ class AttendanceView(View):
             eventId = self.eventCtrl.value
             page.launch_url(f'https://{View.api()}/attendances/{self.token()}/{self.user().id}/{eventId}')
 
+        def exportXlsx(e):
+            if self.eventCtrl.value is None:
+                return
+            eventId = self.eventCtrl.value
+            page.launch_url(f'https://{View.api()}/attendances_xlsx/{self.token()}/{self.user().id}/{eventId}')
+
         def createRows():
             if self.eventCtrl.value is None:
                 return []
@@ -147,10 +153,14 @@ class AttendanceView(View):
             self.eventCtrl,
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
             ft.Row(spacing=0, controls=[
-                ft.IconButton(ft.Icons.SAVE,
+                ft.IconButton(ft.Icons.PICTURE_AS_PDF,
                           icon_color=ft.Colors.BLUE_300,
                           tooltip="pdf",
-                          on_click=printPdf)]),
+                          on_click=printPdf),
+                ft.IconButton(ft.Icons.SAVE,
+                          icon_color=ft.Colors.BLUE_300,
+                          tooltip="xlsx",
+                          on_click=exportXlsx)]),
             ft.ElevatedButton(self.tr.tr("Home"), on_click=lambda _: self.page.go("/")),
         ]
 

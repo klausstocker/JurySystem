@@ -31,43 +31,51 @@ def createResponse(template: str, context: dict, filename: str) -> Response:
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(pdf_file, headers=headers, media_type='application/pdf')
 
+def createXlsxResponse(headers: list[str], tables: list[tuple[str, list[list]]], filename: str, sheet_title: str = 'Export') -> StreamingResponse:
+    output = BytesIO()
+    wb = Workbook()
+    ws = wb.active
+    ws.title = alphaNum(sheet_title)[:31] or 'Export'
+
+    for index, (table_title, rows) in enumerate(tables):
+        if index > 0:
+            ws.append([])
+        if table_title:
+            ws.append([table_title])
+        ws.append(headers)
+        for row in rows:
+            ws.append(row)
+
+    wb.save(output)
+    output.seek(0)
+    return StreamingResponse(
+        output,
+        media_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        headers={
+            'Content-Disposition': f'attachment; filename="{filename}"'
+        },
+    )
+
 def alphaNum(text: str) -> str:
     return ''.join(x for x in text if x.isalnum())
 
-@api.get("/test")
-async def test():
-    return {"message": f"API running {datetime.now()}"}
 
-@api.get('/athletes/{token}/{userId}', response_class=HTMLResponse)
-async def athletes(userId: int, token: str):
+def validateToken(token: str) -> None:
     if r.get(token) is None:
         raise HTTPException(
             status_code=401,
             detail="unautohrized"
         )
-    db = JuryDatabase('db')
-    data = [[athlete.name(), athlete.birthFormated(), athlete.gender.name] for athlete in db.getAthletes(userId)]
+
+def buildAthletesTable(db: JuryDatabase, userId: int):
     user = db.getUser(userId)
+    data = [[athlete.name(), athlete.birthFormated(), athlete.gender.name] for athlete in db.getAthletes(userId)]
+    return user, ['name', 'birth', 'gender'], [('', data)]
 
-    context = {
-            "orientation": 'A4 portrait',
-            "title": f'Athletes of {user.team}',
-            "headers": ['name', 'birth', 'gender'],
-            "tables": [('', data)]
-        }
-    return createResponse('table.html', context, f'athletes_{alphaNum(user.team)}.pdf')
-
-@api.get('/attendances/{token}/{userId}/{eventId}', response_class=HTMLResponse)
-async def attendances(userId: int, eventId: int, token: str):
-    if r.get(token) is None:
-        raise HTTPException(
-            status_code=401,
-            detail="unautohrized"
-        )
-    db = JuryDatabase('db')
+def buildAttendancesTables(db: JuryDatabase, userId: int, eventId: int):
     event = db.getEvent(eventId)
     athleteAttendances = []
-    
+
     user = db.getUser(userId)
     if user.isHost():
         for attendance in db.getEventAttendances(event.id):
@@ -82,7 +90,7 @@ async def attendances(userId: int, eventId: int, token: str):
     athleteAttendances.sort(key=lambda t: (t[0].group, t[1], t[2].givenname))
 
     data = [[t, a.name(), a.birthFormated(), a.gender.name, b.eventCategoryName, b.group] for b, t, a in athleteAttendances]
-    
+
     # group by group
     tables = []
     if user.isHost():
@@ -94,13 +102,44 @@ async def attendances(userId: int, eventId: int, token: str):
             tables[-1][1].append(row)
     else:
         tables = [('', data)]
-    
+
+    return user, event, ['team', 'name', 'birth', 'gender', 'category', 'group'], tables
+
+@api.get("/test")
+async def test():
+    return {"message": f"API running {datetime.now()}"}
+
+@api.get('/athletes/{token}/{userId}', response_class=HTMLResponse)
+async def athletes(userId: int, token: str):
+    validateToken(token)
+    db = JuryDatabase('db')
+    user, headers, tables = buildAthletesTable(db, userId)
+
+    context = {
+            "orientation": 'A4 portrait',
+            "title": f'Athletes of {user.team}',
+            "headers": headers,
+            "tables": tables
+        }
+    return createResponse('table.html', context, f'athletes_{alphaNum(user.team)}.pdf')
+
+@api.get('/athletes_xlsx/{token}/{userId}')
+async def athletes_xlsx(userId: int, token: str):
+    validateToken(token)
+    db = JuryDatabase('db')
+    user, headers, tables = buildAthletesTable(db, userId)
+    return createXlsxResponse(headers, tables, f'athletes_{alphaNum(user.team)}.xlsx', user.team)
+
+@api.get('/attendances/{token}/{userId}/{eventId}', response_class=HTMLResponse)
+async def attendances(userId: int, eventId: int, token: str):
+    validateToken(token)
+    db = JuryDatabase('db')
+    user, event, headers, tables = buildAttendancesTables(db, userId, eventId)
+
     title = f'Attendances for {event.descr()}'
     if not user.isHost():
         title += f' of {user.team}'
-    
-    headers = ['team', 'name', 'birth', 'gender', 'category', 'group']
-    
+
     context = {
             "orientation": 'A4 portrait',
             "title": title,
@@ -108,6 +147,13 @@ async def attendances(userId: int, eventId: int, token: str):
             "tables": tables
         }
     return createResponse('table.html', context, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.pdf')
+
+@api.get('/attendances_xlsx/{token}/{userId}/{eventId}')
+async def attendances_xlsx(userId: int, eventId: int, token: str):
+    validateToken(token)
+    db = JuryDatabase('db')
+    user, event, headers, tables = buildAttendancesTables(db, userId, eventId)
+    return createXlsxResponse(headers, tables, f'attendance_{alphaNum(event.name)}_{alphaNum(user.team)}.xlsx', event.name)
 
 @api.get('/results/{eventId}', response_class=HTMLResponse)
 async def results(eventId: int):
@@ -132,6 +178,19 @@ async def results(eventId: int):
             "tables": tables
         }
     return createResponse('table.html', context, f'{event.name}.pdf')
+
+@api.get('/results_xlsx/{eventId}')
+async def results_xlsx(eventId: int):
+    db = JuryDatabase('db')
+    event = db.getEvent(eventId)
+    rows = []
+    for category in db.getEventCategories(eventId):
+        for rank in db.getEventCategoryRankings(eventId, category.name):
+            athlete = rank.ratings.athlete
+            user = db.getUser(athlete.userId)
+            rows.append([category.name, rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
+
+    return createXlsxResponse(['category', 'rank', 'name', 'team', 'rating'], [('', rows)], f'results_{alphaNum(event.name)}.xlsx', event.name)
 
 @api.get('/ranking/{token}/{eventId}/{category}/{detail}', response_class=HTMLResponse)
 async def ranking(eventId: int, token: str, category: str, detail: int):
@@ -161,7 +220,7 @@ async def ranking(eventId: int, token: str, category: str, detail: int):
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')
 
-@api.get('/ranking_xlsx/{token}/{eventId}/{category}', response_class=HTMLResponse)
+@api.get('/ranking_xlsx/{token}/{eventId}/{category}')
 async def ranking_xlsx(eventId: int, token: str, category: str):
     if r.get(token) is None:
         raise HTTPException(

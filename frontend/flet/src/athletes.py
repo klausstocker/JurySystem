@@ -60,6 +60,9 @@ class AthleteView(View):
         def printPdf(e):
             page.launch_url(f'https://{View.api()}/athletes/{self.token()}/{user.id}')
 
+        def exportXlsx(e):
+            page.launch_url(f'https://{View.api()}/athletes_xlsx/{self.token()}/{user.id}')
+
         self.table = ft.DataTable(
                 columns=[ft.DataColumn(ft.Text(self.tr.tr(h))) for h in header()],
                 rows=createRows()
@@ -72,10 +75,14 @@ class AthleteView(View):
                     icon_color=ft.Colors.BLUE_300,
                     tooltip=self.tr.tr("Add"),
                     on_click=addFunc),
-                ft.IconButton(ft.Icons.SAVE,
+                ft.IconButton(ft.Icons.PICTURE_AS_PDF,
                           icon_color=ft.Colors.BLUE_300,
                           tooltip="pdf",
-                          on_click=printPdf)]),
+                          on_click=printPdf),
+                ft.IconButton(ft.Icons.SAVE,
+                          icon_color=ft.Colors.BLUE_300,
+                          tooltip="xlsx",
+                          on_click=exportXlsx)]),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
         
