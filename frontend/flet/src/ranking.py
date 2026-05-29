@@ -70,7 +70,7 @@ class RankingView(View):
             if self.categoryEdit.value:
                 self.page.launch_url(f'https://{View.api()}/certificate/{self.token()}/{self.event.id}/{self.categoryEdit.value}')
 
-        def exportCsv(e):
+        def exportXlsx(e):
             if self.categoryEdit.value:
                 self.page.launch_url(f'https://{View.api()}/ranking_xlsx/{self.token()}/{self.event.id}/{self.categoryEdit.value}')
 
@@ -99,8 +99,8 @@ class RankingView(View):
             controls.append(
                 ft.IconButton(ft.Icons.SAVE,
                               icon_color=ft.Colors.BLUE_300,
-                              tooltip="csv",
-                              on_click=exportCsv))
+                              tooltip="xlsx",
+                              on_click=exportXlsx))
 
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
