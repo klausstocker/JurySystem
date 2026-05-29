@@ -615,7 +615,7 @@ class JuryDatabase:
     def getEventGroups(self, eventId: int) -> list[str]:
         groups = []
         with self.conn.cursor() as cursor:
-            cursor.execute(f'SELECT DISTINCT `group` FROM `attendances` WHERE eventId = {eventId} AND `hidden` = 0 ORDER BY `group`;')
+            cursor.execute(f'SELECT DISTINCT `group` FROM `attendances` WHERE eventId = {eventId} AND `hidden` = 0 AND TRIM(`group`) <> "" ORDER BY `group`;')
             for row in cursor.fetchall():
                 groups.append(row['group'])
         return groups

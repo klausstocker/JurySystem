@@ -66,6 +66,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(len(self.db.getAttendances(1, 4)), 2)
         self.db.addAttendance(1, 5, 'Md02')
         self.assertEqual(self.db.getAttendance(5, 1).eventCategoryName, 'Md02')
+        self.assertNotIn('', self.db.getEventGroups(1))
         self.db.setAttendanceCategory(1, 5, 'Md01')
         self.assertEqual(self.db.getAttendance(5, 1).eventCategoryName, 'Md01')
         self.assertEqual(len(self.db.getAttendances(1, 4)), 3)
