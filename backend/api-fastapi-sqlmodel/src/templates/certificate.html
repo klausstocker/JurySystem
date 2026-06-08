@@ -77,6 +77,8 @@
     }
 
     .certificate-footer {
+      display: table;
+      width: 100%;
       margin-top: 22mm;
       padding: 0 5mm 0 1mm;
       font-size: 12pt;
@@ -84,21 +86,23 @@
       text-align: left;
     }
 
-    .certificate-footer::after {
-      clear: both;
-      content: '';
-      display: block;
+    .certificate-date,
+    .signature {
+      display: table-cell;
+      vertical-align: bottom;
     }
 
     .certificate-date {
-      float: left;
-      margin: 0 0 4mm;
+      margin: 0;
       white-space: nowrap;
     }
 
+    .signature {
+      text-align: right;
+    }
+
     .signature-img {
-      display: block;
-      float: right;
+      display: inline-block;
       width: 38mm;
       height: auto;
     }
@@ -119,7 +123,9 @@
     </div>
     <div class="certificate-footer">
       <p class="certificate-date">{{ event.dateFormated() }}</p>
-      <img class="signature-img" alt="Unterschrift" src="static/signature.png">
+      <div class="signature">
+        <img class="signature-img" alt="Unterschrift" src="static/signature.png">
+      </div>
     </div>
   </section>
   {% endfor %}
