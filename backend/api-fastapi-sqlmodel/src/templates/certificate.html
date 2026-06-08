@@ -77,9 +77,6 @@
     }
 
     .certificate-footer {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
       margin-top: 22mm;
       padding: 0 5mm 0 1mm;
       font-size: 12pt;
@@ -87,13 +84,21 @@
       text-align: left;
     }
 
+    .certificate-footer::after {
+      clear: both;
+      content: '';
+      display: block;
+    }
+
     .certificate-date {
+      float: left;
       margin: 0 0 4mm;
       white-space: nowrap;
     }
 
     .signature-img {
       display: block;
+      float: right;
       width: 38mm;
       height: auto;
     }
