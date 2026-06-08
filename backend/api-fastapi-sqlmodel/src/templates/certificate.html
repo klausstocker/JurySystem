@@ -9,32 +9,125 @@
 
 <body>
   <style>
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
     body {
+      margin: 0;
+      color: #000;
+      font-family: Georgia, 'Times New Roman', serif;
       text-align: center;
-      font-family: Georgia, serif;
-      ;
-      margin: 20px;
+    }
+
+    .certificate {
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      min-height: 297mm;
+      padding: 88mm 31mm 40mm;
+      break-before: page;
+    }
+
+    .certificate:first-of-type {
+      break-before: auto;
+    }
+
+    .certificate-content {
+      font-style: italic;
+      font-weight: 700;
+      line-height: 1.16;
+    }
+
+    .athlete-name {
+      margin: 0 0 4mm;
+      font-size: 24pt;
+      line-height: 1.05;
+    }
+
+    .intro {
+      margin: 0;
+      font-size: 15pt;
+      line-height: 1.15;
+    }
+
+    .event-name {
+      margin: 10mm 0 0;
+      font-size: 28pt;
+      line-height: 1.08;
+    }
+
+    .event-year {
+      margin: 1mm 0 6mm;
+      font-size: 26pt;
+      line-height: 1.05;
+    }
+
+    .discipline,
+    .category,
+    .ranking {
+      margin: 0 0 4mm;
+      font-size: 18pt;
+      line-height: 1.05;
+    }
+
+    .ranking {
+      margin-bottom: 0;
+    }
+
+    .certificate-footer {
+      display: table;
+      width: 100%;
+      margin-top: 22mm;
+      padding: 0 5mm 0 1mm;
+      font-size: 12pt;
+      line-height: 1;
+      text-align: left;
+    }
+
+    .certificate-date,
+    .signature {
+      display: table-cell;
+      vertical-align: bottom;
+    }
+
+    .certificate-date {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .signature {
+      text-align: right;
     }
 
     .signature-img {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 200px;
+      display: inline-block;
+      width: 38mm;
+      height: auto;
     }
   </style>
+  {% set event_name_parts = event.name.rsplit(' ', 1) %}
+  {% set event_year = event_name_parts[1] if event_name_parts|length > 1 and event_name_parts[1].isdigit() else event.date.strftime('%Y') %}
+  {% set event_title = event_name_parts[0] if event_name_parts|length > 1 and event_name_parts[1].isdigit() else event.name %}
   {% for ranking in rankings %}
-  <h1 style="break-before: page;">{{ ranking.ratings.athlete.name() }}</h1>
-  <p>erreichte bei der</p>
-  <h2>{{ event.name }}</h2>
-  <p>
-    im Geräteturnen<br>
-    in der Klasse {{ category }}<br>
-  <h3>{{ ("den " + ranking.ranking + ". Rang") if rankingType == 0 else ("das Abzeichen in " +
-    ranking.ranking)}}</h3>
-  </p>
-  <p>{{ event.dateFormated() }}</p>
-  <img class="signature-img" alt="Unterschrift" src="static/signature.png">
+  <section class="certificate">
+    <div class="certificate-content">
+      <h1 class="athlete-name">{{ ranking.ratings.athlete.name() }}</h1>
+      <p class="intro">erreichte<br>bei der</p>
+      <h2 class="event-name">{{ event_title }}</h2>
+      <p class="event-year">{{ event_year }}</p>
+      <p class="discipline">im Geräteturnen</p>
+      <p class="category">in der Klasse&nbsp; {{ category }}</p>
+      <p class="ranking">{{ ("den&nbsp;&nbsp;&nbsp;" + ranking.ranking + ". Rang") if rankingType == 0 else ("das Abzeichen in " + ranking.ranking) }}</p>
+    </div>
+    <div class="certificate-footer">
+      <p class="certificate-date">{{ event.dateFormated() }}</p>
+      <div class="signature">
+        <img class="signature-img" alt="Unterschrift" src="static/signature.png">
+      </div>
+    </div>
+  </section>
   {% endfor %}
 </body>
 
