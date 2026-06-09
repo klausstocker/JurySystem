@@ -21,12 +21,17 @@
       text-align: center;
     }
 
+    :root {
+      /* Change this one value to move the certificate text block up or down. */
+      --certificate-text-top: 120mm;
+    }
+
     .certificate {
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       min-height: 297mm;
-      padding: 88mm 31mm 40mm;
+      padding: var(--certificate-text-top) 31mm 40mm;
       break-before: page;
     }
 
