@@ -15,7 +15,7 @@ class UserView(View):
 
         def createRows():
             return [self.userAsRow(user, editFunc, deleteFunc) for user in self.db.getAllUsers()]
-        
+
         def deleteFunc(e, userId):
             user = self.db.getUser(userId)
             def yes(e):
@@ -44,10 +44,10 @@ class UserView(View):
         def editFunc(e, userId):
             print(f'edit {userId=}')
             self.page.go(f'/userEdit/{userId}')
-        
+
         def addFunc(e):
             self.page.go(f'/userEdit/0')
-            
+
         self.page = page
         self.route = '/users'
         self.scroll = ft.ScrollMode.AUTO
@@ -64,7 +64,7 @@ class UserView(View):
                     on_click=addFunc),
             ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")),
         ]
-        
+
     def userAsRow(self, user: User, editFunc: callable, deleteFunc: callable):
         cells = [
             ft.DataCell(ft.IconButton(
@@ -121,7 +121,7 @@ class UserEditView(View):
             width = 300,
             options=[ft.dropdownm2.Option(e.name) for e in Restrictions],
             value=Restrictions.TRAINER.name if createUser else user.restrictions.name)
-        langEdt = ft.Dropdown(label="Language", width=300, options=[ft.dropdownm2.Option(l) for l in ['en', 'ge']], value=user.language)
+        langEdt = ft.Dropdown(label="Language", width=300, options=[ft.dropdownm2.Option(l) for l in ['en', 'ge']], value='en' if createUser else user.language)
         expiresEdit = ft.TextField(label="expires", value=None if createUser else user.expires)
         lockedEdit = ft.Checkbox(label="locked", value=False if createUser else user.locked)
         self.controls = [
