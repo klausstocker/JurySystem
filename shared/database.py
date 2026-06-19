@@ -571,6 +571,19 @@ class JuryDatabase:
             for row in cursor.fetchall():
                 disciplines.append(EventDiscipline.fromRow(row))
         return disciplines
+
+    def isValidEventDiscipline(self, eventId: int, disciplineName: str) -> bool:
+        if disciplineName is None:
+            return False
+
+        disciplineName = disciplineName.strip()
+        if disciplineName == '' or disciplineName.lower() == 'none':
+            return False
+
+        with self.conn.cursor() as cursor:
+            sql = 'SELECT COUNT(*) AS cnt FROM `event_disciplines` WHERE `eventId` = %s AND `name` = %s;'
+            cursor.execute(sql, (eventId, disciplineName))
+            return cursor.fetchone()['cnt'] == 1
     
     def getEventDisciplinesEnableRemove(self, eventId: int) -> list[(EventDiscipline, bool)]:
         disciplines = []
@@ -768,6 +781,11 @@ class JuryDatabase:
         return None
 
     def insertRating(self, athleteId: int, eventId: int, userId: int, eventDisciplineName: str, difficulty: float, execution: float):
+        if not self.isValidEventDiscipline(eventId, eventDisciplineName):
+            return None
+
+        eventDisciplineName = eventDisciplineName.strip()
+
         with self.conn.cursor() as cursor:
             sql = f"INSERT INTO `ratings` (athleteId, eventId, ts, userId, eventDisciplineName, difficulty, execution) VALUES ('{athleteId}', '{eventId}', '{datetime.now()}', '{userId}', '{eventDisciplineName}', '{difficulty}', '{execution}');"
             cnt = cursor.execute(sql)
