@@ -118,7 +118,9 @@ class Event:
     def descr(self) -> str:
         return f'{self.name} / {self.dateFormated()}'
     
-    def progress(self, day:date=date.today()) -> Progress:
+    def progress(self, day: date | None = None) -> Progress:
+        if day is None:
+            day = date.today()
         if day < self.date.date():
             return Progress.PLANNED
         return Progress.FINISHED if self.__finished else Progress.ACTIVE
@@ -238,7 +240,8 @@ class JuryDatabase:
         self.addInitialUsers()
 
     def __del__(self):
-        self.conn.close()
+        if hasattr(self, "conn"):
+            self.conn.close()
 
     def addInitialUsers(self):
         with self.conn.cursor() as cursor:

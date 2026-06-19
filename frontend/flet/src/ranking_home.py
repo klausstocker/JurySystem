@@ -4,7 +4,7 @@ import flet as ft
 from view import View
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
-from shared.database import Progress
+from shared.database import Progress, Restrictions
 
 class RankingHomeView(View):
     def __init__(self, page: ft.Page, db, redis):
@@ -15,11 +15,16 @@ class RankingHomeView(View):
         controls = [
             ft.Text("Events", size=40, weight="bold"),
         ]
+        user = self.page.session.get("user")
+        is_host = user is not None and user.restrictions == Restrictions.HOST
 
         for e in self.db.getAllEvents():
-            if e.progress() == Progress.FINISHED:
+            progress = e.progress()
+            if progress == Progress.FINISHED:
                 controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/ranking/{id}"), width=300))
-            if e.progress() == Progress.ACTIVE:
+            elif progress == Progress.ACTIVE and is_host:
+                controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/ranking/{id}"), width=300))
+            elif progress == Progress.ACTIVE:
                 controls.append(ft.ElevatedButton(f"{e.descr()}", on_click=lambda _,id=e.id: self.page.go(f"/public/liveEvent/{id}"), width=300))
 
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
