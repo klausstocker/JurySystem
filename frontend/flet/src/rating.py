@@ -58,8 +58,16 @@ class RatingView(View):
         self.groups = self.db.getEventGroups(eventId)
         self.athletes = []
         
+        def selectedDiscipline():
+            discipline = self.disciplineEdit.value
+            return discipline if discipline and discipline.strip() else None
+
         def updateAthletes(e):
-            self.athletes = self.db.getEventGroup(self.event.id, self.groupEdit.value)
+            self.groupEdit.disabled = selectedDiscipline() is None
+            if self.groupEdit.disabled or not self.groupEdit.value:
+                self.athletes = []
+            else:
+                self.athletes = self.db.getEventGroup(self.event.id, self.groupEdit.value)
             self.updateControls()
 
         self.disciplineEdit = ft.Dropdown(
@@ -72,6 +80,7 @@ class RatingView(View):
             label=self.tr.tr("Group"),
             width = 300,
             options=[ft.dropdownm2.Option(g) for g in self.groups],
+            disabled=True,
             on_change=updateAthletes
         )
         self.updateControls()
@@ -208,7 +217,7 @@ class RatingView(View):
                     print(f'update athlete="{ratings.athlete.name()}"')
                     if ratingId is None:
                         self.db.insertRating(ratings.athlete.id, ratings.eventId,
-                                            self.user.id, self.disciplineEdit.value,
+                                            self.user.id, discipline,
                                             difficultyEdt.value, executionEdt.value)
                     else:
                         self.db.updateRating(ratingId, self.user.id, difficultyEdt.value,
@@ -264,9 +273,10 @@ class RatingView(View):
             sheet.bottom = 0
             self.page.update()
         
+        selected_discipline = self.disciplineEdit.value if self.disciplineEdit.value and self.disciplineEdit.value.strip() else None
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', self.disciplineEdit.value, '']],
-                rows= [self.AthleteRatingAsRow(athlete, self.disciplineEdit.value, editRating, i) for i, athlete in enumerate(self.athletes)],
+                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', selected_discipline or self.tr.tr('Discipline'), '']],
+                rows= [self.AthleteRatingAsRow(athlete, selected_discipline, editRating, i) for i, athlete in enumerate(self.athletes)] if selected_discipline else [],
                 column_spacing=10,
                 vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
             )
