@@ -49,6 +49,7 @@ class RankingView(View):
         cells = [
             ft.DataCell(ft.Text(index + 1)),
             ft.DataCell(ft.Text(ranking.ratings.eventCategoryName)),
+            ft.DataCell(ft.Text(ranking.ratings.group)),
             ft.DataCell(ft.Text(ranking.ranking)),
             ft.DataCell(ft.Text(ranking.ratings.athlete.name()))
             ]
@@ -58,7 +59,7 @@ class RankingView(View):
         
     def updateControls(self):
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in ['', 'category', 'rank', 'name'] + [d.name for d in self.disciplines] + ['sum']],
+                columns=[ft.DataColumn(ft.Text(h)) for h in ['', 'category', 'group', 'rank', 'name'] + [d.name for d in self.disciplines] + ['sum']],
                 rows= [self.AthleteRankingAsRow(ranking, i) for i, ranking in enumerate(self.rankings)]
             )
 
