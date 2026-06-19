@@ -207,6 +207,7 @@ class AthleteRatings:
     athlete: Athlete
     eventId: int
     eventCategoryName: str
+    group: str
     ratings: dict[str, Rating]
     
     def sum(self) -> float:
@@ -690,7 +691,7 @@ class JuryDatabase:
     def getAthleteAndRatings(self, athleteId: int, eventId: int) -> AthleteRatings:
         athlete = self.getAthlete(athleteId)
         attendance = self.getAttendance(athleteId, eventId)
-        return AthleteRatings(athlete, eventId, attendance.eventCategoryName, self.getAthleteRatings(athleteId, eventId))
+        return AthleteRatings(athlete, eventId, attendance.eventCategoryName, attendance.group, self.getAthleteRatings(athleteId, eventId))
 
     def _getEventCategoryRankings(self, eventId, category: EventCategory) -> list[AthleteRanking]:
         customRanking = self.getEvent(eventId).customRanking
