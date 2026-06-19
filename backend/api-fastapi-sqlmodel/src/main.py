@@ -167,14 +167,14 @@ async def results(eventId: int):
         for rank in db.getEventCategoryRankings(eventId, category.name):
             athlete = rank.ratings.athlete
             user = db.getUser(athlete.userId)
-            data.append([rank.ranking, athlete.name(), user.team, rank.ratings.group, rank.ratings.sum()])
+            data.append([rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
         if len(data):
             tables.append((category.name, data))
 
     context = {
             "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
             "title": f'Rankings for {event.descr()}',
-            "headers": ['rank', 'name', 'team', 'group', 'rating'],
+            "headers": ['rank', 'name', 'team', 'rating'],
             "tables": tables
         }
     return createResponse('table.html', context, f'{event.name}.pdf')
@@ -210,12 +210,12 @@ async def ranking(eventId: int, token: str, category: str, detail: int):
             for discipline in disciplines:
                 ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
         user = db.getUser(athlete.userId)
-        data.append([rank.ranking, athlete.name(), user.team, rank.ratings.group] + ratingData + [rank.ratings.sum()])
+        data.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
 
     context = {
             "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
             "title": f'Rankings for {event.descr()} / {category}',
-            "headers": ['rank', 'name', 'team', 'group'] + ([d.name for d in disciplines] if detail == 1 else []) + ['rating'],
+            "headers": ['rank', 'name', 'team'] + ([d.name for d in disciplines] if detail == 1 else []) + ['rating'],
             "tables": [('', data)]
         }
     return createResponse('table.html', context, f'ranking_{category}.pdf')
