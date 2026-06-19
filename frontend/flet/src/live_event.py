@@ -9,16 +9,20 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, User, Athlete, Attendance, Event, Progress, Rating
 
+
+def _display_text(value):
+    return "" if value is None else str(value)
+
 def header():
     return ['Name', 'Team', 'Category', 'Discipline', 'Rating']
 
 def ratingAsRow(user: User, athlete: Athlete, attendance: Attendance, event: Event, rating: Rating):
     cells = [
-        ft.DataCell(ft.Text(athlete.name())),
-        ft.DataCell(ft.Text(user.team)),
-        ft.DataCell(ft.Text(attendance.eventCategoryName)),
-        ft.DataCell(ft.Text(rating.eventDisciplineName)),
-        ft.DataCell(ft.Text(rating.prettySum())),
+        ft.DataCell(ft.Text(_display_text(athlete.name() if athlete else None))),
+        ft.DataCell(ft.Text(_display_text(user.team if user else None))),
+        ft.DataCell(ft.Text(_display_text(attendance.eventCategoryName if attendance else None))),
+        ft.DataCell(ft.Text(_display_text(rating.eventDisciplineName))),
+        ft.DataCell(ft.Text(_display_text(rating.prettySum()))),
         ]
     return ft.DataRow(cells=cells)
 
