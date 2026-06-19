@@ -75,6 +75,11 @@ class Navigator:
             self.page.views.append(RankingHomeView(self.page, self.db, self.redis))
             self.page.update()
             return
+        elif self.page.route.startswith('/ranking/'):
+            eventId = int(self.page.route.split('/')[-1])
+            self.page.views.append(RankingView(self.page, self.db, self.redis, eventId))
+            self.page.update()
+            return
         elif self.page.route == '/login':
             self.page.views.append(LoginView(self.page, self.db, self.redis))
         elif self.page.route.startswith('/autoLogin'):
