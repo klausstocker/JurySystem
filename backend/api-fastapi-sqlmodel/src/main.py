@@ -292,6 +292,9 @@ def get_bytes(image):
     image.save(img_byte_arr, format='png')
     return img_byte_arr.getvalue()
 
+def judge_login_url(user, target: str) -> str:
+    return f"https://{os.environ['SUBDOMAIN_JURY'] + os.environ['DOMAIN']}/autoLogin/{user.username}/{user.token}/{target}"
+
 @api.get('/qrcodes/login/{token}/{userId}/{target}', response_class=HTMLResponse)
 async def qrCodesLogin(userId: int, token: str, target: str, request: Request) ->Response:
     if r.get(token) is None:
@@ -306,7 +309,7 @@ async def qrCodesLogin(userId: int, token: str, target: str, request: Request) -
             status_code=404,
             detail="user not found"
         )
-    img = qrcode.make(f'https://{os.environ['SUBDOMAIN_JURY'] + os.environ['DOMAIN']}/autoLogin/{user.username}/{user.token}/{target}')
+    img = qrcode.make(judge_login_url(user, target))
     filename = f'login_{alphaNum(user.username)}.png'
     headers = {'Content-Disposition': f'attachment; filename="{filename}"'}
     return Response(get_bytes(img), headers=headers, media_type='application/png')
@@ -328,7 +331,7 @@ async def qrCodesLoginAllJudges(eventId: int, token: str, target: str) ->Respons
         )
     targets = []
     for judge in judges:
-        img = qrcode.make(f'https://{os.environ['SUBDOMAIN_API'] + os.environ['DOMAIN']}/qrcodes/login/{token}/{judge.id}/{target}')
+        img = qrcode.make(judge_login_url(judge, target))
         targets.append((judge.username, base64.b64encode(get_bytes(img)).decode("utf-8")))
 
     template = env.get_template('qr_login.html')
