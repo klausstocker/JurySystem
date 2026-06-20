@@ -161,20 +161,22 @@ async def results(eventId: int):
     event = db.getEvent(eventId)
     disciplines = db.getEventDisciplines(eventId)
     tables = []
-    detail = 0
     for category in db.getEventCategories(eventId):
         data = []
         for rank in db.getEventCategoryRankings(eventId, category.name):
             athlete = rank.ratings.athlete
+            ratingData = []
+            for discipline in disciplines:
+                ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
             user = db.getUser(athlete.userId)
-            data.append([rank.ranking, athlete.name(), user.team, rank.ratings.sum()])
+            data.append([rank.ranking, athlete.name(), user.team] + ratingData + [rank.ratings.sum()])
         if len(data):
             tables.append((category.name, data))
 
     context = {
-            "orientation": 'A4 portrait' if detail == 0 else 'A4 landscape',
+            "orientation": 'A4 landscape',
             "title": f'Rankings for {event.descr()}',
-            "headers": ['rank', 'name', 'team', 'rating'],
+            "headers": ['rank', 'name', 'team'] + [d.name for d in disciplines] + ['rating'],
             "tables": tables
         }
     return createResponse('table.html', context, f'{event.name}.pdf')
@@ -183,14 +185,18 @@ async def results(eventId: int):
 async def results_xlsx(eventId: int):
     db = JuryDatabase('db')
     event = db.getEvent(eventId)
+    disciplines = db.getEventDisciplines(eventId)
     rows = []
     for category in db.getEventCategories(eventId):
         for rank in db.getEventCategoryRankings(eventId, category.name):
             athlete = rank.ratings.athlete
+            ratingData = []
+            for discipline in disciplines:
+                ratingData.append(rank.ratings.prettyOrDefault(discipline.name))
             user = db.getUser(athlete.userId)
-            rows.append([category.name, rank.ranking, athlete.name(), user.team, rank.ratings.group, rank.ratings.sum()])
+            rows.append([category.name, rank.ranking, athlete.name(), user.team, rank.ratings.group] + ratingData + [rank.ratings.sum()])
 
-    return createXlsxResponse(['category', 'rank', 'name', 'team', 'group', 'rating'], [('', rows)], f'results_{alphaNum(event.name)}.xlsx', event.name)
+    return createXlsxResponse(['category', 'rank', 'name', 'team', 'group'] + [d.name for d in disciplines] + ['rating'], [('', rows)], f'results_{alphaNum(event.name)}.xlsx', event.name)
 
 @api.get('/ranking/{token}/{eventId}/{category}/{detail}', response_class=HTMLResponse)
 async def ranking(eventId: int, token: str, category: str, detail: int):
