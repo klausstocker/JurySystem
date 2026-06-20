@@ -2,6 +2,7 @@ import os
 import sys
 import flet as ft
 from view import View
+from apscheduler.schedulers.background import BackgroundScheduler
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "../.."))
 from shared.database import JuryDatabase, Athlete, AthleteRatings, AthleteRanking, Gender
@@ -25,16 +26,11 @@ class RankingView(View):
         self.disciplines = self.db.getEventDisciplines(eventId)
         self.categories = self.db.getEventCategories(eventId)
         self.rankings = []
+        self.scheduler = BackgroundScheduler()
+        self.autoReloadJob = None
         
         def updateRankings(e):
-            if self.categoryEdit.value == 'All':
-                print(f'Selected All: {len(self.categories)}')
-                self.rankings = []
-                for category in self.categories:
-                    self.rankings += self.db.getEventCategoryRankings(self.event.id, category.name)
-            else:
-                self.rankings = self.db.getEventCategoryRankings(self.event.id, self.categoryEdit.value)
-            self.updateControls()
+            self.reloadRankings()
 
         self.categoryEdit = ft.Dropdown(
             label="Category",
@@ -42,8 +38,42 @@ class RankingView(View):
             options=[ft.dropdownm2.Option('All')] + [ft.dropdownm2.Option(d.name) for d in self.categories],
             on_change=updateRankings
         )
+        self.autoReloadSwitch = ft.Switch(
+            label="Auto reload (30s)",
+            value=False,
+            tooltip="Automatically reload rankings every 30 seconds",
+            on_change=self.toggleAutoReload
+        )
 
         self.updateControls()
+
+    def reloadRankings(self):
+        if self.categoryEdit.value == 'All':
+            print(f'Selected All: {len(self.categories)}')
+            self.rankings = []
+            for category in self.categories:
+                self.rankings += self.db.getEventCategoryRankings(self.event.id, category.name)
+        elif self.categoryEdit.value:
+            self.rankings = self.db.getEventCategoryRankings(self.event.id, self.categoryEdit.value)
+        self.updateControls()
+
+    def toggleAutoReload(self, e):
+        if self.autoReloadSwitch.value:
+            if not self.scheduler.running:
+                self.scheduler.start()
+            if self.autoReloadJob is None:
+                self.autoReloadJob = self.scheduler.add_job(self.reloadRankings, 'interval', seconds=30)
+        elif self.autoReloadJob is not None:
+            self.autoReloadJob.remove()
+            self.autoReloadJob = None
+
+    def will_unmount(self):
+        if self.autoReloadJob is not None:
+            self.autoReloadJob.remove()
+            self.autoReloadJob = None
+        if self.scheduler.running:
+            self.scheduler.shutdown(wait=False)
+        super().will_unmount()
 
     def AthleteRankingAsRow(self, ranking: AthleteRanking, index: int):
         cells = [
@@ -106,7 +136,12 @@ class RankingView(View):
         controls.append(ft.ElevatedButton("Home", on_click=lambda _: self.page.go("/")))
 
         self.controls = [
-            ft.AppBar(leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')), title=ft.Text('Ranking'), bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+            ft.AppBar(
+                leading=ft.IconButton(icon=ft.Icons.HELP_OUTLINE, tooltip=self.tr.tr('Help'), on_click=lambda _: self.page.go('/help')),
+                title=ft.Text('Ranking'),
+                bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                actions=[self.autoReloadSwitch]
+            ),
             ft.Text(self.event.name, size=30, color=ft.Colors.PINK_600, italic=True),
             self.categoryEdit,
             ft.Row([self.table], scroll=ft.ScrollMode.AUTO),
