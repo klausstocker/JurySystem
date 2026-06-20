@@ -95,7 +95,6 @@ class RatingView(View):
         cells = [
             ft.DataCell(ft.Text(athlete.name())),
             ft.DataCell(ft.Text(ratings.eventCategoryName)),
-            ft.DataCell(ft.Text('{:.1f}'.format(ratings.sum()))),
             ft.DataCell(ft.Text(ratings.prettyOrDefault(discipline))),
             ft.DataCell(ft.Row(spacing=0, controls=[
                 ft.IconButton(
@@ -120,8 +119,20 @@ class RatingView(View):
             d_val = "{:.2f}".format(difficultyContent) if difficultyContent is not None else ""
             e_val = "{:.2f}".format(executionContent) if executionContent is not None else ""
 
-            difficultyEdt = ft.TextField(label=self.tr.tr("difficulty"), value=d_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
-            executionEdt = ft.TextField(label=self.tr.tr("execution"), value=e_val, width=200, read_only=True, text_align=ft.TextAlign.RIGHT)
+            difficultyEdt = ft.TextField(
+                label=self.tr.tr("difficulty"),
+                value=d_val,
+                width=120,
+                read_only=True,
+                text_align=ft.TextAlign.CENTER,
+            )
+            executionEdt = ft.TextField(
+                label=self.tr.tr("execution"),
+                value=e_val,
+                width=120,
+                read_only=True,
+                text_align=ft.TextAlign.CENTER,
+            )
 
             self.active_field = difficultyEdt
 
@@ -239,7 +250,7 @@ class RatingView(View):
                     [
                         ft.Text(f'{discipline} / {ratings.eventCategoryName}', size=20, weight=ft.FontWeight.BOLD),
                         ft.Text(f'{ratings.athlete.name()} / {ratings.athlete.birthFormated()}', size=16),
-                        ft.Row(controls=[difficultyEdt, executionEdt]),
+                        ft.Row(controls=[difficultyEdt, executionEdt], alignment=ft.MainAxisAlignment.CENTER),
                         ft.Divider(),
                         keypad,
                         ft.Row([
@@ -275,7 +286,7 @@ class RatingView(View):
         
         selected_discipline = self.disciplineEdit.value if self.disciplineEdit.value and self.disciplineEdit.value.strip() else None
         self.table = ft.DataTable(
-                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', 'sum', selected_discipline or self.tr.tr('Discipline'), '']],
+                columns=[ft.DataColumn(ft.Text(h)) for h in ['name', 'cat', selected_discipline or self.tr.tr('Discipline'), '']],
                 rows= [self.AthleteRatingAsRow(athlete, selected_discipline, editRating, i) for i, athlete in enumerate(self.athletes)] if selected_discipline else [],
                 column_spacing=10,
                 vertical_lines=ft.border.BorderSide(1, ft.Colors.OUTLINE)
